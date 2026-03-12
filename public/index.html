@@ -1705,7 +1705,7 @@
       <a href="#" id="deskProposals" style="display:none;" onclick="go('proposals');return false;">📝 Proposals</a>
       <a href="#" id="deskAdmin" style="display:none;" onclick="go('admin');return false;">⚙ Admin</a>
       
-        <a href="https://edmonton.aradiafitness.com" target="_blank" rel="noopener">Website ↗</a>
+        <a id="deskWebsiteLink" href="https://edmonton.aradiafitness.com" target="_blank" rel="noopener">Website ↗</a>
       
     </nav>
   </div>
@@ -4710,14 +4710,19 @@
     // ═══════════════════════════════════════
     var BRAND = window.__BRAND || { name: "Aradia Time", sub: "Edmonton", colorPrimary: "#8b1e2d", demoMode: false };
     (function initBrand(){
-      // Update topbar name
+      // Update topbar name + subtitle
       var tn = document.querySelector('.t-name');
       if (tn) tn.textContent = BRAND.name || "Aradia Time";
+      if (BRAND.sub) { var ts = document.querySelector('.t-sub'); if (ts) ts.textContent = BRAND.sub; }
+      // Update website link
+      if (BRAND.site) { var wl = document.getElementById('deskWebsiteLink'); if (wl) wl.href = BRAND.site; }
       // Update meta tags
       var am = document.querySelector('meta[name="application-name"]');
       if (am) am.setAttribute('content', BRAND.name || "Aradia Time");
       var at = document.querySelector('meta[name="apple-mobile-web-app-title"]');
       if (at) at.setAttribute('content', BRAND.name || "Aradia Time");
+      // Update page title
+      document.title = BRAND.name || "Aradia Time";
       // Update install prompt
       var ip = document.querySelector('#installPrompt b');
       if (ip) ip.textContent = "Install " + (BRAND.name || "Aradia Time");
