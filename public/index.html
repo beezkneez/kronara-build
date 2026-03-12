@@ -28,7 +28,7 @@
       var t = localStorage.getItem('app_theme') || localStorage.getItem('aradia_theme') || dflt;
       if (t !== 'light' && t !== 'dark' && t !== 'aradia' && t !== 'kronara') t = dflt;
       document.documentElement.setAttribute('data-theme', t);
-      var colors = { light: '#0b0b0b', dark: '#0e0e11', aradia: '#1a0a0e', kronara: '#1A1A2E' };
+      var colors = { light: '#0b0b0b', dark: '#0e0e11', aradia: '#1a0a0e', kronara: '#0A0A1A' };
       if (B.colorDarkBg) colors[dflt] = B.colorDarkBg;
       var mc = document.querySelector('meta[name="theme-color"]');
       if (mc) mc.setAttribute('content', colors[t] || '#0b0b0b');
@@ -226,58 +226,58 @@
        KRONARA THEME — deep teal + warm gold
     ═══════════════════════════════════════ */
     [data-theme="kronara"] {
-      --red:    #0C7C80;
+      --red:    #6C5CE7;
       --green:  #7ac4a0;
-      --green-bg: #162e28;
-      --ink:    #1A1A2E;
-      --card:   #1e1e30;
+      --green-bg: #162028;
+      --ink:    #0A0A1A;
+      --card:   #141428;
       --muted:  #8a8ea0;
-      --line:   #2a2a40;
-      --bg:     #12121e;
-      --shadow: 0 2px 16px rgba(12,124,128,.15);
+      --line:   #252540;
+      --bg:     #0A0A1A;
+      --shadow: 0 2px 16px rgba(108,92,231,.15);
 
-      --input-bg:      #24243a;
-      --input-border:   #3a3a52;
+      --input-bg:      #1a1a32;
+      --input-border:   #2e2e4a;
       --input-text:     #e4e6f0;
       --label-color:    #a0a4b8;
 
-      --btn-secondary-bg:     #24243a;
-      --btn-secondary-border: #3a3a52;
+      --btn-secondary-bg:     #1a1a32;
+      --btn-secondary-border: #2e2e4a;
       --btn-secondary-text:   #e4e6f0;
-      --lbtn-bg:              #24243a;
-      --lbtn-border:          #3a3a52;
+      --lbtn-bg:              #1a1a32;
+      --lbtn-border:          #2e2e4a;
 
-      --day-head-bg:    #18182a;
-      --stat-bg:        #18182a;
-      --line-card-bg:   #18182a;
-      --edit-form-bg:   #1e2038;
-      --edit-form-border: #3a4060;
+      --day-head-bg:    #101022;
+      --stat-bg:        #101022;
+      --line-card-bg:   #101022;
+      --edit-form-bg:   #161630;
+      --edit-form-border: #2e2e50;
 
-      --admin-pill-bg:  #24243a;
-      --detail-bg:      #18182a;
-      --detail-hdr-bg:  #20203a;
+      --admin-pill-bg:  #1a1a32;
+      --detail-bg:      #101022;
+      --detail-hdr-bg:  #1a1a36;
 
       --text-primary:   #e8eaf0;
       --text-secondary: #b0b4c4;
       --text-tertiary:  #8a8ea0;
       --small-color:    #8a8ea0;
       --pill-text:      #c8cce0;
-      --pill-bg:        #24243a;
+      --pill-bg:        #1a1a32;
 
-      --wn-bg: #1a2030; --wn-text: #e0eaff; --wn-accent: #D4942A;
+      --wn-bg: #14142a; --wn-text: #e0eaff; --wn-accent: #E8832A;
 
-      --pend-border:      rgba(212,148,42,.3);
-      --pend-hdr-bg:      rgba(100,70,20,.35);
-      --pend-hdr-text:    #D4942A;
-      --pend-detail-bg:   rgba(50,35,10,.4);
-      --pend-card-bg:     rgba(50,35,10,.25);
-      --pend-card-bg-off: rgba(50,35,10,.12);
-      --pend-badge-bg:    rgba(100,70,20,.35);
-      --pend-badge-border:rgba(212,148,42,.4);
-      --pend-badge-text:  #D4942A;
-      --pend-excl-bg:     rgba(80,50,10,.3);
-      --pend-excl-text:   #e0a030;
-      --pend-excl-border: rgba(212,148,42,.35);
+      --pend-border:      rgba(232,131,42,.3);
+      --pend-hdr-bg:      rgba(120,60,15,.35);
+      --pend-hdr-text:    #E8832A;
+      --pend-detail-bg:   rgba(60,30,8,.4);
+      --pend-card-bg:     rgba(60,30,8,.25);
+      --pend-card-bg-off: rgba(60,30,8,.12);
+      --pend-badge-bg:    rgba(120,60,15,.35);
+      --pend-badge-border:rgba(232,131,42,.4);
+      --pend-badge-text:  #E8832A;
+      --pend-excl-bg:     rgba(90,45,10,.3);
+      --pend-excl-text:   #f0a040;
+      --pend-excl-border: rgba(232,131,42,.35);
       --pend-dim:         var(--muted);
       --pend-dim-off:     #555;
       --pend-pay:         var(--red);
@@ -1711,7 +1711,7 @@
   </div>
 
   <!-- Demo mode banner -->
-  <div id="demoBanner" style="display:none;background:linear-gradient(135deg,var(--red),#D4942A);color:#fff;text-align:center;padding:8px 16px;font-size:13px;font-weight:700;letter-spacing:.03em;">
+  <div id="demoBanner" style="display:none;background:linear-gradient(135deg,#6C5CE7,#E8832A);color:#fff;text-align:center;padding:8px 16px;font-size:13px;font-weight:700;letter-spacing:.03em;">
     🎯 LIVE DEMO — Explore all features freely! Demo data cannot be deleted.
   </div>
 
@@ -4747,7 +4747,7 @@
       localStorage.setItem('app_theme', theme);
 
       // Update PWA theme-color meta
-      var colors = { light: '#0b0b0b', dark: '#0e0e11', aradia: '#1a0a0e', kronara: '#1A1A2E' };
+      var colors = { light: '#0b0b0b', dark: '#0e0e11', aradia: '#1a0a0e', kronara: '#0A0A1A' };
       var mc = document.querySelector('meta[name="theme-color"]');
       if (mc) mc.setAttribute('content', colors[theme] || '#0b0b0b');
 
