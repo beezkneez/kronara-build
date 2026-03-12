@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Guide - Aradia Fitness</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f2f3f6; color: #23243a; line-height: 1.7; }
+    .container { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+    .logo { text-align: center; margin-bottom: 32px; }
+    .logo img { height: 90px; }
+    h1 { font-size: 2rem; margin-bottom: 4px; text-align: center; }
+    .subtitle { text-align: center; color: #888; font-size: 1rem; margin-bottom: 36px; }
+    h2 {
+      font-size: 1.35rem; margin-top: 48px; margin-bottom: 16px; color: #8b1e2d;
+      padding-bottom: 8px; border-bottom: 2px solid #f0d0d8;
+    }
+    h3 { font-size: 1.05rem; margin-top: 24px; margin-bottom: 8px; color: #23243a; }
+    p, li { margin-bottom: 10px; font-size: 0.95rem; }
+    ul, ol { padding-left: 24px; margin-bottom: 16px; }
+    a { color: #8b1e2d; }
+    strong { color: #23243a; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.88rem; }
+
+    /* Table of contents */
+    .toc {
+      background: #fff; border: 1px solid #e4e4e8; border-radius: 14px;
+      padding: 24px 28px; margin-bottom: 40px;
+    }
+    .toc-title { font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #8b1e2d; }
+    .toc ol { padding-left: 20px; margin: 0; }
+    .toc li { margin-bottom: 6px; font-size: 0.93rem; }
+    .toc a { text-decoration: none; font-weight: 600; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* Info cards / callouts */
+    .tip, .note, .warn {
+      border-radius: 10px; padding: 14px 18px; margin: 16px 0; font-size: 0.93rem;
+    }
+    .tip  { background: #e8f5e9; border-left: 4px solid #2e7d32; }
+    .note { background: #e3f2fd; border-left: 4px solid #1565c0; }
+    .warn { background: #fff8e1; border-left: 4px solid #f9a825; }
+    .tip strong, .note strong, .warn strong { display: block; margin-bottom: 4px; }
+
+    /* Step lists */
+    .steps { counter-reset: step; list-style: none; padding-left: 0; }
+    .steps li {
+      counter-increment: step; position: relative; padding-left: 40px; margin-bottom: 14px;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute; left: 0; top: 1px;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #8b1e2d; color: #fff; font-weight: 800; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Feature cards */
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px; margin: 16px 0;
+    }
+    .feature-card {
+      background: #fff; border: 1px solid #e4e4e8; border-radius: 12px;
+      padding: 16px; text-align: center;
+    }
+    .feature-card .icon { font-size: 28px; margin-bottom: 8px; }
+    .feature-card .label { font-weight: 800; font-size: 0.9rem; margin-bottom: 4px; }
+    .feature-card .desc { font-size: 0.82rem; color: #666; line-height: 1.5; }
+
+    /* Key-value description */
+    .field-list { margin: 12px 0; }
+    .field-list dt { font-weight: 800; font-size: 0.9rem; margin-top: 10px; }
+    .field-list dd { font-size: 0.9rem; color: #555; margin-left: 16px; }
+
+    /* Divider */
+    hr { border: none; border-top: 1px solid #e4e4e8; margin: 40px 0; }
+
+    /* Back link */
+    .back { display: inline-block; margin-top: 40px; color: #8b1e2d; text-decoration: none; font-weight: 600; }
+    .back:hover { text-decoration: underline; }
+
+    /* Print styles */
+    @media print {
+      body { background: #fff; }
+      .toc { break-after: page; }
+      h2 { break-before: page; }
+      .back { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo"><img src="/logo.png" alt="Aradia Fitness"></div>
+    <h1>Aradia Time &mdash; User Guide</h1>
+    <p class="subtitle">Everything you need to know about using the timesheet app</p>
+
+    <!-- ═══════════════════════════════
+         TABLE OF CONTENTS
+    ═══════════════════════════════ -->
+    <div class="toc">
+      <div class="toc-title">Table of Contents</div>
+      <ol>
+        <li><a href="#getting-started">Getting Started</a></li>
+        <li><a href="#home">The Home Page</a></li>
+        <li><a href="#logging">Logging a Class</a></li>
+        <li><a href="#multi">Multiple Shifts in One Day</a></li>
+        <li><a href="#commissions">Logging Commissions</a></li>
+        <li><a href="#editing">Editing &amp; Deleting Entries</a></li>
+        <li><a href="#pay-periods">Pay Periods &amp; Navigation</a></li>
+        <li><a href="#calendar">The Calendar Widget</a></li>
+        <li><a href="#bonuses">Bonuses &amp; How They Work</a></li>
+        <li><a href="#late">Late Submissions</a></li>
+        <li><a href="#flags">The Flag System</a></li>
+        <li><a href="#google">Google Calendar Integration</a></li>
+        <li><a href="#reports">Reports &amp; Exports</a></li>
+        <li><a href="#profile">Your Profile</a></li>
+        <li><a href="#themes">Themes</a></li>
+        <li><a href="#support">Support &amp; FAQ</a></li>
+        <li><a href="#install">Installing as a Phone App</a></li>
+        <li><a href="#admin">Admin Features</a></li>
+        <li><a href="#tips">Tips &amp; Tricks</a></li>
+      </ol>
+    </div>
+
+    <!-- ═══════════════════════════════
+         1. GETTING STARTED
+    ═══════════════════════════════ -->
+    <h2 id="getting-started">1. Getting Started</h2>
+
+    <p>Aradia Time is a timesheet app built for the Aradia Fitness team. It runs entirely in your browser &mdash; no download required &mdash; and works on any phone, tablet, or computer.</p>
+
+    <h3>Logging In</h3>
+    <ol class="steps">
+      <li>Go to <strong>aradiafitness.app</strong> in your browser.</li>
+      <li>Enter your <strong>email address</strong> (or username, if you've set one) and your <strong>PIN</strong>.</li>
+      <li>Tap <strong>Log In</strong>. You'll land on the Home page.</li>
+    </ol>
+
+    <div class="tip">
+      <strong>Tip</strong>
+      Forgot your PIN? Tap <em>Forgot PIN?</em> on the login screen and we'll email it to you.
+    </div>
+
+    <h3>First-Time Setup</h3>
+    <p>After your first login, head to the <strong>Profile</strong> tab to:</p>
+    <ul>
+      <li>Set a <strong>username</strong> (so you can log in faster next time)</li>
+      <li>Upload a <strong>profile photo</strong></li>
+      <li>Choose your preferred <strong>theme</strong> (Light, Dark, or Aradia)</li>
+      <li>Connect your <strong>Google Calendar</strong> (optional &mdash; makes importing shifts a breeze)</li>
+    </ul>
+
+    <!-- ═══════════════════════════════
+         2. THE HOME PAGE
+    ═══════════════════════════════ -->
+    <h2 id="home">2. The Home Page</h2>
+
+    <p>The Home tab is your main workspace. From top to bottom, here's what you'll see:</p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="icon">📊</div>
+        <div class="label">Pay Period Bar</div>
+        <div class="desc">Shows the selected period, total shifts, hours, and gross pay at a glance.</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📅</div>
+        <div class="label">Calendar Widget</div>
+        <div class="desc">Visual calendar with entry counts on each day. Tap a day to jump to it.</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📝</div>
+        <div class="label">Log a Class</div>
+        <div class="desc">The main form for adding shifts. Date, location, time, class name, hours, rate.</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">💰</div>
+        <div class="label">Log Commission</div>
+        <div class="desc">Quick form for retail or other commissions. Just amount, date, and a note.</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📋</div>
+        <div class="label">This Pay Period</div>
+        <div class="desc">All your logged entries, grouped by date. Edit, delete, or review from here.</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════
+         3. LOGGING A CLASS
+    ═══════════════════════════════ -->
+    <h2 id="logging">3. Logging a Class</h2>
+
+    <p>This is the core of the app &mdash; here's how to log a shift step by step:</p>
+
+    <ol class="steps">
+      <li><strong>Pick a date.</strong> Defaults to today. Tap the date field to choose a different day. The date must fall within the selected pay period (or you can switch periods first).</li>
+      <li><strong>Choose a location.</strong> Select from the dropdown &mdash; these are set up by your admin (e.g. "Downtown Studio", "Warehouse").</li>
+      <li><strong>Add optional notes.</strong> Anything you want your admin to see &mdash; "covered for Jess", "private lesson", etc.</li>
+      <li><strong>Fill in the shift details:</strong>
+        <dl class="field-list">
+          <dt>Time (Start &amp; End)</dt>
+          <dd>Tap the time fields to open the clock picker. Drag the hand or type the time. AM/PM toggle included.</dd>
+          <dt>Class / Party</dt>
+          <dd>The name of the class you taught &mdash; e.g. "Pole 1", "Aerial Silks", "Kids Birthday Party".</dd>
+          <dt>Hours Offered</dt>
+          <dd>How many hours the shift was (e.g. 1.5). Auto-calculated from start/end times if provided.</dd>
+          <dt>Hourly Rate</dt>
+          <dd>Your pay rate for this class (e.g. 25). Check with your admin if unsure.</dd>
+          <dt>Pole 11+ Bonus</dt>
+          <dd>Check this box if you taught a pole class with 11 or more students. Adds a $5 bonus to that shift.</dd>
+        </dl>
+      </li>
+      <li><strong>Check the subtotal.</strong> The running total updates in real time as you fill in hours and rate.</li>
+      <li><strong>Tap Submit.</strong> Your entry is saved instantly and appears in the "This Pay Period" section below.</li>
+    </ol>
+
+    <div class="note">
+      <strong>Duplicate Detection</strong>
+      If another staff member already has an entry at the same date, time, and location, you'll see a "Heads up" warning. You can still submit &mdash; it's just a friendly check.
+    </div>
+
+    <!-- ═══════════════════════════════
+         4. MULTIPLE SHIFTS
+    ═══════════════════════════════ -->
+    <h2 id="multi">4. Multiple Shifts in One Day</h2>
+
+    <p>Taught more than one class? No need to submit separately:</p>
+
+    <ol class="steps">
+      <li>After filling in your first shift, tap <strong>+ Add shift</strong> at the bottom of the shift section.</li>
+      <li>A new row appears. Fill in the time, class name, hours, and rate for the second class.</li>
+      <li>Repeat for as many shifts as you need. Each line has its own delete button (X) if you change your mind.</li>
+      <li>The <strong>subtotal</strong> updates to show the combined total of all shifts.</li>
+      <li>Tap <strong>Submit</strong> once &mdash; all shifts are saved together under the same date.</li>
+    </ol>
+
+    <div class="tip">
+      <strong>Tip</strong>
+      You can mix different locations and rates across shifts on the same day. Each shift is tracked independently.
+    </div>
+
+    <!-- ═══════════════════════════════
+         5. COMMISSIONS
+    ═══════════════════════════════ -->
+    <h2 id="commissions">5. Logging Commissions</h2>
+
+    <p>Commissions (retail sales, tips, etc.) are logged separately from class shifts.</p>
+
+    <ol class="steps">
+      <li>Scroll down to the <strong>Log Commission</strong> card on the Home tab.</li>
+      <li>Enter the <strong>dollar amount</strong>.</li>
+      <li>Pick a <strong>date</strong> (defaults to today).</li>
+      <li>Add an optional <strong>note</strong> (e.g. "retail sales", "private lesson tip").</li>
+      <li>Tap <strong>Add Commission</strong>.</li>
+    </ol>
+
+    <p>Commissions show up in your entry list with a 💰 icon and are counted separately in your pay summary. They appear in both the Home tab and the Reports tab under a dedicated "Commissions" section.</p>
+
+    <!-- ═══════════════════════════════
+         6. EDITING & DELETING
+    ═══════════════════════════════ -->
+    <h2 id="editing">6. Editing &amp; Deleting Entries</h2>
+
+    <h3>Editing an Entry</h3>
+    <ol class="steps">
+      <li>Find the entry in the <strong>"This Pay Period"</strong> section on the Home tab.</li>
+      <li>Tap the blue <strong>Edit</strong> button on that entry.</li>
+      <li>The entry expands into an inline form where you can change: <strong>date, class name, location, start/end time, hours, rate, total,</strong> and <strong>notes</strong>.</li>
+      <li>Make your changes and tap <strong>Save changes</strong>.</li>
+    </ol>
+
+    <div class="note">
+      <strong>Changing the Date</strong>
+      If you change an entry's date to a different pay period, the entry automatically moves to the correct period. You'll see a confirmation message and the view will switch to that period.
+    </div>
+
+    <h3>Deleting a Single Entry</h3>
+    <p>Tap the red <strong>Delete</strong> button on any entry. It's removed immediately.</p>
+
+    <h3>Deleting All Entries for a Day</h3>
+    <p>Each day group has a <strong>"Delete day"</strong> button in the header. This removes all entries for that date at once.</p>
+
+    <h3>Undo</h3>
+    <p>After any delete, an <strong>Undo</strong> toast appears at the bottom of the screen for about 6 seconds. Tap it to restore what you just deleted.</p>
+
+    <div class="warn">
+      <strong>Heads Up</strong>
+      Once the undo timer runs out, the deletion is permanent. Make sure you meant it!
+    </div>
+
+    <!-- ═══════════════════════════════
+         7. PAY PERIODS
+    ═══════════════════════════════ -->
+    <h2 id="pay-periods">7. Pay Periods &amp; Navigation</h2>
+
+    <p>Everything in the app is organized around <strong>pay periods</strong> &mdash; the time window for which you log hours and get paid.</p>
+
+    <h3>The Pay Period Selector</h3>
+    <p>At the top of the Home tab, the dark strip shows:</p>
+    <ul>
+      <li>A <strong>dropdown</strong> with all available pay periods (past, current, and future).</li>
+      <li><strong>‹ / ›</strong> arrow buttons to quickly step backward or forward one period.</li>
+      <li>A <strong>stats bar</strong> showing total shifts, hours, and gross pay for the selected period.</li>
+    </ul>
+
+    <h3>Period Types</h3>
+    <p>Your admin configures the pay schedule. It can be:</p>
+    <ul>
+      <li><strong>Biweekly</strong> &mdash; every 2 weeks (most common)</li>
+      <li><strong>Weekly</strong> &mdash; every week</li>
+      <li><strong>Semi-monthly</strong> &mdash; twice a month on fixed dates (e.g. 1st &amp; 16th)</li>
+      <li><strong>Monthly</strong> &mdash; once a month starting on a set day</li>
+    </ul>
+
+    <h3>Color Coding</h3>
+    <ul>
+      <li><strong>Green border</strong> &mdash; you're viewing the current (active) pay period</li>
+      <li><strong>Blue border</strong> &mdash; you're viewing a future period</li>
+      <li><strong>No border</strong> &mdash; you're viewing a past period</li>
+    </ul>
+
+    <!-- ═══════════════════════════════
+         8. CALENDAR WIDGET
+    ═══════════════════════════════ -->
+    <h2 id="calendar">8. The Calendar Widget</h2>
+
+    <p>The calendar on the Home tab gives you a visual overview of your logged entries across days.</p>
+
+    <h3>Two Views</h3>
+    <ul>
+      <li><strong>Pay Period View</strong> (default) &mdash; shows only the days in the current pay period.</li>
+      <li><strong>Month View</strong> &mdash; shows a full calendar month. Toggle with the <em>Month View</em> button.</li>
+    </ul>
+
+    <h3>Reading the Calendar</h3>
+    <ul>
+      <li>Days with entries have a <strong>tinted background</strong> and a small <strong>count badge</strong> showing the number of shifts.</li>
+      <li><strong>Today</strong> is outlined with a red border.</li>
+      <li>Empty days are plain.</li>
+    </ul>
+
+    <h3>Interacting</h3>
+    <ul>
+      <li><strong>Tap any day with entries</strong> to jump to that date's entries in the list below. If the day is in a different pay period, the app switches automatically.</li>
+      <li><strong>Tap an empty day</strong> in a future period to switch to that period and start logging.</li>
+      <li>Use the <strong>‹ / ›</strong> arrows to navigate between periods (or months, in month view).</li>
+    </ul>
+
+    <div class="tip">
+      <strong>Tip</strong>
+      The calendar syncs with the pay period dropdown. Switching periods via the dropdown also moves the calendar, and vice versa.
+    </div>
+
+    <!-- ═══════════════════════════════
+         9. BONUSES
+    ═══════════════════════════════ -->
+    <h2 id="bonuses">9. Bonuses &amp; How They Work</h2>
+
+    <h3>Weekly Shift Bonus</h3>
+    <p>If you teach <strong>6 or more hours</strong> in a single week (Monday&ndash;Sunday), you earn a <strong>$5/hour bonus</strong> applied retroactively to <em>all</em> your hours that week.</p>
+
+    <ul>
+      <li>A <strong>Weekly Bonus Tracker</strong> appears on the Home tab showing your progress toward the threshold.</li>
+      <li>Once you hit 6 hours, the bonus kicks in automatically &mdash; you don't need to do anything.</li>
+      <li>The bonus shows as a separate line in your reports.</li>
+    </ul>
+
+    <div class="note">
+      <strong>Example</strong>
+      You teach 7 hours in one week at $25/hr. Your base pay is $175. The weekly bonus adds $5 &times; 7 = $35, bringing your total to $210 for that week.
+    </div>
+
+    <h3>Pole 11+ Student Bonus</h3>
+    <p>When logging a pole class with 11 or more students, check the <strong>Pole 11+</strong> checkbox on that shift. This adds a flat <strong>$5 bonus</strong> on top of your hourly rate for that one class.</p>
+
+    <h3>Bonus Exclusions</h3>
+    <p>Some class types (like "Admin" or "Office Work") may be excluded from the weekly bonus threshold. These hours still get paid &mdash; they just don't count toward the 6-hour bonus target. Your admin configures which classes are excluded.</p>
+
+    <!-- ═══════════════════════════════
+         10. LATE SUBMISSIONS
+    ═══════════════════════════════ -->
+    <h2 id="late">10. Late Submissions</h2>
+
+    <p>A "late" entry is any shift logged <em>after</em> its pay period has already ended.</p>
+
+    <h3>How It Looks</h3>
+    <ul>
+      <li>Late entries are highlighted with a <strong>light yellow background</strong> and a yellow left border.</li>
+      <li>A <strong>"Late" tag</strong> appears next to the class name.</li>
+      <li>This is visible on both the <strong>Home</strong> tab and the <strong>Reports</strong> tab.</li>
+    </ul>
+
+    <h3>How It Works</h3>
+    <ul>
+      <li>When you log a shift for a past pay period, it's automatically flagged as a late submission.</li>
+      <li>The entry goes into a <strong>pending submissions</strong> queue for your admin to review.</li>
+      <li>Late entries are included in the <strong>next payroll report</strong> automatically.</li>
+    </ul>
+
+    <h3>Fixing a Late Entry</h3>
+    <p>If you edit a late entry and change its date to fall within the <strong>current</strong> pay period, the late tag is removed and the entry moves to the correct period. If you move it to a <em>different</em> past period, it stays marked as late but moves to the right place.</p>
+
+    <div class="warn">
+      <strong>Good Habit</strong>
+      Log your hours before the pay period ends! Late entries still get paid, but they require extra admin review and show up separately in payroll reports.
+    </div>
+
+    <!-- ═══════════════════════════════
+         11. FLAG SYSTEM
+    ═══════════════════════════════ -->
+    <h2 id="flags">11. The Flag System</h2>
+
+    <p>Flags are how your admin communicates that an entry needs attention &mdash; like incorrect hours, wrong rate, or missing info.</p>
+
+    <h3>If Your Entry Gets Flagged</h3>
+    <ol class="steps">
+      <li>An <strong>orange banner</strong> appears on your Home tab: "🚩 Flagged Entries" with a count.</li>
+      <li>Tap the banner to see which entries were flagged and <strong>why</strong> (the admin's note).</li>
+      <li>Tap <strong>"Respond to Flag"</strong> on any flagged entry.</li>
+      <li>Write an <strong>explanation</strong> &mdash; e.g. "The hours are correct, it was a 2-hour private."</li>
+      <li>Optionally, check <strong>"I'd like to submit corrected values"</strong> to propose new hours, rate, time, etc.</li>
+      <li>Tap <strong>Submit Response</strong>. Your admin will review and resolve the flag.</li>
+    </ol>
+
+    <h3>Flag Statuses</h3>
+    <ul>
+      <li><strong>Flagged</strong> &mdash; admin flagged it, waiting for your response</li>
+      <li><strong>Corrected</strong> &mdash; you've submitted a response/correction</li>
+      <li><strong>Resolved / Approved</strong> &mdash; admin reviewed and closed the flag</li>
+    </ul>
+
+    <div class="tip">
+      <strong>Tip</strong>
+      Respond to flags promptly! Unresolved flags may carry over to the next pay period.
+    </div>
+
+    <!-- ═══════════════════════════════
+         12. GOOGLE CALENDAR
+    ═══════════════════════════════ -->
+    <h2 id="google">12. Google Calendar Integration</h2>
+
+    <p>Connect your Google Calendar to import shifts directly &mdash; no manual entry needed.</p>
+
+    <h3>Connecting</h3>
+    <ol class="steps">
+      <li>Go to the <strong>Profile</strong> tab.</li>
+      <li>Scroll to <strong>Google Calendar</strong> and tap <strong>Connect</strong>.</li>
+      <li>Google shows an authorization screen. Click <strong>Advanced</strong>, then <strong>Go to Aradia Fitness (unsafe)</strong>, then <strong>Continue</strong>.</li>
+      <li>You'll be redirected back to the app. A <strong>"Connected ✓"</strong> badge appears.</li>
+      <li>Select your <strong>Default Calendar</strong> from the dropdown and save it.</li>
+    </ol>
+
+    <div class="note">
+      <strong>Why "Unsafe"?</strong>
+      Google shows this warning because our app hasn't gone through their lengthy verification process. Aradia only requests <strong>read-only</strong> access to event names, times, and locations. We never modify, delete, or share your calendar data.
+    </div>
+
+    <h3>Importing Events</h3>
+    <ol class="steps">
+      <li>On the Home tab, tap <strong>📅 Import</strong> (in the calendar widget header) to import by period, or <strong>📅 Import from Google Calendar</strong> (below the date field) to import by date.</li>
+      <li>Your calendar events appear in a list. Toggle on the ones you want to import.</li>
+      <li>Set a <strong>bulk rate</strong> ($/hr) that applies to all selected events, or tap individual events to set per-event rates.</li>
+      <li>Tap <strong>Import Selected</strong>. Events become entries in your timesheet.</li>
+    </ol>
+
+    <h3>Smart Features</h3>
+    <ul>
+      <li><strong>Location matching</strong> &mdash; the import automatically maps your calendar event locations to the app's location list.</li>
+      <li><strong>Duplicate detection</strong> &mdash; events that match existing entries are flagged with a red badge and toggled off by default.</li>
+      <li><strong>Default calendar</strong> &mdash; set once in Profile and never have to pick it again.</li>
+    </ul>
+
+    <!-- ═══════════════════════════════
+         13. REPORTS & EXPORTS
+    ═══════════════════════════════ -->
+    <h2 id="reports">13. Reports &amp; Exports</h2>
+
+    <h3>The Reports Tab</h3>
+    <p>The Reports tab shows a professional breakdown of your pay for any period:</p>
+    <ul>
+      <li><strong>Daily breakdown</strong> &mdash; each day lists your shifts with location, time, hours, rate, and pay.</li>
+      <li><strong>Weekly bonuses</strong> &mdash; if you hit the bonus threshold, it shows which weeks and how much.</li>
+      <li><strong>Commissions</strong> &mdash; a separate section listing all commissions with dates, amounts, and notes.</li>
+      <li><strong>Grand total</strong> &mdash; total shifts, hours, gross pay, and GST (if applicable).</li>
+      <li><strong>Late entries</strong> appear with the yellow "Late" tag so you know which ones were submitted after the period closed.</li>
+    </ul>
+
+    <h3>Exporting</h3>
+    <ul>
+      <li><strong>PDF export</strong> &mdash; tap the <em>⬇ Export PDF</em> button on the Reports tab (or the export button on the Home tab). Opens a formatted, printable statement.</li>
+      <li><strong>Pay History PDF</strong> &mdash; go to Profile &rarr; My Pay History, set a date range, and tap <em>🖨 Print/PDF</em> for a comprehensive earnings statement.</li>
+      <li><strong>Email attachments</strong> &mdash; in Profile &rarr; Preferences, toggle on <em>Attach PDF</em> and/or <em>Attach CSV</em> to receive formatted reports with your pay summary emails.</li>
+    </ul>
+
+    <!-- ═══════════════════════════════
+         14. PROFILE
+    ═══════════════════════════════ -->
+    <h2 id="profile">14. Your Profile</h2>
+
+    <p>The Profile tab is your personal settings hub. Here's everything you can manage:</p>
+
+    <h3>Profile Photo</h3>
+    <p>Tap the pencil icon on your avatar to upload a photo. It shows in the top bar when you're logged in.</p>
+
+    <h3>Email &amp; Username</h3>
+    <ul>
+      <li><strong>Change email</strong> &mdash; updates your login email.</li>
+      <li><strong>Set a username</strong> &mdash; use it instead of your email to log in. Letters, numbers, dots, and dashes only.</li>
+    </ul>
+
+    <h3>Change PIN</h3>
+    <p>Enter a new PIN (4&ndash;10 digits) and save. Takes effect immediately.</p>
+
+    <h3>Contractor Settings</h3>
+    <p>If you're set up as a contractor, you can:</p>
+    <ul>
+      <li>Enter your <strong>GST number</strong>.</li>
+      <li>Toggle <strong>Charge GST</strong> to add 5% GST to all your pay in reports.</li>
+    </ul>
+
+    <h3>Preferences</h3>
+    <ul>
+      <li><strong>Theme</strong> &mdash; choose Light, Dark, or Aradia.</li>
+      <li><strong>Email me my pay summary</strong> &mdash; get an email when payroll is processed.</li>
+      <li><strong>Attach PDF / CSV</strong> &mdash; get formatted files attached to your pay email.</li>
+      <li><strong>Email me bug report updates</strong> &mdash; get notified when a bug you reported is fixed.</li>
+    </ul>
+
+    <h3>My Pay History</h3>
+    <p>View all your earnings over any date range. Set start and end dates, tap <em>Load Pay History</em>, and see:</p>
+    <ul>
+      <li><strong>Total hours</strong>, <strong>gross pay</strong>, <strong>GST</strong> (if applicable), and <strong>total owing</strong>.</li>
+      <li>Toggle between <strong>Summary</strong> (by period) and <strong>Shifts</strong> (every individual entry) views.</li>
+      <li>Export with the <em>🖨 Print/PDF</em> button.</li>
+    </ul>
+
+    <!-- ═══════════════════════════════
+         15. THEMES
+    ═══════════════════════════════ -->
+    <h2 id="themes">15. Themes</h2>
+
+    <p>The app comes with three visual themes:</p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="icon">☀️</div>
+        <div class="label">Light</div>
+        <div class="desc">Clean white background with dark text. Easy on the eyes in bright environments.</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🌙</div>
+        <div class="label">Dark</div>
+        <div class="desc">Dark background with light text. Great for low-light conditions and reducing eye strain.</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🔴</div>
+        <div class="label">Aradia</div>
+        <div class="desc">Deep burgundy brand theme. Rich, warm colors that match the Aradia brand.</div>
+      </div>
+    </div>
+
+    <p>To switch: go to <strong>Profile</strong> &rarr; <strong>Preferences</strong> and tap the theme you want. The change applies instantly and is remembered across sessions.</p>
+
+    <!-- ═══════════════════════════════
+         16. SUPPORT & FAQ
+    ═══════════════════════════════ -->
+    <h2 id="support">16. Support &amp; FAQ</h2>
+
+    <p>The Support tab has everything you need to get help:</p>
+
+    <h3>Report a Bug</h3>
+    <p>Something not working? Describe what happened, what you expected, and which page you were on. An admin will investigate and fix it.</p>
+
+    <h3>Message Support</h3>
+    <p>For general questions that aren't in the FAQ. Enter your email, subject, and message &mdash; an admin will reply to your email.</p>
+
+    <h3>AI Assistant</h3>
+    <p>Need a quick answer? The <strong>Aradia Assistant</strong> chatbot can answer questions about logging hours, pay periods, bonuses, reports, and more &mdash; right on the Support tab.</p>
+
+    <h3>FAQ</h3>
+    <p>Tap any question to expand the answer. Covers the most common topics like logging classes, bonuses, duplicates, Google Calendar, and more.</p>
+
+    <!-- ═══════════════════════════════
+         17. INSTALLING AS A PHONE APP
+    ═══════════════════════════════ -->
+    <h2 id="install">17. Installing as a Phone App</h2>
+
+    <p>You can add Aradia Time to your phone's home screen for a full-screen app experience &mdash; no browser bar, just the app.</p>
+
+    <h3>iPhone (Safari)</h3>
+    <ol class="steps">
+      <li>Open <strong>aradiafitness.app</strong> in Safari.</li>
+      <li>Tap the <strong>Share</strong> button (the square with an arrow).</li>
+      <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+      <li>Tap <strong>Add</strong>. The app icon appears on your home screen.</li>
+    </ol>
+
+    <h3>Android (Chrome)</h3>
+    <ol class="steps">
+      <li>Open <strong>aradiafitness.app</strong> in Chrome.</li>
+      <li>Tap the <strong>three-dot menu</strong> (top right).</li>
+      <li>Tap <strong>Add to Home Screen</strong> (or <strong>Install App</strong>).</li>
+      <li>Tap <strong>Add</strong>. The app icon appears on your home screen.</li>
+    </ol>
+
+    <!-- ═══════════════════════════════
+         18. ADMIN FEATURES
+    ═══════════════════════════════ -->
+    <h2 id="admin">18. Admin Features</h2>
+
+    <p>If you're an admin or moderator, you'll see an extra <strong>Admin</strong> tab with powerful management tools.</p>
+
+    <h3>Staff Management</h3>
+    <ul>
+      <li>View all staff members, their types (Employee/Contractor), and status.</li>
+      <li>Add new staff with email, name, and user type.</li>
+      <li>Edit or remove existing staff.</li>
+    </ul>
+
+    <h3>Payroll Processing</h3>
+    <ul>
+      <li>View per-period summaries: staff count, total hours, gross pay.</li>
+      <li>Send payroll reports to configured recipients (accountant, admin emails).</li>
+      <li>Review and manage <strong>pending (late) submissions</strong> before including in payroll.</li>
+    </ul>
+
+    <h3>Pending Submissions Tab</h3>
+    <ul>
+      <li>All late entries grouped by staff member and period.</li>
+      <li><strong>Flag</strong> entries that need correction.</li>
+      <li><strong>Exclude</strong> entries from payroll (uncheck the approval box).</li>
+    </ul>
+
+    <h3>Flagged Entries Tab</h3>
+    <ul>
+      <li>See all flagged entries across staff &mdash; grouped by status.</li>
+      <li>Read staff responses and proposed corrections.</li>
+      <li>Approve corrections or resolve flags with notes.</li>
+    </ul>
+
+    <h3>Settings</h3>
+    <p>The admin settings panel lets you configure:</p>
+    <ul>
+      <li><strong>Report recipients</strong> &mdash; accountant email, admin emails, payroll admin.</li>
+      <li><strong>Auto-send payroll</strong> &mdash; set a time (MST) for automatic report delivery at end of period.</li>
+      <li><strong>Bonus configuration</strong> &mdash; weekly bonus threshold &amp; amount, pole bonus amount, exclusion list.</li>
+      <li><strong>Pay period settings</strong> &mdash; frequency, anchor dates, history count.</li>
+      <li><strong>Locations</strong> &mdash; add, edit, or remove work locations.</li>
+    </ul>
+
+    <!-- ═══════════════════════════════
+         19. TIPS & TRICKS
+    ═══════════════════════════════ -->
+    <h2 id="tips">19. Tips &amp; Tricks</h2>
+
+    <div class="tip">
+      <strong>Log as you go</strong>
+      Don't wait until end of period. Log each class right after you teach it &mdash; the date defaults to today so it takes 30 seconds.
+    </div>
+
+    <div class="tip">
+      <strong>Use Google Calendar import</strong>
+      If your schedule is already on Google Calendar, connect it once and import shifts in two taps. The app auto-fills times, class names, and locations.
+    </div>
+
+    <div class="tip">
+      <strong>Check the bonus tracker</strong>
+      Keep an eye on the weekly bonus progress bar on the Home tab. If you're close to 6 hours, one more class could unlock the $5/hr bonus for the entire week.
+    </div>
+
+    <div class="tip">
+      <strong>Use the calendar widget</strong>
+      Quickly scan which days you've already logged by looking at the count badges. Tap any day to jump straight to those entries.
+    </div>
+
+    <div class="tip">
+      <strong>Set up email reports</strong>
+      Go to Profile &rarr; Preferences and turn on <em>Email me my pay summary</em>. You'll get a detailed breakdown delivered to your inbox when payroll is processed &mdash; no need to check the app.
+    </div>
+
+    <div class="tip">
+      <strong>Bookmark the app</strong>
+      Add Aradia Time to your phone's home screen (see section 17) for quick one-tap access without opening a browser.
+    </div>
+
+    <hr>
+
+    <p style="text-align:center;color:#888;font-size:0.85rem;">
+      Aradia Time User Guide &mdash; Last updated March 2026<br>
+      Questions? Use the <strong>Support</strong> tab in the app or ask the AI Assistant.
+    </p>
+
+    <a class="back" href="/">&larr; Back to app</a>
+  </div>
+</body>
+</html>
