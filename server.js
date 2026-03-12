@@ -525,6 +525,18 @@ async function setupDatabase() {
 // ─── Demo Seed Data ───
 async function seedDemoData() {
   const tid = 1;
+
+  // Ensure admin account exists
+  const adminExists = await query(`SELECT id FROM users WHERE tenant_id=$1 AND LOWER(username)='admin'`, [tid]);
+  if (!adminExists.rows.length) {
+    await query(
+      `INSERT INTO users (tenant_id, email, name, type, pin, username, is_active)
+       VALUES ($1,'admin@kronara.com','Admin','Admin','1212','admin',TRUE)`,
+      [tid]
+    );
+    console.log("Created admin account");
+  }
+
   // Check if already seeded
   const check = await query(`SELECT COUNT(*) FROM users WHERE tenant_id=$1 AND is_demo=TRUE`, [tid]);
   if (parseInt(check.rows[0].count) > 0) return;
