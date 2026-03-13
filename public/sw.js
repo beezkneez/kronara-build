@@ -1,6 +1,6 @@
-// Aradia Time — Service Worker for Push Notifications
+// Kronara — Service Worker for Push Notifications
 self.addEventListener("push", function(event) {
-  var data = { title: "Aradia Time", body: "You have a new notification.", url: "/" };
+  var data = { title: "Kronara", body: "You have a new notification.", url: "/" };
   try {
     if (event.data) data = Object.assign(data, event.data.json());
   } catch (e) {}

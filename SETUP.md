@@ -24,8 +24,8 @@ DEMO_MODE           → true
 ### Branding
 ```
 BRAND_NAME          → Kronara
-BRAND_SUB           → Studio Management Demo
-BRAND_SITE          → https://kronara.com
+BRAND_SUB           → Time. Teams. Simplified.
+BRAND_SITE          → https://kronara.app
 BRAND_LOGO_URL      → /logo.png
 BRAND_COLOR_PRIMARY → #0C7C80
 BRAND_COLOR_ACCENT  → #D4942A
@@ -37,7 +37,7 @@ APP_DOMAIN          → your-domain.up.railway.app
 ### Email (optional)
 ```
 RESEND_API_KEY      → your Resend API key
-RESEND_FROM         → Kronara <support@kronara.com>
+RESEND_FROM         → Kronara <support@kronara.app>
 ```
 
 ### Not needed for demo (skip these)
