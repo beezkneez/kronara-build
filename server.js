@@ -57,14 +57,14 @@ const CONFIG = {
   PAY_PERIOD_DAYS:   14,
   PAY_PERIOD_HISTORY_COUNT: 8,
 
-  BRAND_NAME:           process.env.BRAND_NAME           || "Aradia Time",
-  BRAND_SUB:            process.env.BRAND_SUB            || "Edmonton",
-  BRAND_SITE:           process.env.BRAND_SITE           || "https://edmonton.aradiafitness.com",
-  BRAND_LOGO_URL:       process.env.BRAND_LOGO_URL       || "https://edmonton.aradiafitness.com/wp-content/uploads/sites/5/2020/08/Logo-Edmonton.png",
-  BRAND_COLOR_PRIMARY:  process.env.BRAND_COLOR_PRIMARY  || "#8b1e2d",
-  BRAND_COLOR_ACCENT:   process.env.BRAND_COLOR_ACCENT   || "#8b1e2d",
-  BRAND_COLOR_DARK_BG:  process.env.BRAND_COLOR_DARK_BG  || "#1a0a0e",
-  BRAND_DEFAULT_THEME:  process.env.BRAND_DEFAULT_THEME  || "light",
+  BRAND_NAME:           process.env.BRAND_NAME           || "Kronara",
+  BRAND_SUB:            process.env.BRAND_SUB            || "Time. Teams. Simplified.",
+  BRAND_SITE:           process.env.BRAND_SITE           || "https://kronara.app",
+  BRAND_LOGO_URL:       process.env.BRAND_LOGO_URL       || "/logo.png",
+  BRAND_COLOR_PRIMARY:  process.env.BRAND_COLOR_PRIMARY  || "#6C5CE7",
+  BRAND_COLOR_ACCENT:   process.env.BRAND_COLOR_ACCENT   || "#E8832A",
+  BRAND_COLOR_DARK_BG:  process.env.BRAND_COLOR_DARK_BG  || "#0A0A1A",
+  BRAND_DEFAULT_THEME:  process.env.BRAND_DEFAULT_THEME  || "kronara",
   DEMO_MODE:            process.env.DEMO_MODE === "true",
 
   FORGOT_PIN_COOLDOWN_SECONDS: 300,
@@ -89,7 +89,7 @@ const DEMO_BLOCK_MSG = "This is demo data and cannot be deleted.";
 // ─────────────────────────────────────────
 try {
   if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-    const vapidSubject = process.env.VAPID_SUBJECT || "mailto:support@aradiafitness.app";
+    const vapidSubject = process.env.VAPID_SUBJECT || "mailto:support@kronara.app";
     const subject = vapidSubject.startsWith("mailto:") ? vapidSubject : `mailto:${vapidSubject}`;
     webpush.setVapidDetails(subject, process.env.VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
     console.log("Web Push: VAPID configured ✅");
@@ -417,6 +417,7 @@ async function setupDatabase() {
   await query(`ALTER TABLE shift_posts ADD COLUMN IF NOT EXISTS reminder_24h_sent BOOLEAN DEFAULT FALSE`).catch(()=>{});
   await query(`ALTER TABLE shift_posts ADD COLUMN IF NOT EXISTS claimed_by_name TEXT`).catch(()=>{});
   await query(`ALTER TABLE shift_posts ADD COLUMN IF NOT EXISTS duration INTEGER DEFAULT 60`).catch(()=>{});
+  await query(`ALTER TABLE shift_posts ADD COLUMN IF NOT EXISTS front_desk BOOLEAN DEFAULT FALSE`).catch(()=>{});
 
   // Push notification category preferences (per user)
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS push_flags BOOLEAN DEFAULT FALSE`).catch(()=>{});
@@ -428,6 +429,8 @@ async function setupDatabase() {
   // Email notification preferences for TSPS shifts
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_shifts BOOLEAN DEFAULT TRUE`).catch(()=>{});
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_shifts_urgent_only BOOLEAN DEFAULT FALSE`).catch(()=>{});
+  await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS front_desk_staff BOOLEAN DEFAULT FALSE`).catch(()=>{});
+  await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS front_desk_only BOOLEAN DEFAULT FALSE`).catch(()=>{});
   // Enable email_shifts for all existing users
   await query(`UPDATE users SET email_shifts = TRUE WHERE email_shifts IS NULL OR email_shifts = FALSE`).catch(()=>{});
 
@@ -531,7 +534,7 @@ async function seedDemoData() {
   if (!adminExists.rows.length) {
     await query(
       `INSERT INTO users (tenant_id, email, name, type, pin, username, is_active)
-       VALUES ($1,'admin@kronara.com','Admin','Admin','1212','admin',TRUE)`,
+       VALUES ($1,'admin@kronara.app','Admin','Admin','1212','admin',TRUE)`,
       [tid]
     );
     console.log("Created admin account");
@@ -544,19 +547,19 @@ async function seedDemoData() {
 
   const locations = [
     { name: "Downtown Studio", address: "123 Main St" },
-    { name: "Kingsway Studio", address: "456 Kingsway Ave" },
-    { name: "Southside Studio", address: "789 Whyte Ave" }
+    { name: "Midtown Studio", address: "456 Central Ave" },
+    { name: "Westend Studio", address: "789 Park Blvd" }
   ];
   for (const loc of locations) {
     await query(`INSERT INTO locations (tenant_id, name, address, is_demo) VALUES ($1,$2,$3,TRUE)`, [tid, loc.name, loc.address]);
   }
 
   const staff = [
-    { email: "sarah@demo.kronara.com", name: "Sarah Mitchell", type: "Employee", pin: "1234", username: "sarah" },
-    { email: "jessica@demo.kronara.com", name: "Jessica Chen", type: "Contractor", pin: "1234", username: "jessica" },
-    { email: "alex@demo.kronara.com", name: "Alex Rivera", type: "Employee", pin: "1234", username: "alex" },
-    { email: "maya@demo.kronara.com", name: "Maya Thompson", type: "Contractor", pin: "1234", username: "maya" },
-    { email: "demo@demo.kronara.com", name: "Demo User", type: "Employee", pin: "1212", username: "demo" }
+    { email: "sarah@demo.kronara.app", name: "Sarah Mitchell", type: "Employee", pin: "1234", username: "sarah" },
+    { email: "jessica@demo.kronara.app", name: "Jessica Chen", type: "Contractor", pin: "1234", username: "jessica" },
+    { email: "alex@demo.kronara.app", name: "Alex Rivera", type: "Employee", pin: "1234", username: "alex" },
+    { email: "maya@demo.kronara.app", name: "Maya Thompson", type: "Contractor", pin: "1234", username: "maya" },
+    { email: "demo@demo.kronara.app", name: "Demo User", type: "Employee", pin: "1212", username: "demo" }
   ];
   for (const s of staff) {
     await query(
@@ -613,9 +616,9 @@ async function seedDemoData() {
 
   // Seed a couple proposals
   const proposalData = [
-    { email: "sarah@demo.kronara.com", name: "Sarah Mitchell", cn: "Chair Dance Basics", date: demoDate(7), time: "6:00 PM", loc: "Downtown Studio", room: "Studio B", status: "pending" },
-    { email: "jessica@demo.kronara.com", name: "Jessica Chen", cn: "Handstand Workshop", date: demoDate(10), time: "11:00 AM", loc: "Kingsway Studio", room: "Studio A", status: "pending" },
-    { email: "alex@demo.kronara.com", name: "Alex Rivera", cn: "Pole Combos", date: demoDate(5), time: "7:00 PM", loc: "Southside Studio", room: "Pole Room", status: "approved", archived_at: "NOW()" }
+    { email: "sarah@demo.kronara.app", name: "Sarah Mitchell", cn: "Chair Dance Basics", date: demoDate(7), time: "6:00 PM", loc: "Downtown Studio", room: "Studio B", status: "pending" },
+    { email: "jessica@demo.kronara.app", name: "Jessica Chen", cn: "Handstand Workshop", date: demoDate(10), time: "11:00 AM", loc: "Midtown Studio", room: "Studio A", status: "pending" },
+    { email: "alex@demo.kronara.app", name: "Alex Rivera", cn: "Pole Combos", date: demoDate(5), time: "7:00 PM", loc: "Westend Studio", room: "Pole Room", status: "approved", archived_at: "NOW()" }
   ];
   for (const p of proposalData) {
     await query(
@@ -629,7 +632,7 @@ async function seedDemoData() {
   await query(
     `INSERT INTO shift_posts (tenant_id, poster_email, poster_name, location, shift_time, shift_date, class_name, notes, status, is_demo)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'open',TRUE)`,
-    [tid, "maya@demo.kronara.com", "Maya Thompson", "Downtown Studio", "5:30 PM", demoDate(3), "Aerial Silks", "Need someone to cover — family event!"]
+    [tid, "maya@demo.kronara.app", "Maya Thompson", "Downtown Studio", "5:30 PM", demoDate(3), "Aerial Silks", "Need someone to cover — family event!"]
   );
 
   console.log("Demo data seeded.");
@@ -786,7 +789,7 @@ async function sendMail(opts) {
       .filter((v,i,a) => a.indexOf(v) === i); // dedupe
 
     const resend = getResend();
-    const from   = process.env.RESEND_FROM || `${CONFIG.BRAND_NAME} <support@aradiafitness.app>`;
+    const from   = process.env.RESEND_FROM || `${CONFIG.BRAND_NAME} <support@kronara.app>`;
 
     // Admin/accountant reports always bypass test mode filtering — send to actual recipients
     if (opts.adminReport) {
@@ -879,7 +882,7 @@ async function sendMail(opts) {
 
   // Normal send
   const resend = getResend();
-  const from = process.env.RESEND_FROM || `${CONFIG.BRAND_NAME} <support@aradiafitness.app>`;
+  const from = process.env.RESEND_FROM || `${CONFIG.BRAND_NAME} <support@kronara.app>`;
   await mailRateLimit();
   await sendMailWithRetry(() => resend.emails.send({
     from,
@@ -965,7 +968,7 @@ async function buildPayrollPdf(users, pp, settings, lateGroups) {
     doc.on("end",  () => resolve(Buffer.concat(bufs)));
     doc.on("error", reject);
 
-    const brand = CONFIG.BRAND_NAME || "Aradia Fitness";
+    const brand = CONFIG.BRAND_NAME || "Kronara";
     const col   = { red: "${CONFIG.BRAND_COLOR_PRIMARY}", dark: "#222", mid: "#555", light: "#888" };
     const pageW = doc.page.width;
     const contentW = pageW - 80;
@@ -1157,7 +1160,7 @@ async function buildStaffPeriodPdf(user, tid, pp) {
     doc.on("end",  () => resolve(Buffer.concat(bufs)));
     doc.on("error", reject);
 
-    const brand = CONFIG.BRAND_NAME || "Aradia Fitness";
+    const brand = CONFIG.BRAND_NAME || "Kronara";
     const col   = { red: "${CONFIG.BRAND_COLOR_PRIMARY}", dark: "#222", mid: "#555", light: "#888" };
     const isC   = (user.type||"").toLowerCase() === "contractor";
     const gst_  = isC && user.chargeGST;
@@ -1367,7 +1370,7 @@ async function buildStaffEarningsPdf(user, tid, dateFrom, dateTo) {
     doc.on("end",  () => resolve(Buffer.concat(bufs)));
     doc.on("error", reject);
 
-    const brand = CONFIG.BRAND_NAME || "Aradia Fitness";
+    const brand = CONFIG.BRAND_NAME || "Kronara";
     const col   = { red: "${CONFIG.BRAND_COLOR_PRIMARY}", dark: "#222", mid: "#555", light: "#888" };
     const range = (dateFrom && dateTo) ? dateFrom + " to " + dateTo : "All time";
 
@@ -1803,6 +1806,8 @@ function formatUser(row) {
     emailShifts: row.email_shifts !== false,
     emailShiftsUrgentOnly: !!row.email_shifts_urgent_only,
     shiftFilterKeywords: row.shift_filter_keywords || "",
+    frontDeskStaff: !!row.front_desk_staff,
+    frontDeskOnly: !!row.front_desk_only,
     adminPermissions: row.admin_permissions || "",
   };
 }
@@ -2786,7 +2791,7 @@ api.post("/adminResetPin", async (req, res) => {
 
     // Send PIN via email
     const userName = tgtUser.rows[0].name || tgtEmail;
-    const appUrl = `https://${process.env.APP_DOMAIN || "aradiafitness.app"}`;
+    const appUrl = `https://${process.env.APP_DOMAIN || "kronara.app"}`;
     const settings = await getAdminSettings();
     const ytLink = settings.youtubeLink || "";
 
@@ -2833,8 +2838,8 @@ api.post("/massResetPins", async (req, res) => {
 
     const tid = await getDefaultTenantId();
     const staffRes = await query(`SELECT * FROM users WHERE tenant_id=$1 AND is_active=TRUE`, [tid]);
-    const brand = CONFIG.BRAND_NAME || "Aradia Fitness";
-    const appUrl = `https://${process.env.APP_DOMAIN || "aradiafitness.app"}`;
+    const brand = CONFIG.BRAND_NAME || "Kronara";
+    const appUrl = `https://${process.env.APP_DOMAIN || "kronara.app"}`;
     let count = 0;
 
     for (const u of staffRes.rows) {
@@ -3295,7 +3300,7 @@ api.post("/debugEmail", async (req, res) => {
 
     // Test Resend API key by hitting their /domains endpoint
     const resendKey = process.env.RESEND_API_KEY || "";
-    const resendFrom = process.env.RESEND_FROM || `(not set — will use: ${CONFIG.BRAND_NAME} <support@aradiafitness.app>)`;
+    const resendFrom = process.env.RESEND_FROM || `(not set — will use: ${CONFIG.BRAND_NAME} <support@kronara.app>)`;
     report.env.RESEND_API_KEY = resendKey ? "✅ Set (" + resendKey.length + " chars)" : "⚠️ NOT SET";
     report.env.RESEND_FROM    = resendFrom;
     // Remove old SMTP fields
@@ -3597,7 +3602,7 @@ api.post("/updateStaffMember", async (req, res) => {
     if (targetUser && String(targetUser.type||"").toUpperCase() === "ADMIN" && updates.type !== undefined && String(updates.type||"").toUpperCase() !== "ADMIN") {
       delete updates.type; // silently preserve admin type
     }
-    const colMap = { name:"name", username:"username", type:"type", gstNumber:"gst_number", isActive:"is_active", chargeGST:"charge_gst", emailReports:"email_reports", requiresPinChange:"require_pin_change", requiresManualApproval:"requires_approval", setupCleanupRate:"setup_cleanup_rate", setupCleanupAllowed:"setup_cleanup_allowed", canCreateImages:"can_create_images", tspsEnabled:"tsps_enabled", pushFlags:"push_flags", pushPay:"push_pay", pushShifts:"push_shifts", emailShifts:"email_shifts", emailShiftsUrgentOnly:"email_shifts_urgent_only", shiftFilterKeywords:"shift_filter_keywords", adminPermissions:"admin_permissions" };
+    const colMap = { name:"name", username:"username", type:"type", gstNumber:"gst_number", isActive:"is_active", chargeGST:"charge_gst", emailReports:"email_reports", requiresPinChange:"require_pin_change", requiresManualApproval:"requires_approval", setupCleanupRate:"setup_cleanup_rate", setupCleanupAllowed:"setup_cleanup_allowed", canCreateImages:"can_create_images", tspsEnabled:"tsps_enabled", pushFlags:"push_flags", pushPay:"push_pay", pushShifts:"push_shifts", emailShifts:"email_shifts", emailShiftsUrgentOnly:"email_shifts_urgent_only", shiftFilterKeywords:"shift_filter_keywords", frontDeskStaff:"front_desk_staff", frontDeskOnly:"front_desk_only", adminPermissions:"admin_permissions" };
     const sets   = [];
     const vals   = [];
     let i = 1;
@@ -3639,7 +3644,7 @@ api.post("/sendReminderEmails", async (req, res) => {
       [tid]
     );
 
-    const appUrl = `https://${process.env.APP_DOMAIN||"aradiafitness.app"}`;
+    const appUrl = `https://${process.env.APP_DOMAIN||"kronara.app"}`;
     let count = 0;
     for (const u of staff.rows) {
       const entryCount = submittedMap[u.email] || 0;
@@ -3648,8 +3653,8 @@ api.post("/sendReminderEmails", async (req, res) => {
         ? `Reminder: Confirm your hours are complete — ${pp.start} to ${pp.end}`
         : `Reminder: Submit your hours for ${pp.start} to ${pp.end}`;
       const body = isPartial
-        ? `<p>Hi ${u.name||""},</p><p>You have <strong>${entryCount} shift${entryCount===1?'':'s'}</strong> logged for the pay period ending <strong>${pp.end}</strong>. Please review and confirm all your hours are entered before the deadline.</p><p><a href="${appUrl}">Open Aradia Time</a></p>`
-        : `<p>Hi ${u.name||""},</p><p>This is a reminder to submit your hours for the pay period ending <strong>${pp.end}</strong>.</p><p><a href="${appUrl}">Open Aradia Time</a></p>`;
+        ? `<p>Hi ${u.name||""},</p><p>You have <strong>${entryCount} shift${entryCount===1?'':'s'}</strong> logged for the pay period ending <strong>${pp.end}</strong>. Please review and confirm all your hours are entered before the deadline.</p><p><a href="${appUrl}">Open Kronara</a></p>`
+        : `<p>Hi ${u.name||""},</p><p>This is a reminder to submit your hours for the pay period ending <strong>${pp.end}</strong>.</p><p><a href="${appUrl}">Open Kronara</a></p>`;
       await sendMail({ to: u.email, subject, html: body }).catch(() => {});
       sendPush(u.email, "📋 Submit Your Hours", `Reminder: submit your hours for ${pp.start} to ${pp.end}.`, "/", "pay").catch(() => {});
       count++;
@@ -3763,7 +3768,7 @@ api.post("/saveUserFlags", async (req, res) => {
     const uType = String(admin.type || "").toUpperCase();
     if (uType !== "ADMIN" && uType !== "MODERATOR") return res.json({ ok: false, reason: "Admin access required." });
     const tid = await getDefaultTenantId();
-    const colMap = { chargeGST: "charge_gst", emailReports: "email_reports", emailBugUpdates: "email_bug_updates", requiresPinChange: "require_pin_change", canCreateImages: "can_create_images", tspsEnabled: "tsps_enabled", pushFlags: "push_flags", pushPay: "push_pay", pushShifts: "push_shifts", emailShifts: "email_shifts", emailShiftsUrgentOnly: "email_shifts_urgent_only", shiftFilterKeywords: "shift_filter_keywords" };
+    const colMap = { chargeGST: "charge_gst", emailReports: "email_reports", emailBugUpdates: "email_bug_updates", requiresPinChange: "require_pin_change", canCreateImages: "can_create_images", tspsEnabled: "tsps_enabled", pushFlags: "push_flags", pushPay: "push_pay", pushShifts: "push_shifts", emailShifts: "email_shifts", emailShiftsUrgentOnly: "email_shifts_urgent_only", shiftFilterKeywords: "shift_filter_keywords", frontDeskStaff: "front_desk_staff", frontDeskOnly: "front_desk_only" };
     const sets = [], vals = [];
     let idx = 1;
     for (const [k, v] of Object.entries(flags || {})) {
@@ -4557,7 +4562,7 @@ async function rolloverUnresolvedFlags(force = false) {
             </div>
             <p>This entry has been <strong>rolled into the next pay cycle</strong> as a late submission. It will appear in the current period's payroll pending review.</p>
             <p><strong>⚠️ Please log in and correct this entry as soon as possible.</strong></p>
-            <p style="margin-top:20px;"><a href="https://${process.env.APP_DOMAIN || 'aradiafitness.app'}" style="display:inline-block;background:#e65100;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700;">Log In & Correct</a></p>
+            <p style="margin-top:20px;"><a href="https://${process.env.APP_DOMAIN || 'kronara.app'}" style="display:inline-block;background:#e65100;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700;">Log In & Correct</a></p>
           </div>
         </div>`
       }).catch(err => console.error("Rollover email failed:", err));
@@ -4912,10 +4917,10 @@ api.post("/submitSupportMessage", async (req, res) => {
 
 // ── AI Support Chat ──────────────────────
 const SUPPORT_KNOWLEDGE_BASE = `
-You are Aradia Assistant — a helpful, friendly support bot for Aradia Fitness Timesheets, a payroll timesheet app used by instructors at Aradia Fitness pole dancing and aerial fitness studios.
+You are Kronara Assistant — a helpful, friendly support bot for Kronara, a studio management and payroll timesheet app used by staff at fitness studios, creative spaces, and service businesses.
 
 RULES:
-- Only answer questions about the Aradia Fitness Timesheets app, pay periods, logging hours, and related topics.
+- Only answer questions about the Kronara app, pay periods, logging hours, and related topics.
 - If you don't know the answer or it's outside the app scope, say so and suggest they use "Message Support" on the Support tab.
 - Be concise and friendly. Use plain language. Keep answers under 3 short paragraphs.
 - Never make up features that don't exist. If unsure, say "I'm not 100% sure about that — I'd recommend reaching out to your admin or using Message Support below."
@@ -4981,7 +4986,7 @@ Google Calendar integration:
 You can connect your Google Calendar from the Profile tab under "Google Calendar." Once connected, use the "Import from Google Calendar" buttons on the Home tab to pull in events as timecard entries. The import modal lets you pick which calendar to pull from, review events, match locations, set rates, and choose which events to import.
 
 Connecting Google Calendar — "unsafe" warning:
-When connecting your Google Calendar, Google will show a warning that says the app "hasn't been verified." This is normal — it simply means the app hasn't gone through Google's lengthy verification process. Aradia Fitness only requests read-only access to your calendar event names, times, and locations. We never modify, delete, or share your calendar data. To continue: click "Advanced," then "Go to Aradia Fitness (unsafe)," then "Continue."
+When connecting your Google Calendar, Google will show a warning that says the app "hasn't been verified." This is normal — it simply means the app hasn't gone through Google's lengthy verification process. Kronara only requests read-only access to your calendar event names, times, and locations. We never modify, delete, or share your calendar data. To continue: click "Advanced," then "Go to Kronara (unsafe)," then "Continue."
 
 Default Google Calendar:
 After connecting Google Calendar, go to the Profile tab. Below the connection status you'll see a "Default Calendar" dropdown. Select your preferred calendar and hit "Save Default Calendar." The import modal will automatically pre-select this calendar so you don't have to choose it every time.
@@ -5009,10 +5014,10 @@ Flagged entries:
 If an admin flags one of your entries, you'll see a banner on your Home tab and get an email. Tap "Review" to see what was flagged and respond with an explanation or submit corrected values.
 
 Locations:
-Aradia Fitness has four studio locations: South Edmonton, Kingsway (Edmonton), St. Albert, and Spruce Grove.
+Your studio locations are configured by your admin. Check the Home tab dropdown to see available locations.
 
 Theme/Dark mode:
-Go to the Profile tab to switch between Light, Dark, and Aradia themes.
+Go to the Profile tab to switch between Light, Dark, and Kronara themes.
 `;
 
 api.post("/supportChat", async (req, res) => {
@@ -5834,8 +5839,8 @@ async function checkAutoRemindBeforePeriodEnd() {
       );
 
       let count = 0;
-      const brand = CONFIG.BRAND_NAME || "Aradia Fitness";
-      const appUrl = `https://${process.env.APP_DOMAIN || "aradiafitness.app"}`;
+      const brand = CONFIG.BRAND_NAME || "Kronara";
+      const appUrl = `https://${process.env.APP_DOMAIN || "kronara.app"}`;
       for (const u of staff.rows) {
         const entryCount = submittedMap[u.email] || 0;
         const isPartial = entryCount > 0;
@@ -5881,7 +5886,7 @@ async function checkUnapprovedPayroll() {
     if (!period) return;
 
     const tid = await getDefaultTenantId();
-    const appUrl = `https://${process.env.APP_DOMAIN || "aradiafitness.app"}`;
+    const appUrl = `https://${process.env.APP_DOMAIN || "kronara.app"}`;
 
     // All active non-admin staff
     const allStaffRes = await query(
@@ -6332,15 +6337,15 @@ api.post("/emailImage", async (req, res) => {
     if (!user.canCreateImages) return res.json({ ok: false, reason: "You do not have permission to create images." });
 
     const resend = getResend();
-    const from = process.env.RESEND_FROM || `${CONFIG.BRAND_NAME} <support@aradiafitness.app>`;
-    const fname = filename || "aradia-card.png";
+    const from = process.env.RESEND_FROM || `${CONFIG.BRAND_NAME} <support@kronara.app>`;
+    const fname = filename || "kronara-card.png";
 
     await mailRateLimit();
     await sendMailWithRetry(() => resend.emails.send({
       from,
       to: [user.email],
       subject: `Your Custom Image: ${fname}`,
-      html: `<p>Hi ${user.name || "there"},</p><p>Here's the custom social media card you generated. It's attached as a PNG.</p><p>— Aradia Bot</p>`,
+      html: `<p>Hi ${user.name || "there"},</p><p>Here's the custom social media card you generated. It's attached as a PNG.</p><p>— Kronara</p>`,
       attachments: [{ filename: fname, content: image }],
     }), 2);
 
@@ -6617,7 +6622,7 @@ api.post("/getShiftPosts", async (req, res) => {
     const rows = await query(
       `SELECT sp.id, sp.poster_email, sp.location, sp.shift_time, sp.shift_date, sp.notes, sp.status,
               sp.claimed_by, COALESCE(sp.claimed_by_name, cu.name, sp.claimed_by) AS claimed_by_name,
-              sp.claimed_at, sp.created_at, sp.class_name, sp.poster_name, sp.duration
+              sp.claimed_at, sp.created_at, sp.class_name, sp.poster_name, sp.duration, sp.front_desk
        FROM shift_posts sp
        LEFT JOIN users cu ON LOWER(cu.email) = LOWER(sp.claimed_by) AND cu.tenant_id = sp.tenant_id
        WHERE sp.tenant_id=$1 AND sp.shift_date >= $2 AND sp.shift_date <= $3
@@ -6643,9 +6648,9 @@ api.post("/postShift", async (req, res) => {
     for (const s of shifts) {
       if (!s.location || !s.shift_time || !s.shift_date) continue;
       const r = await query(
-        `INSERT INTO shift_posts (tenant_id, poster_email, location, shift_time, shift_date, notes, class_name, poster_name, duration)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
-        [tid, email, s.location, s.shift_time, s.shift_date, s.notes || "", s.class_name || "", posterName, parseInt(s.duration) || 60]
+        `INSERT INTO shift_posts (tenant_id, poster_email, location, shift_time, shift_date, notes, class_name, poster_name, duration, front_desk)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
+        [tid, email, s.location, s.shift_time, s.shift_date, s.notes || "", s.class_name || "", posterName, parseInt(s.duration) || 60, !!s.front_desk]
       );
       created.push(r.rows[0].id);
     }
@@ -6655,14 +6660,17 @@ api.post("/postShift", async (req, res) => {
       const s0 = shifts[0];
       const desc = s0.class_name ? `${s0.class_name} at ${s0.location}` : s0.location;
       const _shiftText = shifts.map(s => `${s.class_name||""} ${s.location||""} ${s.notes||""}`).join(" ").toLowerCase();
-      // Send push to all staff, filtering by shift keywords
+      // Send push to all staff, filtering by shift keywords (and front desk)
+      const _isFrontDesk = !!s0.front_desk;
       try {
         const _pushUsers = await query(
-          `SELECT DISTINCT ps.user_email, u.shift_filter_keywords FROM push_subscriptions ps LEFT JOIN users u ON LOWER(u.email)=LOWER(ps.user_email) AND u.tenant_id=ps.tenant_id WHERE ps.tenant_id=$1`,
+          `SELECT DISTINCT ps.user_email, u.shift_filter_keywords, u.front_desk_staff, u.front_desk_only FROM push_subscriptions ps LEFT JOIN users u ON LOWER(u.email)=LOWER(ps.user_email) AND u.tenant_id=ps.tenant_id WHERE ps.tenant_id=$1`,
           [tid]
         );
         for (const pu of _pushUsers.rows) {
           if (pu.user_email.toLowerCase() === email.toLowerCase()) continue;
+          if (_isFrontDesk && !pu.front_desk_staff) continue;
+          if (!_isFrontDesk && pu.front_desk_only) continue;
           if (pu.shift_filter_keywords) {
             const filters = pu.shift_filter_keywords.split(",").map(k => k.trim().toLowerCase()).filter(Boolean);
             if (filters.some(kw => _shiftText.includes(kw))) continue;
@@ -6689,7 +6697,7 @@ api.post("/postShift", async (req, res) => {
       // Email all users with email_shifts enabled (not urgent-only), except the poster
       try {
         const emailUsers = await query(
-          `SELECT email, name, shift_filter_keywords FROM users WHERE tenant_id=$1 AND email_shifts=TRUE AND email_shifts_urgent_only=FALSE AND LOWER(email) != LOWER($2) AND tsps_enabled=TRUE AND (is_active IS NULL OR is_active=TRUE)`,
+          `SELECT email, name, shift_filter_keywords, front_desk_staff, front_desk_only FROM users WHERE tenant_id=$1 AND email_shifts=TRUE AND email_shifts_urgent_only=FALSE AND LOWER(email) != LOWER($2) AND tsps_enabled=TRUE AND (is_active IS NULL OR is_active=TRUE)`,
           [tid, email]
         );
         const s0 = shifts[0];
@@ -6698,6 +6706,10 @@ api.post("/postShift", async (req, res) => {
         const shiftListHtml = shifts.filter(s => s.location && s.shift_time && s.shift_date)
           .map(s => `<div style="background:#f5f5f5;border-radius:8px;padding:10px 14px;margin:6px 0;"><strong>${s.class_name || "Shift"}</strong> — ${s.location} @ ${s.shift_time} on ${s.shift_date}${s.notes ? ` (${s.notes})` : ""}</div>`).join("");
         for (const u of emailUsers.rows) {
+          // Front desk filter: if shift is front-desk-only, skip non-front-desk staff
+          if (_isFrontDesk && !u.front_desk_staff) continue;
+          // Front desk only filter: if user is front-desk-only, skip non-front-desk shifts
+          if (!_isFrontDesk && u.front_desk_only) continue;
           // Check keyword filter
           if (u.shift_filter_keywords) {
             const filters = u.shift_filter_keywords.split(",").map(k => k.trim().toLowerCase()).filter(Boolean);
@@ -6711,7 +6723,7 @@ api.post("/postShift", async (req, res) => {
               <p><strong>${posterName}</strong> posted ${created.length} shift(s):</p>
               ${shiftListHtml}
               <p style="margin-top:16px;text-align:center;">
-                <a href="${process.env.BASE_URL || 'https://aradiafitness.app'}?tab=tsps" style="display:inline-block;background:${CONFIG.BRAND_COLOR_PRIMARY};color:#fff;font-weight:700;font-size:15px;padding:12px 32px;border-radius:8px;text-decoration:none;">CLAIM SHIFT</a>
+                <a href="${process.env.BASE_URL || 'https://kronara.app'}?tab=tsps" style="display:inline-block;background:${CONFIG.BRAND_COLOR_PRIMARY};color:#fff;font-weight:700;font-size:15px;padding:12px 32px;border-radius:8px;text-decoration:none;">CLAIM SHIFT</a>
               </p>
               <p style="color:#888;font-size:12px;">You can manage email preferences in your profile settings.</p>
             </div>`
@@ -6845,7 +6857,7 @@ api.post("/updateShiftPost", async (req, res) => {
     if (shift.status !== "open") return res.json({ ok: false, reason: "Cannot edit a claimed shift." });
     const isAdmin = String(user.type || "").toUpperCase() === "ADMIN";
     if (shift.poster_email.toLowerCase() !== email.toLowerCase() && !isAdmin) return res.json({ ok: false, reason: "You can only edit your own shifts." });
-    const allowed = { location: "location", shift_time: "shift_time", shift_date: "shift_date", class_name: "class_name", notes: "notes", duration: "duration" };
+    const allowed = { location: "location", shift_time: "shift_time", shift_date: "shift_date", class_name: "class_name", notes: "notes", duration: "duration", front_desk: "front_desk" };
     const sets = [], vals = [];
     let idx = 1;
     for (const [k, col] of Object.entries(allowed)) {
@@ -7116,7 +7128,7 @@ api.post("/getProposalsDashboard", async (req, res) => {
 });
 
 // ── Proposal email helper ──
-const PROPOSAL_APP_URL = "https://aradiafitness.app/";
+const PROPOSAL_APP_URL = "https://kronara.app/";
 
 function proposalGcalUrl(proposal) {
   // Parse start_time like "10:00 AM" or "2:30 PM" into 24h
@@ -7646,7 +7658,7 @@ setupDatabase()
     if (delRes.rowCount > 0) console.log(`Startup: repaired ${delRes.rowCount} email enabled toggle(s) that were stuck on false.`);
 
     const server = app.listen(PORT, () => {
-      console.log(`Aradia Time PG running on port ${PORT}`);
+      console.log(`Kronara PG running on port ${PORT}`);
       server.timeout = 720000; // 12 minutes — needed for long scrape requests (all studios)
       // Run automation checks every hour — each function fires only at its configured MST time
       cron.schedule("0 * * * *", async () => {
@@ -7745,13 +7757,16 @@ setupDatabase()
             if (shiftDateTime > now && shiftDateTime <= in24h) {
               const desc = shift.class_name ? `${shift.class_name} at ${shift.location}` : shift.location;
               const _urgentText = `${shift.class_name||""} ${shift.location||""} ${shift.notes||""}`.toLowerCase();
+              const _urgFrontDesk = !!shift.front_desk;
               // Filtered push for urgent shifts
               try {
                 const _urgPush = await query(
-                  `SELECT DISTINCT ps.user_email, u.shift_filter_keywords FROM push_subscriptions ps LEFT JOIN users u ON LOWER(u.email)=LOWER(ps.user_email) AND u.tenant_id=ps.tenant_id WHERE ps.tenant_id=$1`,
+                  `SELECT DISTINCT ps.user_email, u.shift_filter_keywords, u.front_desk_staff, u.front_desk_only FROM push_subscriptions ps LEFT JOIN users u ON LOWER(u.email)=LOWER(ps.user_email) AND u.tenant_id=ps.tenant_id WHERE ps.tenant_id=$1`,
                   [tid]
                 );
                 for (const pu of _urgPush.rows) {
+                  if (_urgFrontDesk && !pu.front_desk_staff) continue;
+                  if (!_urgFrontDesk && pu.front_desk_only) continue;
                   if (pu.shift_filter_keywords) {
                     const filters = pu.shift_filter_keywords.split(",").map(k => k.trim().toLowerCase()).filter(Boolean);
                     if (filters.some(kw => _urgentText.includes(kw))) continue;
@@ -7762,10 +7777,12 @@ setupDatabase()
               // Email all users with email_shifts enabled (including urgent-only)
               try {
                 const emailUsers = await query(
-                  `SELECT email, name, shift_filter_keywords FROM users WHERE tenant_id=$1 AND email_shifts=TRUE AND tsps_enabled=TRUE AND (is_active IS NULL OR is_active=TRUE)`,
+                  `SELECT email, name, shift_filter_keywords, front_desk_staff, front_desk_only FROM users WHERE tenant_id=$1 AND email_shifts=TRUE AND tsps_enabled=TRUE AND (is_active IS NULL OR is_active=TRUE)`,
                   [tid]
                 );
                 for (const u of emailUsers.rows) {
+                  if (_urgFrontDesk && !u.front_desk_staff) continue;
+                  if (!_urgFrontDesk && u.front_desk_only) continue;
                   if (u.shift_filter_keywords) {
                     const filters = u.shift_filter_keywords.split(",").map(k => k.trim().toLowerCase()).filter(Boolean);
                     if (filters.some(kw => _urgentText.includes(kw))) continue;
@@ -7782,7 +7799,7 @@ setupDatabase()
                         <div><strong>Time:</strong> ${shift.shift_time}</div>
                         <div><strong>Location:</strong> ${shift.location}</div>
                       </div>
-                      <p style="text-align:center;"><a href="${process.env.BASE_URL || 'https://aradiafitness.app'}?tab=tsps" style="display:inline-block;background:#e65100;color:#fff;font-weight:700;font-size:15px;padding:12px 32px;border-radius:8px;text-decoration:none;">CLAIM SHIFT</a></p>
+                      <p style="text-align:center;"><a href="${process.env.BASE_URL || 'https://kronara.app'}?tab=tsps" style="display:inline-block;background:#e65100;color:#fff;font-weight:700;font-size:15px;padding:12px 32px;border-radius:8px;text-decoration:none;">CLAIM SHIFT</a></p>
                       <p style="color:#888;font-size:12px;">You can manage email preferences in your profile settings.</p>
                     </div>`
                   }).catch(e => console.error("TSPS urgent email failed:", e.message));
