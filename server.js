@@ -2019,8 +2019,10 @@ async function getAdminSettings() {
     autoSendDay:          map.autoSendDay           || "",
     autoRemindersEnabled: map.autoRemindersEnabled  === "true",
     autoSendEnabled:      map.autoSendEnabled       === "true",
+    weeklyBonusEnabled:   map.weeklyBonusEnabled !== "false",
     weeklyBonusHours:     parseFloat(map.weeklyBonusHours  || "6")  || 6,
     weeklyBonusAmount:    parseFloat(map.weeklyBonusAmount || "5")  || 5,
+    poleBonusEnabled:     map.poleBonusEnabled !== "false",
     poleClassBonus:       parseFloat(map.poleClassBonus    || "5")  || 5,
     bonusExclusions:      map.bonusExclusions || "admin",
     attachPdf:            map.attachPdf  === "true",
@@ -2060,6 +2062,12 @@ async function getAdminSettings() {
     // Setup & Cleanup time tracking
     setupCleanupEnabled:  map.setupCleanupEnabled === "true",
     setupCleanupBaseRate: parseFloat(map.setupCleanupBaseRate || "21.75") || 21.75,
+    setupEnabled:         map.setupEnabled !== "false",
+    cleanupEnabled:       map.cleanupEnabled !== "false",
+    riggingEnabled:       map.riggingEnabled !== "false",
+    setupLabel:           map.setupLabel || "",
+    cleanupLabel:         map.cleanupLabel || "",
+    riggingLabel:         map.riggingLabel || "",
     // What's New announcement banner
     whatsNewEnabled: map.whatsNewEnabled === "true",
     whatsNewContent: map.whatsNewContent || "",
@@ -2452,7 +2460,7 @@ api.post("/addEntriesBatch", async (req, res) => {
     }
 
     const totalWeekHours   = round2(existingWeekHours + submittedHours);
-    const weeklyBonusActive = !isContractor && totalWeekHours >= bonusHours;
+    const weeklyBonusActive = settings.weeklyBonusEnabled !== false && !isContractor && totalWeekHours >= bonusHours;
 
     // Insert entries
     const studioRentalFee_ = parseFloat(studioRentalFee) || 0;
@@ -2466,7 +2474,7 @@ api.post("/addEntriesBatch", async (req, res) => {
 
       const hours      = parseNum(ln.hours);
       const rate       = parseNum(ln.rate);
-      const hasPoleBns = !isContractor && !!ln.poleBonus && /pole/i.test(classParty);
+      const hasPoleBns = settings.poleBonusEnabled !== false && !isContractor && !!ln.poleBonus && /pole/i.test(classParty);
 
       // Setup, Cleanup & Rigging pay
       let setupMin_   = parseInt(ln.setupMinutes) || 0;
@@ -2692,7 +2700,7 @@ api.post("/editEntry", async (req, res) => {
     const poleBonus_ = settings.poleClassBonus || 5;
     const h  = parseNum(hours);
     const rt = parseNum(rate);
-    const hasPoleBns = !!poleBonus && /pole/i.test(classParty||"");
+    const hasPoleBns = settings.poleBonusEnabled !== false && !!poleBonus && /pole/i.test(classParty||"");
 
     // Setup, Cleanup & Rigging pay
     let setupMin_   = parseInt(setupMinutes) || 0;
@@ -3467,7 +3475,7 @@ api.post("/saveAdminSettings", async (req, res) => {
     const keys = [
       "accountantEmail","adminEmail1","adminEmail2","adminEmail3",
       "autoSendDay","autoRemindersEnabled","autoSendEnabled",
-      "weeklyBonusHours","weeklyBonusAmount","poleClassBonus","bonusExclusions",
+      "weeklyBonusEnabled","weeklyBonusHours","weeklyBonusAmount","poleBonusEnabled","poleClassBonus","bonusExclusions",
       "attachPdf","attachQb",
       "notifyLateAdmin","autoSendPending",
       "ppFrequency","ppAnchorDate","ppWeekStartDay",
@@ -3477,7 +3485,7 @@ api.post("/saveAdminSettings", async (req, res) => {
       "adminEmailsWhitelistExempt",
       "youtubeLink","autoRemindDaysBeforeEnabled","autoRemindDaysBefore",
       "autoSendTime","autoRemindersTime","autoRemindBeforeTime",
-      "setupCleanupEnabled","setupCleanupBaseRate",
+      "setupCleanupEnabled","setupCleanupBaseRate","setupEnabled","cleanupEnabled","riggingEnabled","setupLabel","cleanupLabel","riggingLabel",
       "whatsNewEnabled","whatsNewContent","whatsNewVersion","whatsNewImage",
       "lateGraceDays",
       "schedulingManagerEmail",

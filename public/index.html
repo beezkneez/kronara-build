@@ -3507,27 +3507,43 @@
             Pay & Bonuses <span class="chevron">▼</span>
           </div>
           <div class="settings-section-body">
-          <div class="g2" style="margin-bottom:10px;">
-            <div>
-              <label>Weekly bonus threshold (hrs)</label>
-              <input id="adminBonusHours" placeholder="6" inputmode="decimal" />
+
+          <div style="font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:8px;">Weekly Hourly Bonus</div>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;">
+            <input type="checkbox" id="adminWeeklyBonusEnabled" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;">
+            <span style="font-size:13px;">Enable weekly hourly bonus</span>
+          </label>
+          <div id="weeklyBonusSettings" style="margin-bottom:14px;">
+            <div class="g2" style="margin-bottom:10px;">
+              <div>
+                <label>Weekly bonus threshold (hrs)</label>
+                <input id="adminBonusHours" placeholder="6" inputmode="decimal" />
+              </div>
+              <div>
+                <label>Bonus per hour ($)</label>
+                <input id="adminBonusAmt" placeholder="5" inputmode="decimal" />
+              </div>
             </div>
-            <div>
-              <label>Bonus per hour ($)</label>
-              <input id="adminBonusAmt" placeholder="5" inputmode="decimal" />
+            <div class="muted" style="margin-bottom:10px;font-size:12px;">When a staff member works ≥ this many hours in a week (Mon–Sun), all their hours that week earn the bonus rate.</div>
+            <div style="margin-bottom:14px;">
+              <label>Exclude from bonus (class names to ignore)</label>
+              <input id="adminBonusExclusions" placeholder="e.g. Admin, Cleaning, Meeting" />
+              <div class="muted" style="font-size:12px;margin-top:4px;">Comma-separated. Hours logged under these class/party names won't count toward the weekly bonus threshold.</div>
             </div>
           </div>
-          <div class="muted" style="margin-bottom:10px;font-size:12px;">When a staff member works ≥ this many hours in a week (Mon–Sun), all their hours that week earn the bonus rate.</div>
-          <div class="g2" style="margin-bottom:10px;">
-            <div>
-              <label>Pole class 11+ students bonus ($/hr)</label>
-              <input id="adminPoleBonus" placeholder="5" inputmode="decimal" />
+
+          <div style="font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:8px;margin-top:18px;">Pole Class Bonus</div>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;">
+            <input type="checkbox" id="adminPoleBonusEnabled" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;">
+            <span style="font-size:13px;">Enable pole class bonus (11+ students)</span>
+          </label>
+          <div id="poleBonusSettings">
+            <div class="g2" style="margin-bottom:10px;">
+              <div>
+                <label>Pole class 11+ students bonus ($/hr)</label>
+                <input id="adminPoleBonus" placeholder="5" inputmode="decimal" />
+              </div>
             </div>
-          </div>
-          <div style="margin-bottom:14px;">
-            <label>Exclude from bonus (class names to ignore)</label>
-            <input id="adminBonusExclusions" placeholder="e.g. Admin, Cleaning, Meeting" />
-            <div class="muted" style="font-size:12px;margin-top:4px;">Comma-separated. Hours logged under these class/party names won't count toward the weekly bonus threshold.</div>
           </div>
 
           <div style="font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:8px;margin-top:18px;">Setup, Cleanup & Rigging Time</div>
@@ -3535,11 +3551,38 @@
             <input type="checkbox" id="adminSetupCleanupEnabled" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;">
             <span style="font-size:13px;">Enable setup/cleanup time tracking</span>
           </label>
-          <div class="muted" style="font-size:12px;margin-bottom:10px;">When enabled, staff can log extra setup/cleanup minutes per shift at a base hourly rate.</div>
-          <div style="margin-bottom:14px;">
-            <label>Default base rate ($/hr)</label>
-            <input id="adminSetupCleanupRate" placeholder="21.75" inputmode="decimal" style="max-width:140px;" />
-            <div class="muted" style="font-size:12px;margin-top:4px;">Staff are paid this rate for setup/cleanup time. Can be overridden per-staff in their profile.</div>
+          <div id="setupCleanupSettings">
+            <div class="muted" style="font-size:12px;margin-bottom:10px;">When enabled, staff can log extra setup/cleanup minutes per shift at a base hourly rate.</div>
+            <div style="margin-bottom:14px;">
+              <label>Default base rate ($/hr)</label>
+              <input id="adminSetupCleanupRate" placeholder="21.75" inputmode="decimal" style="max-width:140px;" />
+              <div class="muted" style="font-size:12px;margin-top:4px;">Staff are paid this rate for setup/cleanup time. Can be overridden per-staff in their profile.</div>
+            </div>
+            <div style="font-weight:600;font-size:12px;color:#888;margin-bottom:8px;">Individual Toggles & Custom Labels</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;min-width:140px;">
+                  <input type="checkbox" id="adminSetupEnabled" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;" checked>
+                  <span style="font-size:13px;">Setup</span>
+                </label>
+                <input id="adminSetupLabel" placeholder="Setup" style="max-width:180px;font-size:13px;" />
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;min-width:140px;">
+                  <input type="checkbox" id="adminCleanupEnabled" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;" checked>
+                  <span style="font-size:13px;">Cleanup</span>
+                </label>
+                <input id="adminCleanupLabel" placeholder="Cleanup" style="max-width:180px;font-size:13px;" />
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;min-width:140px;">
+                  <input type="checkbox" id="adminRiggingEnabled" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;" checked>
+                  <span style="font-size:13px;">Rigging</span>
+                </label>
+                <input id="adminRiggingLabel" placeholder="Rigging" style="max-width:180px;font-size:13px;" />
+              </div>
+            </div>
+            <div class="muted" style="font-size:12px;margin-bottom:10px;">Toggle each option on/off and customize the label your staff sees. Leave blank to use the default name.</div>
           </div>
 
           <div style="font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:8px;margin-top:18px;">Chat</div>
@@ -6510,8 +6553,9 @@
       const tracker = el("weeklyBonusTracker");
       if (!tracker) return;
 
-      // Contractors don't receive bonuses
+      // Hide if weekly bonus is disabled or user is a contractor
       const user = STATE.user || {};
+      if (STATE.adminSettings && STATE.adminSettings.weeklyBonusEnabled === false) { tracker.style.display="none"; return; }
       if ((user.type||"").toLowerCase() === "contractor") { tracker.style.display="none"; return; }
 
       const pp = STATE.selectedPayPeriod;
@@ -6628,25 +6672,25 @@
           <span style="font-size:13px;color:var(--muted);">&#127942; Pole class — 11 or more students <span style="color:var(--red);font-weight:700;">(+$` + poleBonusAmt + `/hr added on save)</span></span>
         </div>
         <div class="lineSetupCleanupWrap" style="display:none;margin-top:10px;padding:10px 12px;background:var(--green-bg,#f0f7f0);border-radius:8px;border:1px solid var(--line,#e0e0e0);">
-          <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Setup, Cleanup & Rigging Time</div>
+          <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;" class="lineSetupCleanupTitle">Setup, Cleanup & Rigging Time</div>
           <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;">
-            <div style="display:flex;align-items:center;gap:6px;">
+            <div class="lineSetupWrap" style="display:flex;align-items:center;gap:6px;">
               <label class="admin-toggle"><input type="checkbox" class="lineSetupChk"><span class="slider"></span></label>
-              <span style="font-size:13px;">Setup</span>
+              <span style="font-size:13px;" class="lineSetupLbl">Setup</span>
               <select class="lineSetupMin" style="font-size:12px;padding:3px 6px;border-radius:4px;border:1px solid var(--line,#ccc);display:none;">
                 <option value="5">5 min</option><option value="10">10 min</option><option value="15" selected>15 min</option><option value="20">20 min</option><option value="25">25 min</option><option value="30">30 min</option>
               </select>
             </div>
-            <div style="display:flex;align-items:center;gap:6px;">
+            <div class="lineCleanupWrap" style="display:flex;align-items:center;gap:6px;">
               <label class="admin-toggle"><input type="checkbox" class="lineCleanupChk"><span class="slider"></span></label>
-              <span style="font-size:13px;">Cleanup</span>
+              <span style="font-size:13px;" class="lineCleanupLbl">Cleanup</span>
               <select class="lineCleanupMin" style="font-size:12px;padding:3px 6px;border-radius:4px;border:1px solid var(--line,#ccc);display:none;">
                 <option value="5">5 min</option><option value="10">10 min</option><option value="15" selected>15 min</option><option value="20">20 min</option><option value="25">25 min</option><option value="30">30 min</option>
               </select>
             </div>
-            <div style="display:flex;align-items:center;gap:6px;">
+            <div class="lineRiggingWrap" style="display:flex;align-items:center;gap:6px;">
               <label class="admin-toggle"><input type="checkbox" class="lineRiggingChk"><span class="slider"></span></label>
-              <span style="font-size:13px;">Rigging</span>
+              <span style="font-size:13px;" class="lineRiggingLbl">Rigging</span>
               <select class="lineRiggingMin" style="font-size:12px;padding:3px 6px;border-radius:4px;border:1px solid var(--line,#ccc);display:none;">
                 <option value="5">5 min</option><option value="10">10 min</option><option value="15" selected>15 min</option><option value="20">20 min</option><option value="25">25 min</option><option value="30">30 min</option>
               </select>
@@ -6662,8 +6706,9 @@
       const classInput = wrap.querySelector(".lineClass");
       const poleWrap   = wrap.querySelector(".linePoleWrap");
       const isContractor_ = ((STATE.user && STATE.user.type)||"").toLowerCase() === "contractor";
+      const poleBonusOn_ = !STATE.adminSettings || STATE.adminSettings.poleBonusEnabled !== false;
       classInput.addEventListener("input", function(){
-        const hasPole = !isContractor_ && /pole/i.test(classInput.value);
+        const hasPole = poleBonusOn_ && !isContractor_ && /pole/i.test(classInput.value);
         poleWrap.style.display = hasPole ? "flex" : "none";
         if (!hasPole && poleChk.checked) {
           poleChk.checked = false;
@@ -6712,6 +6757,30 @@
       const scEnabled_ = STATE.adminSettings && STATE.adminSettings.setupCleanupEnabled;
       if (scWrap_ && scEnabled_) {
         scWrap_.style.display = "block";
+        // Apply custom labels and individual toggles
+        const _s = STATE.adminSettings || {};
+        const setupW = wrap.querySelector(".lineSetupWrap");
+        const cleanupW = wrap.querySelector(".lineCleanupWrap");
+        const riggingW = wrap.querySelector(".lineRiggingWrap");
+        if (setupW && _s.setupEnabled === false) setupW.style.display = "none";
+        if (cleanupW && _s.cleanupEnabled === false) cleanupW.style.display = "none";
+        if (riggingW && _s.riggingEnabled === false) riggingW.style.display = "none";
+        // Custom labels
+        const setupLbl = wrap.querySelector(".lineSetupLbl");
+        const cleanupLbl = wrap.querySelector(".lineCleanupLbl");
+        const riggingLbl = wrap.querySelector(".lineRiggingLbl");
+        const titleEl = wrap.querySelector(".lineSetupCleanupTitle");
+        if (setupLbl && _s.setupLabel) setupLbl.textContent = _s.setupLabel;
+        if (cleanupLbl && _s.cleanupLabel) cleanupLbl.textContent = _s.cleanupLabel;
+        if (riggingLbl && _s.riggingLabel) riggingLbl.textContent = _s.riggingLabel;
+        // Update title based on visible items
+        if (titleEl) {
+          const parts = [];
+          if (_s.setupEnabled !== false) parts.push(_s.setupLabel || "Setup");
+          if (_s.cleanupEnabled !== false) parts.push(_s.cleanupLabel || "Cleanup");
+          if (_s.riggingEnabled !== false) parts.push(_s.riggingLabel || "Rigging");
+          titleEl.textContent = parts.join(", ") + " Time";
+        }
       }
 
       // Setup/Cleanup/Rigging checkbox wiring
@@ -15162,8 +15231,10 @@
         attachPdf:            el("adminAttachPdf")?.checked ? "true" : "false",
         attachQb:             el("adminAttachQb")?.checked ? "true" : "false",
         autoSendDay:          String(el("adminAutoSendDay")?.value||"").trim() || "1",
+        weeklyBonusEnabled:   el("adminWeeklyBonusEnabled")?.checked ? "true" : "false",
         weeklyBonusHours:     String(el("adminBonusHours")?.value||"6").trim(),
         weeklyBonusAmount:    String(el("adminBonusAmt")?.value||"5").trim(),
+        poleBonusEnabled:     el("adminPoleBonusEnabled")?.checked ? "true" : "false",
         poleClassBonus:       String(el("adminPoleBonus")?.value||"5").trim(),
         bonusExclusions:      String(el("adminBonusExclusions")?.value||"").trim(),
         forceAllPinChange:      el("adminForceAllPin")?.checked ? "true" : "false",
@@ -15179,6 +15250,12 @@
         autoRemindBeforeTime:   el("adminAutoRemindBeforeTime")?.value || "12:00",
         setupCleanupEnabled:  el("adminSetupCleanupEnabled")?.checked ? "true" : "false",
         setupCleanupBaseRate: String(el("adminSetupCleanupRate")?.value || "21.75").trim(),
+        setupEnabled:         el("adminSetupEnabled")?.checked ? "true" : "false",
+        cleanupEnabled:       el("adminCleanupEnabled")?.checked ? "true" : "false",
+        riggingEnabled:       el("adminRiggingEnabled")?.checked ? "true" : "false",
+        setupLabel:           String(el("adminSetupLabel")?.value || "").trim(),
+        cleanupLabel:         String(el("adminCleanupLabel")?.value || "").trim(),
+        riggingLabel:         String(el("adminRiggingLabel")?.value || "").trim(),
         whatsNewEnabled:  STATE.adminSettings?.whatsNewEnabled ? "true" : "false",
         whatsNewContent:  STATE.adminSettings?.whatsNewContent || "",
         whatsNewVersion:  STATE.adminSettings?.whatsNewVersion || "",
@@ -15233,8 +15310,12 @@
       const pph = el("ppHistoryCount");     if (pph) pph.value = String(s.ppHistoryCount||"8");
       updatePpPreview_();
       const ad = el("adminAutoSendDay");     if (ad) ad.value = s.autoSendDay||"1";
+      const wbe = el("adminWeeklyBonusEnabled"); if (wbe) wbe.checked = s.weeklyBonusEnabled !== false;
+      const wbs = el("weeklyBonusSettings"); if (wbs) wbs.style.display = (s.weeklyBonusEnabled !== false) ? "" : "none";
       const bh = el("adminBonusHours");      if (bh) bh.value = s.weeklyBonusHours||"6";
       const ba = el("adminBonusAmt");        if (ba) ba.value = s.weeklyBonusAmount||"5";
+      const pbe = el("adminPoleBonusEnabled"); if (pbe) pbe.checked = s.poleBonusEnabled !== false;
+      const pbs = el("poleBonusSettings"); if (pbs) pbs.style.display = (s.poleBonusEnabled !== false) ? "" : "none";
       const pb = el("adminPoleBonus");       if (pb) pb.value = s.poleClassBonus||"5";
       const be = el("adminBonusExclusions"); if (be) be.value = s.bonusExclusions||"admin";
       const yl = el("adminYoutubeLink");    if (yl) yl.value = s.youtubeLink||"";
@@ -15244,7 +15325,14 @@
       const art = el("adminAutoRemindersTime");   if (art) art.value = s.autoRemindersTime||"12:00";
       const arbt = el("adminAutoRemindBeforeTime"); if (arbt) arbt.value = s.autoRemindBeforeTime||"12:00";
       const sce = el("adminSetupCleanupEnabled"); if (sce) sce.checked = !!s.setupCleanupEnabled;
+      const scs = el("setupCleanupSettings"); if (scs) scs.style.display = s.setupCleanupEnabled ? "" : "none";
       const scr = el("adminSetupCleanupRate");    if (scr) scr.value = s.setupCleanupBaseRate || "21.75";
+      const se_ = el("adminSetupEnabled");   if (se_) se_.checked = s.setupEnabled !== false;
+      const ce_ = el("adminCleanupEnabled"); if (ce_) ce_.checked = s.cleanupEnabled !== false;
+      const re_ = el("adminRiggingEnabled"); if (re_) re_.checked = s.riggingEnabled !== false;
+      const sl_ = el("adminSetupLabel");     if (sl_) sl_.value = s.setupLabel || "";
+      const cl_ = el("adminCleanupLabel");   if (cl_) cl_.value = s.cleanupLabel || "";
+      const rl_ = el("adminRiggingLabel");   if (rl_) rl_.value = s.riggingLabel || "";
       const wnt = el("whatsNewToggle"); if (wnt) wnt.checked = !!s.whatsNewEnabled;
       const wntx = el("whatsNewText");  if (wntx) wntx.value = s.whatsNewContent || "";
       var wnPrev = el("whatsNewImagePreview");
@@ -15257,6 +15345,19 @@
         if (wnRm) wnRm.style.display = "none";
       }
     }
+
+    // Toggle show/hide for settings sections
+    document.addEventListener("change", function(e) {
+      if (e.target.id === "adminWeeklyBonusEnabled") {
+        var s = el("weeklyBonusSettings"); if (s) s.style.display = e.target.checked ? "" : "none";
+      }
+      if (e.target.id === "adminPoleBonusEnabled") {
+        var s = el("poleBonusSettings"); if (s) s.style.display = e.target.checked ? "" : "none";
+      }
+      if (e.target.id === "adminSetupCleanupEnabled") {
+        var s = el("setupCleanupSettings"); if (s) s.style.display = e.target.checked ? "" : "none";
+      }
+    });
 
     // ══════════════════════════════════════════════════
     //  WHAT'S NEW BANNER
