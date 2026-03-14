@@ -423,6 +423,7 @@ async function setupDatabase() {
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS push_flags BOOLEAN DEFAULT FALSE`).catch(()=>{});
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS push_pay BOOLEAN DEFAULT FALSE`).catch(()=>{});
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS push_shifts BOOLEAN DEFAULT FALSE`).catch(()=>{});
+  await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS push_chat BOOLEAN DEFAULT FALSE`).catch(()=>{});
   // Disable all push notifications for all users
   await query(`UPDATE users SET push_flags=FALSE, push_pay=FALSE, push_shifts=FALSE WHERE push_flags=TRUE OR push_pay=TRUE OR push_shifts=TRUE`).catch(()=>{});
 
@@ -477,6 +478,64 @@ async function setupDatabase() {
   await query(`ALTER TABLE class_proposals ADD COLUMN IF NOT EXISTS archived_at TIMESTAMPTZ DEFAULT NULL`).catch(()=>{});
   // Per-user admin permissions (JSON text)
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS admin_permissions TEXT DEFAULT ''`).catch(()=>{});
+  // What the staff member teaches (free-text, comma-separated)
+  await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS teaches TEXT DEFAULT ''`).catch(()=>{});
+
+  // Auto-populate "teaches" categories from existing logged entries for staff who have it blank
+  try {
+    const blankTeachers = await query(`SELECT u.email, u.tenant_id FROM users u WHERE (u.teaches IS NULL OR u.teaches = '') AND u.type IN ('Employee','Contractor')`);
+    for (const row of blankTeachers.rows) {
+      const entries = await query(
+        `SELECT DISTINCT LOWER(class_party) as cp FROM entries WHERE user_email=$1 AND tenant_id=$2 AND class_party IS NOT NULL AND class_party != ''`,
+        [row.email, row.tenant_id]
+      );
+      if (entries.rows.length) {
+        const allClasses = entries.rows.map(r => r.cp).join(" ");
+        const cats = new Set();
+        if (/pole/i.test(allClasses)) cats.add("pole");
+        if (/aerial|silk|hoop|lyra|trapeze|hammock|sling/i.test(allClasses)) cats.add("aerial");
+        if (/dance|heels|choreo|hip\s*hop|jazz|contemp|ballet|burlesque/i.test(allClasses)) cats.add("dance");
+        if (/fitness|yoga|pilates|stretch|strength|conditioning|barre|cardio|flex/i.test(allClasses)) cats.add("fitness");
+        if (/front\s*desk|reception|check.in/i.test(allClasses)) cats.add("front desk");
+        // If they teach something but none of the known categories matched, mark as "other"
+        if (cats.size === 0 && entries.rows.length > 0) cats.add("other");
+        if (cats.size) {
+          await query(`UPDATE users SET teaches=$1 WHERE email=$2 AND tenant_id=$3`, [Array.from(cats).join(", "), row.email, row.tenant_id]);
+        }
+      }
+    }
+  } catch(e) { console.log("teaches auto-populate skipped:", e.message); }
+
+  // Re-map any old free-text teaches values to category checkboxes
+  try {
+    const validCats = ["pole", "aerial", "dance", "fitness", "front desk", "other"];
+    const needsRemap = await query(`SELECT email, tenant_id, teaches FROM users WHERE teaches IS NOT NULL AND teaches != ''`);
+    for (const row of needsRemap.rows) {
+      const current = (row.teaches || "").toLowerCase().split(",").map(s => s.trim()).filter(Boolean);
+      const allValid = current.every(c => validCats.includes(c));
+      if (allValid) continue; // already in correct format
+      const cats = new Set();
+      const raw = row.teaches.toLowerCase();
+      if (/pole/i.test(raw)) cats.add("pole");
+      if (/aerial|silk|hoop|lyra|trapeze|hammock|sling/i.test(raw)) cats.add("aerial");
+      if (/dance|heels|choreo|hip\s*hop|jazz|contemp|ballet|burlesque/i.test(raw)) cats.add("dance");
+      if (/fitness|yoga|pilates|stretch|strength|conditioning|barre|cardio|flex/i.test(raw)) cats.add("fitness");
+      if (/front\s*desk|reception|check.in/i.test(raw)) cats.add("front desk");
+      if (cats.size === 0) cats.add("other");
+      await query(`UPDATE users SET teaches=$1 WHERE email=$2 AND tenant_id=$3`, [Array.from(cats).join(", "), row.email, row.tenant_id]);
+    }
+  } catch(e) { console.log("teaches remap skipped:", e.message); }
+
+  // Auto-add "front desk" to teaches for users flagged as front_desk_staff
+  try {
+    const fdStaff = await query(`SELECT email, tenant_id, teaches FROM users WHERE front_desk_staff = TRUE`);
+    for (const row of fdStaff.rows) {
+      const current = (row.teaches || "").toLowerCase();
+      if (current.indexOf("front desk") >= 0) continue; // already has it
+      const newTeaches = current ? (row.teaches + ", front desk") : "front desk";
+      await query(`UPDATE users SET teaches=$1 WHERE email=$2 AND tenant_id=$3`, [newTeaches, row.email, row.tenant_id]);
+    }
+  } catch(e) { console.log("front desk teaches sync skipped:", e.message); }
 
   // Proposal dialogue/negotiation messages
   await query(`
@@ -497,6 +556,65 @@ async function setupDatabase() {
   await query(`ALTER TABLE class_proposals ADD COLUMN IF NOT EXISTS denied_at TIMESTAMPTZ DEFAULT NULL`).catch(()=>{});
   await query(`ALTER TABLE class_proposals ADD COLUMN IF NOT EXISTS last_action_by TEXT DEFAULT NULL`).catch(()=>{});
   await query(`ALTER TABLE class_proposals ADD COLUMN IF NOT EXISTS last_action_at TIMESTAMPTZ DEFAULT NULL`).catch(()=>{});
+
+  // ── Chat system tables ──
+  await query(`
+    CREATE TABLE IF NOT EXISTS chat_conversations (
+      id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      tenant_id   INTEGER REFERENCES tenants(id) ON DELETE CASCADE,
+      type        TEXT NOT NULL CHECK (type IN ('global', 'group', 'dm')),
+      name        TEXT DEFAULT '',
+      created_by  TEXT NOT NULL,
+      created_at  TIMESTAMPTZ DEFAULT NOW()
+    )
+  `).catch(()=>{});
+
+  await query(`
+    CREATE TABLE IF NOT EXISTS chat_members (
+      id              SERIAL PRIMARY KEY,
+      conversation_id UUID REFERENCES chat_conversations(id) ON DELETE CASCADE,
+      tenant_id       INTEGER REFERENCES tenants(id) ON DELETE CASCADE,
+      user_email      TEXT NOT NULL,
+      role            TEXT DEFAULT 'member',
+      joined_at       TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(conversation_id, user_email)
+    )
+  `).catch(()=>{});
+
+  await query(`
+    CREATE TABLE IF NOT EXISTS chat_messages (
+      id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      conversation_id UUID REFERENCES chat_conversations(id) ON DELETE CASCADE,
+      tenant_id       INTEGER REFERENCES tenants(id) ON DELETE CASCADE,
+      sender_email    TEXT NOT NULL,
+      sender_name     TEXT DEFAULT '',
+      body            TEXT NOT NULL,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    )
+  `).catch(()=>{});
+
+  await query(`
+    CREATE TABLE IF NOT EXISTS chat_read_cursors (
+      id              SERIAL PRIMARY KEY,
+      conversation_id UUID REFERENCES chat_conversations(id) ON DELETE CASCADE,
+      tenant_id       INTEGER REFERENCES tenants(id) ON DELETE CASCADE,
+      user_email      TEXT NOT NULL,
+      last_read_at    TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(conversation_id, user_email)
+    )
+  `).catch(()=>{});
+
+  await query(`ALTER TABLE chat_read_cursors ADD COLUMN IF NOT EXISTS archived BOOLEAN DEFAULT FALSE`).catch(()=>{});
+  await query(`ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS edited_at TIMESTAMPTZ DEFAULT NULL`).catch(()=>{});
+
+  // Auto-create a single "General" global conversation per tenant
+  {
+    const tid = await getDefaultTenantId();
+    const existing = await query(`SELECT id FROM chat_conversations WHERE tenant_id=$1 AND type='global'`, [tid]);
+    if (!existing.rows.length) {
+      await query(`INSERT INTO chat_conversations (tenant_id, type, name, created_by) VALUES ($1, 'global', 'General', 'system')`, [tid]);
+    }
+  }
 
   // (Removed: auto-enable TSPS for admins — now managed manually per-user)
 
@@ -528,18 +646,6 @@ async function setupDatabase() {
 // ─── Demo Seed Data ───
 async function seedDemoData() {
   const tid = 1;
-
-  // Ensure admin account exists
-  const adminExists = await query(`SELECT id FROM users WHERE tenant_id=$1 AND LOWER(username)='admin'`, [tid]);
-  if (!adminExists.rows.length) {
-    await query(
-      `INSERT INTO users (tenant_id, email, name, type, pin, username, is_active)
-       VALUES ($1,'admin@kronara.app','Admin','Admin','1212','admin',TRUE)`,
-      [tid]
-    );
-    console.log("Created admin account");
-  }
-
   // Check if already seeded
   const check = await query(`SELECT COUNT(*) FROM users WHERE tenant_id=$1 AND is_demo=TRUE`, [tid]);
   if (parseInt(check.rows[0].count) > 0) return;
@@ -547,19 +653,19 @@ async function seedDemoData() {
 
   const locations = [
     { name: "Downtown Studio", address: "123 Main St" },
-    { name: "Midtown Studio", address: "456 Central Ave" },
-    { name: "Westend Studio", address: "789 Park Blvd" }
+    { name: "Kingsway Studio", address: "456 Kingsway Ave" },
+    { name: "Southside Studio", address: "789 Whyte Ave" }
   ];
   for (const loc of locations) {
     await query(`INSERT INTO locations (tenant_id, name, address, is_demo) VALUES ($1,$2,$3,TRUE)`, [tid, loc.name, loc.address]);
   }
 
   const staff = [
-    { email: "sarah@demo.kronara.app", name: "Sarah Mitchell", type: "Employee", pin: "1234", username: "sarah" },
-    { email: "jessica@demo.kronara.app", name: "Jessica Chen", type: "Contractor", pin: "1234", username: "jessica" },
-    { email: "alex@demo.kronara.app", name: "Alex Rivera", type: "Employee", pin: "1234", username: "alex" },
-    { email: "maya@demo.kronara.app", name: "Maya Thompson", type: "Contractor", pin: "1234", username: "maya" },
-    { email: "demo@demo.kronara.app", name: "Demo User", type: "Employee", pin: "1212", username: "demo" }
+    { email: "sarah@demo.kronara.com", name: "Sarah Mitchell", type: "Employee", pin: "1234", username: "sarah" },
+    { email: "jessica@demo.kronara.com", name: "Jessica Chen", type: "Contractor", pin: "1234", username: "jessica" },
+    { email: "alex@demo.kronara.com", name: "Alex Rivera", type: "Employee", pin: "1234", username: "alex" },
+    { email: "maya@demo.kronara.com", name: "Maya Thompson", type: "Contractor", pin: "1234", username: "maya" },
+    { email: "demo@demo.kronara.com", name: "Demo User", type: "Employee", pin: "1212", username: "demo" }
   ];
   for (const s of staff) {
     await query(
@@ -616,9 +722,9 @@ async function seedDemoData() {
 
   // Seed a couple proposals
   const proposalData = [
-    { email: "sarah@demo.kronara.app", name: "Sarah Mitchell", cn: "Chair Dance Basics", date: demoDate(7), time: "6:00 PM", loc: "Downtown Studio", room: "Studio B", status: "pending" },
-    { email: "jessica@demo.kronara.app", name: "Jessica Chen", cn: "Handstand Workshop", date: demoDate(10), time: "11:00 AM", loc: "Midtown Studio", room: "Studio A", status: "pending" },
-    { email: "alex@demo.kronara.app", name: "Alex Rivera", cn: "Pole Combos", date: demoDate(5), time: "7:00 PM", loc: "Westend Studio", room: "Pole Room", status: "approved", archived_at: "NOW()" }
+    { email: "sarah@demo.kronara.com", name: "Sarah Mitchell", cn: "Chair Dance Basics", date: demoDate(7), time: "6:00 PM", loc: "Downtown Studio", room: "Studio B", status: "pending" },
+    { email: "jessica@demo.kronara.com", name: "Jessica Chen", cn: "Handstand Workshop", date: demoDate(10), time: "11:00 AM", loc: "Kingsway Studio", room: "Studio A", status: "pending" },
+    { email: "alex@demo.kronara.com", name: "Alex Rivera", cn: "Pole Combos", date: demoDate(5), time: "7:00 PM", loc: "Southside Studio", room: "Pole Room", status: "approved", archived_at: "NOW()" }
   ];
   for (const p of proposalData) {
     await query(
@@ -632,7 +738,7 @@ async function seedDemoData() {
   await query(
     `INSERT INTO shift_posts (tenant_id, poster_email, poster_name, location, shift_time, shift_date, class_name, notes, status, is_demo)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'open',TRUE)`,
-    [tid, "maya@demo.kronara.app", "Maya Thompson", "Downtown Studio", "5:30 PM", demoDate(3), "Aerial Silks", "Need someone to cover — family event!"]
+    [tid, "maya@demo.kronara.com", "Maya Thompson", "Downtown Studio", "5:30 PM", demoDate(3), "Aerial Silks", "Need someone to cover — family event!"]
   );
 
   console.log("Demo data seeded.");
@@ -789,7 +895,7 @@ async function sendMail(opts) {
       .filter((v,i,a) => a.indexOf(v) === i); // dedupe
 
     const resend = getResend();
-    const from   = process.env.RESEND_FROM || `${CONFIG.BRAND_NAME} <support@kronara.app>`;
+    const from   = process.env.RESEND_FROM || `${CONFIG.BRAND_NAME} <support@aradiafitness.app>`;
 
     // Admin/accountant reports always bypass test mode filtering — send to actual recipients
     if (opts.adminReport) {
@@ -882,7 +988,7 @@ async function sendMail(opts) {
 
   // Normal send
   const resend = getResend();
-  const from = process.env.RESEND_FROM || `${CONFIG.BRAND_NAME} <support@kronara.app>`;
+  const from = process.env.RESEND_FROM || `${CONFIG.BRAND_NAME} <support@aradiafitness.app>`;
   await mailRateLimit();
   await sendMailWithRetry(() => resend.emails.send({
     from,
@@ -910,7 +1016,7 @@ async function sendPush(email, title, body, url, category) {
     const tid = await getDefaultTenantId();
     // Check user's category preference
     if (category) {
-      const col = category === "flags" ? "push_flags" : category === "pay" ? "push_pay" : category === "shifts" ? "push_shifts" : null;
+      const col = category === "flags" ? "push_flags" : category === "pay" ? "push_pay" : category === "shifts" ? "push_shifts" : category === "chat" ? "push_chat" : null;
       if (col) {
         const userRes = await query(`SELECT ${col} FROM users WHERE tenant_id=$1 AND LOWER(email)=LOWER($2)`, [tid, email]);
         if (userRes.rows.length && !userRes.rows[0][col]) return; // user opted out of this category
@@ -968,7 +1074,7 @@ async function buildPayrollPdf(users, pp, settings, lateGroups) {
     doc.on("end",  () => resolve(Buffer.concat(bufs)));
     doc.on("error", reject);
 
-    const brand = CONFIG.BRAND_NAME || "Kronara";
+    const brand = CONFIG.BRAND_NAME || "Aradia Fitness";
     const col   = { red: "${CONFIG.BRAND_COLOR_PRIMARY}", dark: "#222", mid: "#555", light: "#888" };
     const pageW = doc.page.width;
     const contentW = pageW - 80;
@@ -1160,7 +1266,7 @@ async function buildStaffPeriodPdf(user, tid, pp) {
     doc.on("end",  () => resolve(Buffer.concat(bufs)));
     doc.on("error", reject);
 
-    const brand = CONFIG.BRAND_NAME || "Kronara";
+    const brand = CONFIG.BRAND_NAME || "Aradia Fitness";
     const col   = { red: "${CONFIG.BRAND_COLOR_PRIMARY}", dark: "#222", mid: "#555", light: "#888" };
     const isC   = (user.type||"").toLowerCase() === "contractor";
     const gst_  = isC && user.chargeGST;
@@ -1370,7 +1476,7 @@ async function buildStaffEarningsPdf(user, tid, dateFrom, dateTo) {
     doc.on("end",  () => resolve(Buffer.concat(bufs)));
     doc.on("error", reject);
 
-    const brand = CONFIG.BRAND_NAME || "Kronara";
+    const brand = CONFIG.BRAND_NAME || "Aradia Fitness";
     const col   = { red: "${CONFIG.BRAND_COLOR_PRIMARY}", dark: "#222", mid: "#555", light: "#888" };
     const range = (dateFrom && dateTo) ? dateFrom + " to " + dateTo : "All time";
 
@@ -1803,12 +1909,14 @@ function formatUser(row) {
     pushFlags: !!row.push_flags,
     pushPay: !!row.push_pay,
     pushShifts: !!row.push_shifts,
+    pushChat: !!row.push_chat,
     emailShifts: row.email_shifts !== false,
     emailShiftsUrgentOnly: !!row.email_shifts_urgent_only,
     shiftFilterKeywords: row.shift_filter_keywords || "",
     frontDeskStaff: !!row.front_desk_staff,
     frontDeskOnly: !!row.front_desk_only,
     adminPermissions: row.admin_permissions || "",
+    teaches: row.teaches || "",
   };
 }
 
@@ -1968,6 +2076,7 @@ async function getAdminSettings() {
     proposalDigestEmail: map.proposalDigestEmail || "",
     proposalDigestEnabled: map.proposalDigestEnabled === "true",
     proposalNotifyEmail: map.proposalNotifyEmail || "",
+    chatExcludedEmails: map.chatExcludedEmails || "",
   };
 }
 
@@ -2791,7 +2900,7 @@ api.post("/adminResetPin", async (req, res) => {
 
     // Send PIN via email
     const userName = tgtUser.rows[0].name || tgtEmail;
-    const appUrl = `https://${process.env.APP_DOMAIN || "kronara.app"}`;
+    const appUrl = `https://${process.env.APP_DOMAIN || "aradiafitness.app"}`;
     const settings = await getAdminSettings();
     const ytLink = settings.youtubeLink || "";
 
@@ -2838,8 +2947,8 @@ api.post("/massResetPins", async (req, res) => {
 
     const tid = await getDefaultTenantId();
     const staffRes = await query(`SELECT * FROM users WHERE tenant_id=$1 AND is_active=TRUE`, [tid]);
-    const brand = CONFIG.BRAND_NAME || "Kronara";
-    const appUrl = `https://${process.env.APP_DOMAIN || "kronara.app"}`;
+    const brand = CONFIG.BRAND_NAME || "Aradia Fitness";
+    const appUrl = `https://${process.env.APP_DOMAIN || "aradiafitness.app"}`;
     let count = 0;
 
     for (const u of staffRes.rows) {
@@ -3300,7 +3409,7 @@ api.post("/debugEmail", async (req, res) => {
 
     // Test Resend API key by hitting their /domains endpoint
     const resendKey = process.env.RESEND_API_KEY || "";
-    const resendFrom = process.env.RESEND_FROM || `(not set — will use: ${CONFIG.BRAND_NAME} <support@kronara.app>)`;
+    const resendFrom = process.env.RESEND_FROM || `(not set — will use: ${CONFIG.BRAND_NAME} <support@aradiafitness.app>)`;
     report.env.RESEND_API_KEY = resendKey ? "✅ Set (" + resendKey.length + " chars)" : "⚠️ NOT SET";
     report.env.RESEND_FROM    = resendFrom;
     // Remove old SMTP fields
@@ -3374,7 +3483,8 @@ api.post("/saveAdminSettings", async (req, res) => {
       "schedulingManagerEmail",
       "tspsNotifyEmail","tspsNotifyEnabled",
       "proposalDigestEmail","proposalDigestEnabled",
-      "proposalNotifyEmail"
+      "proposalNotifyEmail",
+      "chatExcludedEmails"
     ];
     for (const k of keys) {
       if (settings[k] === undefined) continue;
@@ -3529,14 +3639,15 @@ api.post("/addStaffMember", async (req, res) => {
         return res.json({ ok: false, reason: "Username already taken. Please choose a different one." });
     }
     await query(`
-      INSERT INTO users (tenant_id, email, name, type, pin, username, is_active, charge_gst, gst_number, email_reports, require_pin_change)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      INSERT INTO users (tenant_id, email, name, type, pin, username, is_active, charge_gst, gst_number, email_reports, require_pin_change, teaches)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
     `, [
       tid, normEmail(data.email), data.name, data.type||"Employee",
       String(data.pin), data.username||"",
       data.isActive !== false,
       !!data.chargeGst, data.gst||"", !!data.emailRpt,
-      data.requirePinChange !== false
+      data.requirePinChange !== false,
+      data.teaches || ""
     ]);
     res.json({ ok: true });
   } catch (e) {
@@ -3602,7 +3713,7 @@ api.post("/updateStaffMember", async (req, res) => {
     if (targetUser && String(targetUser.type||"").toUpperCase() === "ADMIN" && updates.type !== undefined && String(updates.type||"").toUpperCase() !== "ADMIN") {
       delete updates.type; // silently preserve admin type
     }
-    const colMap = { name:"name", username:"username", type:"type", gstNumber:"gst_number", isActive:"is_active", chargeGST:"charge_gst", emailReports:"email_reports", requiresPinChange:"require_pin_change", requiresManualApproval:"requires_approval", setupCleanupRate:"setup_cleanup_rate", setupCleanupAllowed:"setup_cleanup_allowed", canCreateImages:"can_create_images", tspsEnabled:"tsps_enabled", pushFlags:"push_flags", pushPay:"push_pay", pushShifts:"push_shifts", emailShifts:"email_shifts", emailShiftsUrgentOnly:"email_shifts_urgent_only", shiftFilterKeywords:"shift_filter_keywords", frontDeskStaff:"front_desk_staff", frontDeskOnly:"front_desk_only", adminPermissions:"admin_permissions" };
+    const colMap = { name:"name", username:"username", type:"type", gstNumber:"gst_number", isActive:"is_active", chargeGST:"charge_gst", emailReports:"email_reports", requiresPinChange:"require_pin_change", requiresManualApproval:"requires_approval", setupCleanupRate:"setup_cleanup_rate", setupCleanupAllowed:"setup_cleanup_allowed", canCreateImages:"can_create_images", tspsEnabled:"tsps_enabled", pushFlags:"push_flags", pushPay:"push_pay", pushShifts:"push_shifts", emailShifts:"email_shifts", emailShiftsUrgentOnly:"email_shifts_urgent_only", shiftFilterKeywords:"shift_filter_keywords", frontDeskStaff:"front_desk_staff", frontDeskOnly:"front_desk_only", adminPermissions:"admin_permissions", teaches:"teaches" };
     const sets   = [];
     const vals   = [];
     let i = 1;
@@ -3610,6 +3721,12 @@ api.post("/updateStaffMember", async (req, res) => {
       if (updates[key] === undefined) continue;
       sets.push(`${col}=$${i++}`);
       vals.push(updates[key]);
+    }
+    // Auto-sync front_desk_staff when teaches changes
+    if (updates.teaches !== undefined) {
+      const hasFrontDesk = String(updates.teaches || "").toLowerCase().includes("front desk");
+      sets.push(`front_desk_staff=$${i++}`);
+      vals.push(hasFrontDesk);
     }
     if (!sets.length) return res.json({ ok: true });
     vals.push(tid, normEmail(targetEmail));
@@ -3644,7 +3761,7 @@ api.post("/sendReminderEmails", async (req, res) => {
       [tid]
     );
 
-    const appUrl = `https://${process.env.APP_DOMAIN||"kronara.app"}`;
+    const appUrl = `https://${process.env.APP_DOMAIN||"aradiafitness.app"}`;
     let count = 0;
     for (const u of staff.rows) {
       const entryCount = submittedMap[u.email] || 0;
@@ -3653,8 +3770,8 @@ api.post("/sendReminderEmails", async (req, res) => {
         ? `Reminder: Confirm your hours are complete — ${pp.start} to ${pp.end}`
         : `Reminder: Submit your hours for ${pp.start} to ${pp.end}`;
       const body = isPartial
-        ? `<p>Hi ${u.name||""},</p><p>You have <strong>${entryCount} shift${entryCount===1?'':'s'}</strong> logged for the pay period ending <strong>${pp.end}</strong>. Please review and confirm all your hours are entered before the deadline.</p><p><a href="${appUrl}">Open Kronara</a></p>`
-        : `<p>Hi ${u.name||""},</p><p>This is a reminder to submit your hours for the pay period ending <strong>${pp.end}</strong>.</p><p><a href="${appUrl}">Open Kronara</a></p>`;
+        ? `<p>Hi ${u.name||""},</p><p>You have <strong>${entryCount} shift${entryCount===1?'':'s'}</strong> logged for the pay period ending <strong>${pp.end}</strong>. Please review and confirm all your hours are entered before the deadline.</p><p><a href="${appUrl}">Open Aradia Time</a></p>`
+        : `<p>Hi ${u.name||""},</p><p>This is a reminder to submit your hours for the pay period ending <strong>${pp.end}</strong>.</p><p><a href="${appUrl}">Open Aradia Time</a></p>`;
       await sendMail({ to: u.email, subject, html: body }).catch(() => {});
       sendPush(u.email, "📋 Submit Your Hours", `Reminder: submit your hours for ${pp.start} to ${pp.end}.`, "/", "pay").catch(() => {});
       count++;
@@ -3745,9 +3862,16 @@ api.post("/saveUserProfile", async (req, res) => {
     if (updates.pushFlags  !== undefined) { sets.push(`push_flags=$${idx++}`);  vals.push(!!updates.pushFlags); }
     if (updates.pushPay    !== undefined) { sets.push(`push_pay=$${idx++}`);    vals.push(!!updates.pushPay); }
     if (updates.pushShifts !== undefined) { sets.push(`push_shifts=$${idx++}`); vals.push(!!updates.pushShifts); }
+    if (updates.pushChat   !== undefined) { sets.push(`push_chat=$${idx++}`);   vals.push(!!updates.pushChat); }
     if (updates.emailShifts !== undefined) { sets.push(`email_shifts=$${idx++}`); vals.push(!!updates.emailShifts); }
     if (updates.emailShiftsUrgentOnly !== undefined) { sets.push(`email_shifts_urgent_only=$${idx++}`); vals.push(!!updates.emailShiftsUrgentOnly); }
     if (updates.shiftFilterKeywords !== undefined) { sets.push(`shift_filter_keywords=$${idx++}`); vals.push(String(updates.shiftFilterKeywords || "")); }
+    if (updates.teaches !== undefined) {
+      sets.push(`teaches=$${idx++}`); vals.push(String(updates.teaches || ""));
+      // Auto-sync front_desk_staff based on teaches
+      const hasFrontDesk = (updates.teaches || "").toLowerCase().includes("front desk");
+      sets.push(`front_desk_staff=$${idx++}`); vals.push(hasFrontDesk);
+    }
     if (!sets.length) return res.json({ ok: true });
     vals.push(tid, normEmail(user.email));
     await query(`UPDATE users SET ${sets.join(",")} WHERE tenant_id=$${idx++} AND email=$${idx++}`, vals);
@@ -3768,7 +3892,7 @@ api.post("/saveUserFlags", async (req, res) => {
     const uType = String(admin.type || "").toUpperCase();
     if (uType !== "ADMIN" && uType !== "MODERATOR") return res.json({ ok: false, reason: "Admin access required." });
     const tid = await getDefaultTenantId();
-    const colMap = { chargeGST: "charge_gst", emailReports: "email_reports", emailBugUpdates: "email_bug_updates", requiresPinChange: "require_pin_change", canCreateImages: "can_create_images", tspsEnabled: "tsps_enabled", pushFlags: "push_flags", pushPay: "push_pay", pushShifts: "push_shifts", emailShifts: "email_shifts", emailShiftsUrgentOnly: "email_shifts_urgent_only", shiftFilterKeywords: "shift_filter_keywords", frontDeskStaff: "front_desk_staff", frontDeskOnly: "front_desk_only" };
+    const colMap = { chargeGST: "charge_gst", emailReports: "email_reports", emailBugUpdates: "email_bug_updates", requiresPinChange: "require_pin_change", canCreateImages: "can_create_images", tspsEnabled: "tsps_enabled", pushFlags: "push_flags", pushPay: "push_pay", pushShifts: "push_shifts", pushChat: "push_chat", emailShifts: "email_shifts", emailShiftsUrgentOnly: "email_shifts_urgent_only", shiftFilterKeywords: "shift_filter_keywords", frontDeskStaff: "front_desk_staff", frontDeskOnly: "front_desk_only" };
     const sets = [], vals = [];
     let idx = 1;
     for (const [k, v] of Object.entries(flags || {})) {
@@ -4562,7 +4686,7 @@ async function rolloverUnresolvedFlags(force = false) {
             </div>
             <p>This entry has been <strong>rolled into the next pay cycle</strong> as a late submission. It will appear in the current period's payroll pending review.</p>
             <p><strong>⚠️ Please log in and correct this entry as soon as possible.</strong></p>
-            <p style="margin-top:20px;"><a href="https://${process.env.APP_DOMAIN || 'kronara.app'}" style="display:inline-block;background:#e65100;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700;">Log In & Correct</a></p>
+            <p style="margin-top:20px;"><a href="https://${process.env.APP_DOMAIN || 'aradiafitness.app'}" style="display:inline-block;background:#e65100;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700;">Log In & Correct</a></p>
           </div>
         </div>`
       }).catch(err => console.error("Rollover email failed:", err));
@@ -4917,10 +5041,10 @@ api.post("/submitSupportMessage", async (req, res) => {
 
 // ── AI Support Chat ──────────────────────
 const SUPPORT_KNOWLEDGE_BASE = `
-You are Kronara Assistant — a helpful, friendly support bot for Kronara, a studio management and payroll timesheet app used by staff at fitness studios, creative spaces, and service businesses.
+You are Aradia Assistant — a helpful, friendly support bot for Aradia Fitness Timesheets, a payroll timesheet app used by instructors at Aradia Fitness pole dancing and aerial fitness studios.
 
 RULES:
-- Only answer questions about the Kronara app, pay periods, logging hours, and related topics.
+- Only answer questions about the Aradia Fitness Timesheets app, pay periods, logging hours, and related topics.
 - If you don't know the answer or it's outside the app scope, say so and suggest they use "Message Support" on the Support tab.
 - Be concise and friendly. Use plain language. Keep answers under 3 short paragraphs.
 - Never make up features that don't exist. If unsure, say "I'm not 100% sure about that — I'd recommend reaching out to your admin or using Message Support below."
@@ -4986,7 +5110,7 @@ Google Calendar integration:
 You can connect your Google Calendar from the Profile tab under "Google Calendar." Once connected, use the "Import from Google Calendar" buttons on the Home tab to pull in events as timecard entries. The import modal lets you pick which calendar to pull from, review events, match locations, set rates, and choose which events to import.
 
 Connecting Google Calendar — "unsafe" warning:
-When connecting your Google Calendar, Google will show a warning that says the app "hasn't been verified." This is normal — it simply means the app hasn't gone through Google's lengthy verification process. Kronara only requests read-only access to your calendar event names, times, and locations. We never modify, delete, or share your calendar data. To continue: click "Advanced," then "Go to Kronara (unsafe)," then "Continue."
+When connecting your Google Calendar, Google will show a warning that says the app "hasn't been verified." This is normal — it simply means the app hasn't gone through Google's lengthy verification process. Aradia Fitness only requests read-only access to your calendar event names, times, and locations. We never modify, delete, or share your calendar data. To continue: click "Advanced," then "Go to Aradia Fitness (unsafe)," then "Continue."
 
 Default Google Calendar:
 After connecting Google Calendar, go to the Profile tab. Below the connection status you'll see a "Default Calendar" dropdown. Select your preferred calendar and hit "Save Default Calendar." The import modal will automatically pre-select this calendar so you don't have to choose it every time.
@@ -5014,10 +5138,10 @@ Flagged entries:
 If an admin flags one of your entries, you'll see a banner on your Home tab and get an email. Tap "Review" to see what was flagged and respond with an explanation or submit corrected values.
 
 Locations:
-Your studio locations are configured by your admin. Check the Home tab dropdown to see available locations.
+Aradia Fitness has four studio locations: South Edmonton, Kingsway (Edmonton), St. Albert, and Spruce Grove.
 
 Theme/Dark mode:
-Go to the Profile tab to switch between Light, Dark, and Kronara themes.
+Go to the Profile tab to switch between Light, Dark, and Aradia themes.
 `;
 
 api.post("/supportChat", async (req, res) => {
@@ -5839,8 +5963,8 @@ async function checkAutoRemindBeforePeriodEnd() {
       );
 
       let count = 0;
-      const brand = CONFIG.BRAND_NAME || "Kronara";
-      const appUrl = `https://${process.env.APP_DOMAIN || "kronara.app"}`;
+      const brand = CONFIG.BRAND_NAME || "Aradia Fitness";
+      const appUrl = `https://${process.env.APP_DOMAIN || "aradiafitness.app"}`;
       for (const u of staff.rows) {
         const entryCount = submittedMap[u.email] || 0;
         const isPartial = entryCount > 0;
@@ -5886,7 +6010,7 @@ async function checkUnapprovedPayroll() {
     if (!period) return;
 
     const tid = await getDefaultTenantId();
-    const appUrl = `https://${process.env.APP_DOMAIN || "kronara.app"}`;
+    const appUrl = `https://${process.env.APP_DOMAIN || "aradiafitness.app"}`;
 
     // All active non-admin staff
     const allStaffRes = await query(
@@ -6337,15 +6461,15 @@ api.post("/emailImage", async (req, res) => {
     if (!user.canCreateImages) return res.json({ ok: false, reason: "You do not have permission to create images." });
 
     const resend = getResend();
-    const from = process.env.RESEND_FROM || `${CONFIG.BRAND_NAME} <support@kronara.app>`;
-    const fname = filename || "kronara-card.png";
+    const from = process.env.RESEND_FROM || `${CONFIG.BRAND_NAME} <support@aradiafitness.app>`;
+    const fname = filename || "aradia-card.png";
 
     await mailRateLimit();
     await sendMailWithRetry(() => resend.emails.send({
       from,
       to: [user.email],
       subject: `Your Custom Image: ${fname}`,
-      html: `<p>Hi ${user.name || "there"},</p><p>Here's the custom social media card you generated. It's attached as a PNG.</p><p>— Kronara</p>`,
+      html: `<p>Hi ${user.name || "there"},</p><p>Here's the custom social media card you generated. It's attached as a PNG.</p><p>— Aradia Bot</p>`,
       attachments: [{ filename: fname, content: image }],
     }), 2);
 
@@ -6723,7 +6847,7 @@ api.post("/postShift", async (req, res) => {
               <p><strong>${posterName}</strong> posted ${created.length} shift(s):</p>
               ${shiftListHtml}
               <p style="margin-top:16px;text-align:center;">
-                <a href="${process.env.BASE_URL || 'https://kronara.app'}?tab=tsps" style="display:inline-block;background:${CONFIG.BRAND_COLOR_PRIMARY};color:#fff;font-weight:700;font-size:15px;padding:12px 32px;border-radius:8px;text-decoration:none;">CLAIM SHIFT</a>
+                <a href="${process.env.BASE_URL || 'https://aradiafitness.app'}?tab=tsps" style="display:inline-block;background:${CONFIG.BRAND_COLOR_PRIMARY};color:#fff;font-weight:700;font-size:15px;padding:12px 32px;border-radius:8px;text-decoration:none;">CLAIM SHIFT</a>
               </p>
               <p style="color:#888;font-size:12px;">You can manage email preferences in your profile settings.</p>
             </div>`
@@ -7128,7 +7252,7 @@ api.post("/getProposalsDashboard", async (req, res) => {
 });
 
 // ── Proposal email helper ──
-const PROPOSAL_APP_URL = "https://kronara.app/";
+const PROPOSAL_APP_URL = "https://aradiafitness.app/";
 
 function proposalGcalUrl(proposal) {
   // Parse start_time like "10:00 AM" or "2:30 PM" into 24h
@@ -7555,6 +7679,502 @@ api.post("/sendProposalDigest", async (req, res) => {
 });
 
 // ─────────────────────────────────────────
+//  CHAT ENDPOINTS
+// ─────────────────────────────────────────
+
+// Get all conversations the user belongs to (+ global)
+api.post("/getChatConversations", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const email = user.email.toLowerCase();
+    const showArchived = !!req.body.showArchived;
+
+    // Get all conversations: global ones + ones where user is a member
+    // Filter by archived status via chat_read_cursors
+    const convos = await query(`
+      SELECT c.*,
+        (SELECT COUNT(*) FROM chat_messages m WHERE m.conversation_id = c.id
+          AND m.created_at > COALESCE(
+            (SELECT last_read_at FROM chat_read_cursors WHERE conversation_id = c.id AND LOWER(user_email) = LOWER($2)),
+            '1970-01-01'
+          )
+        ) as unread_count,
+        (SELECT body FROM chat_messages m2 WHERE m2.conversation_id = c.id ORDER BY m2.created_at DESC LIMIT 1) as last_message,
+        (SELECT sender_name FROM chat_messages m3 WHERE m3.conversation_id = c.id ORDER BY m3.created_at DESC LIMIT 1) as last_sender,
+        (SELECT created_at FROM chat_messages m4 WHERE m4.conversation_id = c.id ORDER BY m4.created_at DESC LIMIT 1) as last_message_at,
+        COALESCE((SELECT archived FROM chat_read_cursors WHERE conversation_id = c.id AND LOWER(user_email) = LOWER($2)), FALSE) as is_archived
+      FROM chat_conversations c
+      WHERE c.tenant_id = $1 AND (
+        c.type = 'global'
+        OR c.id IN (SELECT conversation_id FROM chat_members WHERE LOWER(user_email) = LOWER($2))
+      )
+      ORDER BY last_message_at DESC NULLS LAST
+    `, [tid, email]);
+
+    // Filter by archived status client-side (simpler than SQL for the COALESCE logic)
+    const filtered = convos.rows.filter(c => showArchived ? !!c.is_archived : !c.is_archived);
+
+    // For each conversation, fetch members
+    for (const c of filtered) {
+      const members = await query(
+        `SELECT cm.user_email, cm.role, u.name, u.profile_pic FROM chat_members cm
+         LEFT JOIN users u ON LOWER(u.email) = LOWER(cm.user_email) AND u.tenant_id = $1
+         WHERE cm.conversation_id = $2`,
+        [tid, c.id]
+      );
+      c.members = members.rows;
+    }
+
+    res.json({ ok: true, conversations: filtered });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Get messages for a conversation (paginated)
+api.post("/getChatMessages", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const { conversationId, before } = req.body;
+
+    // Verify membership (global is open to all)
+    const convo = await query(`SELECT * FROM chat_conversations WHERE id=$1 AND tenant_id=$2`, [conversationId, tid]);
+    if (!convo.rows.length) return res.json({ ok: false, reason: "Conversation not found" });
+
+    if (convo.rows[0].type !== 'global') {
+      const membership = await query(
+        `SELECT 1 FROM chat_members WHERE conversation_id=$1 AND LOWER(user_email)=LOWER($2)`,
+        [conversationId, user.email]
+      );
+      if (!membership.rows.length) return res.json({ ok: false, reason: "Not a member" });
+    }
+
+    let msgs;
+    if (before) {
+      msgs = await query(
+        `SELECT m.*, u.profile_pic as sender_profile_pic FROM chat_messages m LEFT JOIN users u ON LOWER(u.email)=LOWER(m.sender_email) AND u.tenant_id=m.tenant_id WHERE m.conversation_id=$1 AND m.tenant_id=$2 AND m.created_at < $3 ORDER BY m.created_at DESC LIMIT 50`,
+        [conversationId, tid, before]
+      );
+    } else {
+      msgs = await query(
+        `SELECT m.*, u.profile_pic as sender_profile_pic FROM chat_messages m LEFT JOIN users u ON LOWER(u.email)=LOWER(m.sender_email) AND u.tenant_id=m.tenant_id WHERE m.conversation_id=$1 AND m.tenant_id=$2 ORDER BY m.created_at DESC LIMIT 50`,
+        [conversationId, tid]
+      );
+    }
+
+    // Auto-update read cursor
+    await query(
+      `INSERT INTO chat_read_cursors (conversation_id, tenant_id, user_email, last_read_at) VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (conversation_id, user_email) DO UPDATE SET last_read_at = NOW()`,
+      [conversationId, tid, user.email.toLowerCase()]
+    );
+
+    res.json({ ok: true, messages: msgs.rows.reverse() });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Send a message
+api.post("/sendChatMessage", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const { conversationId, body } = req.body;
+    if (!body || !body.trim()) return res.json({ ok: false, reason: "Empty message" });
+
+    // Verify conversation exists and user has access
+    const convo = await query(`SELECT * FROM chat_conversations WHERE id=$1 AND tenant_id=$2`, [conversationId, tid]);
+    if (!convo.rows.length) return res.json({ ok: false, reason: "Conversation not found" });
+
+    if (convo.rows[0].type !== 'global') {
+      const membership = await query(
+        `SELECT 1 FROM chat_members WHERE conversation_id=$1 AND LOWER(user_email)=LOWER($2)`,
+        [conversationId, user.email]
+      );
+      if (!membership.rows.length) return res.json({ ok: false, reason: "Not a member" });
+    }
+
+    const senderName = user.name || user.username || user.email;
+    const msg = await query(
+      `INSERT INTO chat_messages (conversation_id, tenant_id, sender_email, sender_name, body) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [conversationId, tid, user.email.toLowerCase(), senderName, body.trim()]
+    );
+
+    // Update sender's read cursor
+    await query(
+      `INSERT INTO chat_read_cursors (conversation_id, tenant_id, user_email, last_read_at) VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (conversation_id, user_email) DO UPDATE SET last_read_at = NOW()`,
+      [conversationId, tid, user.email.toLowerCase()]
+    );
+
+    // Send push notifications to other members
+    const preview = body.trim().length > 60 ? body.trim().slice(0, 57) + "..." : body.trim();
+    const chatUrl = "/?tab=chat&convo=" + conversationId;
+    if (convo.rows[0].type === 'global') {
+      sendPushToAll(`💬 ${senderName}`, preview, chatUrl, user.email, "chat").catch(() => {});
+    } else {
+      const members = await query(`SELECT user_email FROM chat_members WHERE conversation_id=$1`, [conversationId]);
+      for (const m of members.rows) {
+        if (m.user_email.toLowerCase() !== user.email.toLowerCase()) {
+          sendPush(m.user_email, `💬 ${senderName}`, preview, chatUrl, "chat").catch(() => {});
+        }
+      }
+    }
+
+    res.json({ ok: true, message: msg.rows[0] });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Edit a chat message (only by sender)
+api.post("/editChatMessage", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const { messageId, body } = req.body;
+    if (!body || !body.trim()) return res.json({ ok: false, reason: "Empty message" });
+    const msg = await query(
+      `UPDATE chat_messages SET body=$1, edited_at=NOW() WHERE id=$2 AND tenant_id=$3 AND LOWER(sender_email)=LOWER($4) RETURNING *`,
+      [body.trim(), messageId, tid, user.email]
+    );
+    if (!msg.rows.length) return res.json({ ok: false, reason: "Message not found or not yours" });
+    res.json({ ok: true, message: msg.rows[0] });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Delete a chat message (only by sender)
+api.post("/deleteChatMessage", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const { messageId } = req.body;
+    const result = await query(
+      `DELETE FROM chat_messages WHERE id=$1 AND tenant_id=$2 AND LOWER(sender_email)=LOWER($3)`,
+      [messageId, tid, user.email]
+    );
+    if (!result.rowCount) return res.json({ ok: false, reason: "Message not found or not yours" });
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Search chat messages
+api.post("/searchChatMessages", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const { q } = req.body;
+    if (!q || q.trim().length < 2) return res.json({ ok: true, results: [] });
+
+    const results = await query(
+      `SELECT m.id, m.conversation_id, m.sender_name, m.body, m.created_at
+       FROM chat_messages m
+       JOIN chat_conversations c ON c.id = m.conversation_id
+       WHERE m.tenant_id = $1
+         AND LOWER(m.body) LIKE '%' || LOWER($2) || '%'
+         AND (c.type = 'global' OR m.conversation_id IN (SELECT conversation_id FROM chat_members WHERE LOWER(user_email) = LOWER($3)))
+       ORDER BY m.created_at DESC
+       LIMIT 20`,
+      [tid, q.trim(), user.email]
+    );
+    res.json({ ok: true, results: results.rows });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Mark conversation as read
+api.post("/markChatRead", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    await query(
+      `INSERT INTO chat_read_cursors (conversation_id, tenant_id, user_email, last_read_at) VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (conversation_id, user_email) DO UPDATE SET last_read_at = NOW()`,
+      [req.body.conversationId, tid, user.email.toLowerCase()]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Create a group chat
+api.post("/createGroupChat", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const { name, memberEmails } = req.body;
+    if (!name || !name.trim()) return res.json({ ok: false, reason: "Group name required" });
+
+    const convo = await query(
+      `INSERT INTO chat_conversations (tenant_id, type, name, created_by) VALUES ($1, 'group', $2, $3) RETURNING *`,
+      [tid, name.trim(), user.email.toLowerCase()]
+    );
+    const convoId = convo.rows[0].id;
+
+    // Add creator as admin
+    await query(
+      `INSERT INTO chat_members (conversation_id, tenant_id, user_email, role) VALUES ($1, $2, $3, 'admin')`,
+      [convoId, tid, user.email.toLowerCase()]
+    );
+
+    // Add other members
+    if (Array.isArray(memberEmails)) {
+      for (const em of memberEmails) {
+        if (em.toLowerCase() !== user.email.toLowerCase()) {
+          await query(
+            `INSERT INTO chat_members (conversation_id, tenant_id, user_email, role) VALUES ($1, $2, $3, 'member') ON CONFLICT DO NOTHING`,
+            [convoId, tid, em.toLowerCase()]
+          ).catch(() => {});
+        }
+      }
+    }
+
+    res.json({ ok: true, conversation: convo.rows[0] });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Update a group chat (rename, add/remove members)
+api.post("/updateGroupChat", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const { conversationId, updates } = req.body;
+
+    // Check the user is the group admin or app admin
+    const convo = await query(`SELECT * FROM chat_conversations WHERE id=$1 AND tenant_id=$2 AND type='group'`, [conversationId, tid]);
+    if (!convo.rows.length) return res.json({ ok: false, reason: "Group not found" });
+
+    const isGroupAdmin = convo.rows[0].created_by.toLowerCase() === user.email.toLowerCase();
+    const isAppAdmin = (user.type || "").toLowerCase() === "admin";
+    if (!isGroupAdmin && !isAppAdmin) return res.json({ ok: false, reason: "Only group creator or admin can edit" });
+
+    if (updates.name) {
+      await query(`UPDATE chat_conversations SET name=$1 WHERE id=$2`, [updates.name.trim(), conversationId]);
+    }
+
+    if (Array.isArray(updates.addMembers)) {
+      for (const em of updates.addMembers) {
+        await query(
+          `INSERT INTO chat_members (conversation_id, tenant_id, user_email, role) VALUES ($1, $2, $3, 'member') ON CONFLICT DO NOTHING`,
+          [conversationId, tid, em.toLowerCase()]
+        ).catch(() => {});
+      }
+    }
+
+    if (Array.isArray(updates.removeMembers)) {
+      for (const em of updates.removeMembers) {
+        // Don't allow removing the creator
+        if (em.toLowerCase() === convo.rows[0].created_by.toLowerCase()) continue;
+        await query(
+          `DELETE FROM chat_members WHERE conversation_id=$1 AND LOWER(user_email)=LOWER($2)`,
+          [conversationId, em]
+        );
+      }
+    }
+
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Delete a group chat
+api.post("/deleteGroupChat", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const { conversationId } = req.body;
+
+    const convo = await query(`SELECT * FROM chat_conversations WHERE id=$1 AND tenant_id=$2 AND type='group'`, [conversationId, tid]);
+    if (!convo.rows.length) return res.json({ ok: false, reason: "Group not found" });
+
+    const isGroupAdmin = convo.rows[0].created_by.toLowerCase() === user.email.toLowerCase();
+    const isAppAdmin = (user.type || "").toLowerCase() === "admin";
+    if (!isGroupAdmin && !isAppAdmin) return res.json({ ok: false, reason: "Only group creator or admin can delete" });
+
+    await query(`DELETE FROM chat_conversations WHERE id=$1`, [conversationId]);
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Start or find a DM conversation
+api.post("/startDirectMessage", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const { targetEmail } = req.body;
+    if (!targetEmail) return res.json({ ok: false, reason: "Target email required" });
+
+    const myEmail = user.email.toLowerCase();
+    const theirEmail = targetEmail.toLowerCase();
+    if (myEmail === theirEmail) return res.json({ ok: false, reason: "Cannot DM yourself" });
+
+    // Check if DM already exists between these two users
+    const existing = await query(`
+      SELECT c.id FROM chat_conversations c
+      WHERE c.tenant_id = $1 AND c.type = 'dm'
+        AND c.id IN (SELECT conversation_id FROM chat_members WHERE LOWER(user_email) = $2)
+        AND c.id IN (SELECT conversation_id FROM chat_members WHERE LOWER(user_email) = $3)
+    `, [tid, myEmail, theirEmail]);
+
+    if (existing.rows.length) {
+      return res.json({ ok: true, conversationId: existing.rows[0].id, existing: true });
+    }
+
+    // Create new DM
+    const convo = await query(
+      `INSERT INTO chat_conversations (tenant_id, type, name, created_by) VALUES ($1, 'dm', '', $2) RETURNING *`,
+      [tid, myEmail]
+    );
+    const convoId = convo.rows[0].id;
+    await query(`INSERT INTO chat_members (conversation_id, tenant_id, user_email, role) VALUES ($1, $2, $3, 'member')`, [convoId, tid, myEmail]);
+    await query(`INSERT INTO chat_members (conversation_id, tenant_id, user_email, role) VALUES ($1, $2, $3, 'member')`, [convoId, tid, theirEmail]);
+
+    res.json({ ok: true, conversationId: convoId, existing: false });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Get total unread count across all conversations
+api.post("/getChatUnreadTotal", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const email = user.email.toLowerCase();
+
+    const result = await query(`
+      SELECT COALESCE(SUM(unread), 0) as total FROM (
+        SELECT COUNT(*) as unread FROM chat_messages m
+        JOIN chat_conversations c ON c.id = m.conversation_id
+        WHERE c.tenant_id = $1 AND (
+          c.type = 'global'
+          OR c.id IN (SELECT conversation_id FROM chat_members WHERE LOWER(user_email) = LOWER($2))
+        )
+        AND m.created_at > COALESCE(
+          (SELECT last_read_at FROM chat_read_cursors WHERE conversation_id = m.conversation_id AND LOWER(user_email) = LOWER($2)),
+          '1970-01-01'
+        )
+        AND LOWER(m.sender_email) != LOWER($2)
+      ) sub
+    `, [tid, email]);
+
+    res.json({ ok: true, total: parseInt(result.rows[0].total) || 0 });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Get active staff list for chat (lightweight, any logged-in user)
+api.post("/getChatStaffList", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+
+    // Get excluded emails from admin settings
+    const excludedSetting = await query(`SELECT value FROM settings WHERE tenant_id=$1 AND key='chatExcludedEmails'`, [tid]);
+    const excludedRaw = excludedSetting.rows.length ? excludedSetting.rows[0].value : "";
+    const excludedEmails = new Set(excludedRaw.split(/[\n,]+/).map(e => e.trim().toLowerCase()).filter(Boolean));
+
+    const result = await query(
+      `SELECT email, name, profile_pic, teaches, type FROM users WHERE tenant_id=$1 AND is_active=TRUE AND UPPER(type) != 'ADMIN' ORDER BY name`,
+      [tid]
+    );
+    const staff = result.rows
+      .filter(r => r.email.toLowerCase() !== user.email.toLowerCase() && !excludedEmails.has(r.email.toLowerCase()))
+      .map(r => ({ email: r.email, name: r.name || "", profilePic: r.profile_pic || "", teaches: r.teaches || "" }));
+    res.json({ ok: true, staff });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Leave a group chat
+api.post("/leaveGroupChat", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const { conversationId } = req.body;
+
+    const convo = await query(`SELECT * FROM chat_conversations WHERE id=$1 AND tenant_id=$2 AND type='group'`, [conversationId, tid]);
+    if (!convo.rows.length) return res.json({ ok: false, reason: "Group not found" });
+
+    // Creator can't leave — they must delete the group
+    if (convo.rows[0].created_by.toLowerCase() === user.email.toLowerCase()) {
+      return res.json({ ok: false, reason: "Group creator cannot leave. Delete the group instead." });
+    }
+
+    await query(`DELETE FROM chat_members WHERE conversation_id=$1 AND LOWER(user_email)=LOWER($2)`, [conversationId, user.email]);
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Archive a chat conversation (per-user)
+api.post("/archiveChatConvo", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const { conversationId } = req.body;
+    await query(
+      `INSERT INTO chat_read_cursors (conversation_id, user_email, last_read_at, archived)
+       VALUES ($1, LOWER($2), NOW(), TRUE)
+       ON CONFLICT (conversation_id, user_email) DO UPDATE SET archived = TRUE`,
+      [conversationId, user.email]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Unarchive a chat conversation (per-user)
+api.post("/unarchiveChatConvo", async (req, res) => {
+  try {
+    const user = await getAuthorizedUser(req.body.email, req.body.pin);
+    if (!user) return res.json({ ok: false, reason: "Unauthorized" });
+    const tid = await getDefaultTenantId();
+    const { conversationId } = req.body;
+    await query(
+      `UPDATE chat_read_cursors SET archived = FALSE WHERE conversation_id = $1 AND LOWER(user_email) = LOWER($2)`,
+      [conversationId, user.email]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// ─────────────────────────────────────────
 //  PUSH NOTIFICATION ENDPOINTS
 // ─────────────────────────────────────────
 api.post("/getVapidKey", (req, res) => {
@@ -7641,71 +8261,6 @@ api.post("/pushUnsubscribe", async (req, res) => {
   }
 });
 
-// ── Onboarding form submission (from marketing site after Stripe payment) ──
-app.options("/api/onboarding", (req, res) => {
-  res.set("Access-Control-Allow-Origin", "https://kronara.app");
-  res.set("Access-Control-Allow-Methods", "POST");
-  res.set("Access-Control-Allow-Headers", "Content-Type");
-  res.sendStatus(204);
-});
-app.post("/api/onboarding", async (req, res) => {
-  res.set("Access-Control-Allow-Origin", "https://kronara.app");
-  try {
-    const { businessName, ownerName, email, phone, numStaff, numLocations, numAdmins, specialRequests } = req.body;
-    if (!businessName || !ownerName || !email) {
-      return res.status(400).json({ ok: false, reason: "Missing required fields" });
-    }
-
-    const resend = getResend();
-    const onboardingFrom = `Kronara <noreply@kronara.app>`;
-    const adminEmail = process.env.KRONARA_ADMIN_EMAIL || "admin@kronara.app";
-
-    await resend.emails.send({
-      from: onboardingFrom,
-      to: [adminEmail],
-      replyTo: [email],
-      subject: `New Kronara Signup: ${businessName}`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #141428; color: #e8eaf0; padding: 32px; border-radius: 16px;">
-          <h1 style="color: #6C5CE7; margin-bottom: 24px;">New Client Signup</h1>
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Business Name</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${businessName}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Owner Name</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${ownerName}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Email</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${email}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Phone</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${phone || 'Not provided'}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Number of Staff</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numStaff}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Number of Locations</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numLocations}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Admin Staff to Train</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numAdmins}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Special Requests</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${specialRequests || 'None'}</td></tr>
-          </table>
-        </div>
-      `,
-    });
-
-    // Also send a confirmation to the client
-    await resend.emails.send({
-      from: onboardingFrom,
-      replyTo: [adminEmail],
-      to: [email],
-      subject: `Welcome to Kronara, ${ownerName}!`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #141428; color: #e8eaf0; padding: 32px; border-radius: 16px;">
-          <h1 style="color: #6C5CE7; margin-bottom: 16px;">Welcome to Kronara!</h1>
-          <p style="color: #b0b4c4; line-height: 1.6;">Hi ${ownerName},</p>
-          <p style="color: #b0b4c4; line-height: 1.6;">Thank you for signing up! We've received your details for <strong style="color: #fff;">${businessName}</strong> and our team will have your studio set up within 24 hours.</p>
-          <p style="color: #b0b4c4; line-height: 1.6;">We'll reach out to your email with login credentials and next steps for onboarding and training.</p>
-          <p style="color: #b0b4c4; line-height: 1.6; margin-top: 24px;">Cheers,<br><strong style="color: #fff;">The Kronara Team</strong></p>
-        </div>
-      `,
-    });
-
-    res.json({ ok: true });
-  } catch (e) {
-    console.error("Onboarding email error:", e);
-    res.status(500).json({ ok: false, reason: "Failed to send notification" });
-  }
-});
-
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -7723,7 +8278,7 @@ setupDatabase()
     if (delRes.rowCount > 0) console.log(`Startup: repaired ${delRes.rowCount} email enabled toggle(s) that were stuck on false.`);
 
     const server = app.listen(PORT, () => {
-      console.log(`Kronara PG running on port ${PORT}`);
+      console.log(`Aradia Time PG running on port ${PORT}`);
       server.timeout = 720000; // 12 minutes — needed for long scrape requests (all studios)
       // Run automation checks every hour — each function fires only at its configured MST time
       cron.schedule("0 * * * *", async () => {
@@ -7864,7 +8419,7 @@ setupDatabase()
                         <div><strong>Time:</strong> ${shift.shift_time}</div>
                         <div><strong>Location:</strong> ${shift.location}</div>
                       </div>
-                      <p style="text-align:center;"><a href="${process.env.BASE_URL || 'https://kronara.app'}?tab=tsps" style="display:inline-block;background:#e65100;color:#fff;font-weight:700;font-size:15px;padding:12px 32px;border-radius:8px;text-decoration:none;">CLAIM SHIFT</a></p>
+                      <p style="text-align:center;"><a href="${process.env.BASE_URL || 'https://aradiafitness.app'}?tab=tsps" style="display:inline-block;background:#e65100;color:#fff;font-weight:700;font-size:15px;padding:12px 32px;border-radius:8px;text-decoration:none;">CLAIM SHIFT</a></p>
                       <p style="color:#888;font-size:12px;">You can manage email preferences in your profile settings.</p>
                     </div>`
                   }).catch(e => console.error("TSPS urgent email failed:", e.message));

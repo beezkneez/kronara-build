@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <!-- PWA metadata -->
-  <meta name="application-name"  content="Kronara" />
+  <meta name="application-name"  content="Aradia Time" />
   <meta name="theme-color"       content="#0b0b0b" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable"            content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style"   content="black-translucent" />
-  <meta name="apple-mobile-web-app-title"              content="Kronara" />
+  <meta name="apple-mobile-web-app-title"              content="Aradia Time" />
   <link rel="manifest" href="/manifest.json" />
   <link rel="apple-touch-icon" href="/logo.png" />
 
@@ -28,7 +28,7 @@
       var t = localStorage.getItem('app_theme') || localStorage.getItem('aradia_theme') || dflt;
       if (t !== 'light' && t !== 'dark' && t !== 'aradia' && t !== 'kronara') t = dflt;
       document.documentElement.setAttribute('data-theme', t);
-      var colors = { light: '#0b0b0b', dark: '#0e0e11', aradia: '#1a0a0e', kronara: '#0A0A1A' };
+      var colors = { light: '#0b0b0b', dark: '#0e0e11', aradia: '#1a0a0e', kronara: '#1A1A2E' };
       if (B.colorDarkBg) colors[dflt] = B.colorDarkBg;
       var mc = document.querySelector('meta[name="theme-color"]');
       if (mc) mc.setAttribute('content', colors[t] || '#0b0b0b');
@@ -226,58 +226,58 @@
        KRONARA THEME — deep teal + warm gold
     ═══════════════════════════════════════ */
     [data-theme="kronara"] {
-      --red:    #6C5CE7;
+      --red:    #0C7C80;
       --green:  #7ac4a0;
-      --green-bg: #162028;
-      --ink:    #0A0A1A;
-      --card:   #141428;
+      --green-bg: #162e28;
+      --ink:    #1A1A2E;
+      --card:   #1e1e30;
       --muted:  #8a8ea0;
-      --line:   #252540;
-      --bg:     #0A0A1A;
-      --shadow: 0 2px 16px rgba(108,92,231,.15);
+      --line:   #2a2a40;
+      --bg:     #12121e;
+      --shadow: 0 2px 16px rgba(12,124,128,.15);
 
-      --input-bg:      #1a1a32;
-      --input-border:   #2e2e4a;
+      --input-bg:      #24243a;
+      --input-border:   #3a3a52;
       --input-text:     #e4e6f0;
       --label-color:    #a0a4b8;
 
-      --btn-secondary-bg:     #1a1a32;
-      --btn-secondary-border: #2e2e4a;
+      --btn-secondary-bg:     #24243a;
+      --btn-secondary-border: #3a3a52;
       --btn-secondary-text:   #e4e6f0;
-      --lbtn-bg:              #1a1a32;
-      --lbtn-border:          #2e2e4a;
+      --lbtn-bg:              #24243a;
+      --lbtn-border:          #3a3a52;
 
-      --day-head-bg:    #101022;
-      --stat-bg:        #101022;
-      --line-card-bg:   #101022;
-      --edit-form-bg:   #161630;
-      --edit-form-border: #2e2e50;
+      --day-head-bg:    #18182a;
+      --stat-bg:        #18182a;
+      --line-card-bg:   #18182a;
+      --edit-form-bg:   #1e2038;
+      --edit-form-border: #3a4060;
 
-      --admin-pill-bg:  #1a1a32;
-      --detail-bg:      #101022;
-      --detail-hdr-bg:  #1a1a36;
+      --admin-pill-bg:  #24243a;
+      --detail-bg:      #18182a;
+      --detail-hdr-bg:  #20203a;
 
       --text-primary:   #e8eaf0;
       --text-secondary: #b0b4c4;
       --text-tertiary:  #8a8ea0;
       --small-color:    #8a8ea0;
       --pill-text:      #c8cce0;
-      --pill-bg:        #1a1a32;
+      --pill-bg:        #24243a;
 
-      --wn-bg: #14142a; --wn-text: #e0eaff; --wn-accent: #E8832A;
+      --wn-bg: #1a2030; --wn-text: #e0eaff; --wn-accent: #D4942A;
 
-      --pend-border:      rgba(232,131,42,.3);
-      --pend-hdr-bg:      rgba(120,60,15,.35);
-      --pend-hdr-text:    #E8832A;
-      --pend-detail-bg:   rgba(60,30,8,.4);
-      --pend-card-bg:     rgba(60,30,8,.25);
-      --pend-card-bg-off: rgba(60,30,8,.12);
-      --pend-badge-bg:    rgba(120,60,15,.35);
-      --pend-badge-border:rgba(232,131,42,.4);
-      --pend-badge-text:  #E8832A;
-      --pend-excl-bg:     rgba(90,45,10,.3);
-      --pend-excl-text:   #f0a040;
-      --pend-excl-border: rgba(232,131,42,.35);
+      --pend-border:      rgba(212,148,42,.3);
+      --pend-hdr-bg:      rgba(100,70,20,.35);
+      --pend-hdr-text:    #D4942A;
+      --pend-detail-bg:   rgba(50,35,10,.4);
+      --pend-card-bg:     rgba(50,35,10,.25);
+      --pend-card-bg-off: rgba(50,35,10,.12);
+      --pend-badge-bg:    rgba(100,70,20,.35);
+      --pend-badge-border:rgba(212,148,42,.4);
+      --pend-badge-text:  #D4942A;
+      --pend-excl-bg:     rgba(80,50,10,.3);
+      --pend-excl-text:   #e0a030;
+      --pend-excl-border: rgba(212,148,42,.35);
       --pend-dim:         var(--muted);
       --pend-dim-off:     #555;
       --pend-pay:         var(--red);
@@ -679,6 +679,7 @@
     }
     .lbtn.red{ border-color: #f0b4b4; color: #a01818; }
     .lbtn.blue{ border-color: #b4c8f0; color: #1a3a7a; }
+    .chatCatBtn.active{ background: var(--red); color: #fff; border-color: var(--red); }
 
     /* ═══════════════════════════════════════
        MESSAGES
@@ -1686,10 +1687,10 @@
   <!-- ── TOP BAR ─────────────────────────────── -->
   <div class="topbar">
     
-      <img src="/logo.png" alt="Kronara logo">
+      <img src="/logo.png" alt="Aradia logo">
     
     <div>
-      <div class="t-name">Kronara</div>
+      <div class="t-name">Aradia Time</div>
       <div class="t-sub">TimeSheets 1.0</div>
     </div>
 
@@ -1699,19 +1700,20 @@
       <a href="#" id="deskReports"            onclick="go('reports');return false;">Reports</a>
       <a href="#" id="deskProfile"            onclick="go('profile');return false;">Profile</a>
       <a href="#" id="deskSupport"            onclick="go('support');return false;">Support</a>
+      <a href="#" id="deskChat" style="display:none;" onclick="go('chat');return false;">Chat <span id="chatUnreadBadgeDesk" style="display:none;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:800;margin-left:4px;">0</span></a>
       <a href="#" onclick="hardReset();return false;" style="margin-left:auto;color:#c0392b;font-weight:800;">Log out</a>
       <a href="#" id="deskImages" style="display:none;" onclick="go('images');return false;">🖼 Images</a>
       <a href="#" id="deskTsps" style="display:none;" onclick="go('tsps');return false;">🔄 TSPS</a>
       <a href="#" id="deskProposals" style="display:none;" onclick="go('proposals');return false;">📝 Proposals</a>
       <a href="#" id="deskAdmin" style="display:none;" onclick="go('admin');return false;">⚙ Admin</a>
       
-        <a id="deskWebsiteLink" href="https://kronara.app" target="_blank" rel="noopener">Website ↗</a>
+        <a id="deskWebsiteLink" href="https://edmonton.aradiafitness.com" target="_blank" rel="noopener">Website ↗</a>
       
     </nav>
   </div>
 
   <!-- Demo mode banner -->
-  <div id="demoBanner" style="display:none;background:linear-gradient(135deg,#6C5CE7,#E8832A);color:#fff;text-align:center;padding:8px 16px;font-size:13px;font-weight:700;letter-spacing:.03em;">
+  <div id="demoBanner" style="display:none;background:linear-gradient(135deg,var(--red),#D4942A);color:#fff;text-align:center;padding:8px 16px;font-size:13px;font-weight:700;letter-spacing:.03em;">
     🎯 LIVE DEMO — Explore all features freely! Demo data cannot be deleted.
   </div>
 
@@ -1728,6 +1730,11 @@
     <button class="tab-btn" id="tabSupport" onclick="go('support')">
       <span class="tab-icon">💬</span>
       <span>Support</span>
+    </button>
+    <button class="tab-btn" id="tabChat" style="display:none;" onclick="go('chat')">
+      <span class="tab-icon">🗨️</span>
+      <span>Chat</span>
+      <span id="chatUnreadBadge" style="display:none;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:800;margin-left:2px;">0</span>
     </button>
     <button class="tab-btn" id="tabProfile" onclick="go('profile')">
       <span class="tab-icon">👤</span>
@@ -2231,6 +2238,20 @@
           </div>
         </div>
 
+        <!-- What I teach -->
+        <div class="card" id="profileTeachesCard">
+          <div class="card-title">What I teach</div>
+          <div class="muted" style="margin-bottom:12px;font-size:12px;">Select the categories that apply to you. Used for chat group quick-select.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div class="toggle-row" style="padding:8px 0;margin:0;"><div class="toggle-label" style="font-size:13px;">Pole</div><label class="admin-toggle"><input type="checkbox" class="profileTeachChk" value="pole"><span class="slider"></span></label></div>
+            <div class="toggle-row" style="padding:8px 0;margin:0;"><div class="toggle-label" style="font-size:13px;">Aerial</div><label class="admin-toggle"><input type="checkbox" class="profileTeachChk" value="aerial"><span class="slider"></span></label></div>
+            <div class="toggle-row" style="padding:8px 0;margin:0;"><div class="toggle-label" style="font-size:13px;">Dance</div><label class="admin-toggle"><input type="checkbox" class="profileTeachChk" value="dance"><span class="slider"></span></label></div>
+            <div class="toggle-row" style="padding:8px 0;margin:0;"><div class="toggle-label" style="font-size:13px;">Fitness</div><label class="admin-toggle"><input type="checkbox" class="profileTeachChk" value="fitness"><span class="slider"></span></label></div>
+            <div class="toggle-row" style="padding:8px 0;margin:0;"><div class="toggle-label" style="font-size:13px;">Front Desk</div><label class="admin-toggle"><input type="checkbox" class="profileTeachChk" value="front desk"><span class="slider"></span></label></div>
+            <div class="toggle-row" style="padding:8px 0;margin:0;"><div class="toggle-label" style="font-size:13px;">Other</div><label class="admin-toggle"><input type="checkbox" class="profileTeachChk" value="other"><span class="slider"></span></label></div>
+          </div>
+        </div>
+
         <!-- Email preferences -->
         <div class="card">
           <div class="card-title">Preferences</div>
@@ -2329,6 +2350,16 @@
               </div>
               <label class="admin-toggle">
                 <input type="checkbox" id="profilePushShifts">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row" style="margin-top:8px;">
+              <div>
+                <div class="toggle-label">Chat messages</div>
+                <div class="toggle-sub">New messages in global, group, and direct chats</div>
+              </div>
+              <label class="admin-toggle">
+                <input type="checkbox" id="profilePushChat">
                 <span class="slider"></span>
               </label>
             </div>
@@ -2544,14 +2575,14 @@
         <!-- AI Support Chat -->
         <div class="card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-            <div class="card-title" style="margin:0;">🤖 Ask Kronara Assistant</div>
+            <div class="card-title" style="margin:0;">🤖 Ask Aradia Assistant</div>
             <button class="lbtn" id="aiChatClearBtn" style="font-size:11px;display:none;" onclick="clearAiChat_()">Clear chat</button>
           </div>
           <div style="font-size:12px;color:var(--muted,#888);margin-bottom:12px;">Get instant answers about the app, logging hours, pay periods, and more.</div>
 
           <div id="aiChatMessages" style="min-height:60px;max-height:320px;overflow-y:auto;border:1px solid var(--line,#e4e4e8);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--stat-bg,#f9f9fb);">
             <div class="ai-msg ai-msg-bot">
-              <div class="ai-bubble ai-bubble-bot">Hi! I'm the Kronara Assistant 👋 Ask me anything about using the timesheet app — logging hours, pay periods, bonuses, exporting reports, and more.</div>
+              <div class="ai-bubble ai-bubble-bot">Hi! I'm the Aradia Assistant 👋 Ask me anything about using the timesheet app — logging hours, pay periods, bonuses, exporting reports, and more.</div>
             </div>
           </div>
 
@@ -2644,7 +2675,7 @@
             </details>
             <details style="border-bottom:1px solid var(--line);padding:12px 0;">
               <summary style="font-weight:700;font-size:13px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">Why does Google show an "unsafe" warning? <span style="color:var(--muted);font-size:16px;">+</span></summary>
-              <div style="font-size:13px;color:#444;margin-top:8px;line-height:1.6;">When connecting Google Calendar, Google shows a warning that the app "hasn’t been verified." This is <strong>normal</strong> — it means we haven’t gone through Google’s lengthy app review process. Kronara only requests <strong>read-only</strong> access to your calendar event names, times, and locations. We never modify, delete, or share your data. To continue: click <strong>Advanced</strong>, then <strong>Go to Kronara (unsafe)</strong>, then <strong>Continue</strong>.</div>
+              <div style="font-size:13px;color:#444;margin-top:8px;line-height:1.6;">When connecting Google Calendar, Google shows a warning that the app "hasn’t been verified." This is <strong>normal</strong> — it means we haven’t gone through Google’s lengthy app review process. Aradia only requests <strong>read-only</strong> access to your calendar event names, times, and locations. We never modify, delete, or share your data. To continue: click <strong>Advanced</strong>, then <strong>Go to Aradia Fitness (unsafe)</strong>, then <strong>Continue</strong>.</div>
             </details>
             <details style="border-bottom:1px solid var(--line);padding:12px 0;">
               <summary style="font-weight:700;font-size:13px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">Can I set a default Google Calendar? <span style="color:var(--muted);font-size:16px;">+</span></summary>
@@ -2664,7 +2695,7 @@
             </details>
             <details style="border-bottom:1px solid var(--line);padding:12px 0;">
               <summary style="font-weight:700;font-size:13px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">Why won't my Google Calendar connect? <span style="color:var(--muted);font-size:16px;">+</span></summary>
-              <div style="font-size:13px;color:#444;margin-top:8px;line-height:1.6;">Google Calendar sync requires that the Gmail address on your Kronara account is registered as an approved test user with Google (our app is in testing mode while we go through Google's verification process). If you get an error when trying to connect, it usually means your email hasn't been added to the approved list yet. <strong>To fix this:</strong> use <strong>Message Support</strong> below and let us know the Gmail address you'd like to use for Google Calendar — we'll add it and let you know when it's ready. If you'd prefer to use a different Gmail account, just include that in your message.</div>
+              <div style="font-size:13px;color:#444;margin-top:8px;line-height:1.6;">Google Calendar sync requires that the Gmail address on your Aradia account is registered as an approved test user with Google (our app is in testing mode while we go through Google's verification process). If you get an error when trying to connect, it usually means your email hasn't been added to the approved list yet. <strong>To fix this:</strong> use <strong>Message Support</strong> below and let us know the Gmail address you'd like to use for Google Calendar — we'll add it and let you know when it's ready. If you'd prefer to use a different Gmail account, just include that in your message.</div>
             </details>
             <details style="border-bottom:none;padding:12px 0;">
               <summary style="font-weight:700;font-size:13px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">How do I report a bug or ask a question? <span style="color:var(--muted);font-size:16px;">+</span></summary>
@@ -2674,6 +2705,111 @@
         </div>
 
       </div><!-- /page_support -->
+
+      <!-- ════════════════════════════
+           CHAT PAGE
+           ════════════════════════════ -->
+      <div id="page_chat" style="display:none;">
+
+        <!-- Conversation list view -->
+        <div id="chatListView">
+          <div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div class="card-title" style="margin:0;">Chat</div>
+            <div style="display:flex;gap:8px;">
+              <button class="lbtn" onclick="showNewGroupModal_()">+ Group</button>
+              <button class="lbtn" onclick="showNewDmModal_()">+ Message</button>
+            </div>
+          </div>
+
+          <!-- Search bar -->
+          <div style="margin-bottom:12px;">
+            <input id="chatSearchInput" type="text" placeholder="Search conversations…" oninput="filterChatConvos_()" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);font-size:14px;box-sizing:border-box;">
+          </div>
+
+          <!-- Conversation list rendered dynamically -->
+          <div id="chatConvoList" class="card" style="padding:0;overflow:hidden;"></div>
+
+          <!-- Message search results -->
+          <div id="chatSearchResults" class="card" style="padding:0;overflow:hidden;display:none;margin-top:8px;"></div>
+
+          <!-- Archived chats toggle -->
+          <div style="text-align:center;margin-top:12px;">
+            <button class="lbtn" id="chatArchivedToggle" onclick="toggleArchivedChats_()" style="font-size:13px;">Show Archived Chats</button>
+          </div>
+        </div>
+
+        <!-- Active conversation view (hidden until opened) -->
+        <div id="chatConvoView" style="display:none;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <button class="lbtn" onclick="closeChatConvo_()" style="padding:6px 12px;">&#8592; Back</button>
+            <div style="flex:1;font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="chatConvoTitle">General</div>
+            <button class="lbtn" id="chatArchiveBtn" onclick="archiveChatConvo_()" style="padding:6px 12px;font-size:12px;" title="Archive">📥</button>
+            <button class="lbtn" id="chatConvoSettingsBtn" style="display:none;" onclick="showGroupSettingsModal_()">&#9881;</button>
+          </div>
+
+          <div id="chatMessages" style="max-height:65vh;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--card);border-radius:12px;border:1px solid var(--line);">
+          </div>
+
+          <div id="chatLoadMore" style="display:none;text-align:center;padding:8px;">
+            <button class="lbtn" onclick="loadMoreChatMessages_()">Load earlier messages</button>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <input id="chatInput" type="text" placeholder="Type a message…" style="flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--line);font-size:14px;" onkeydown="if(event.key==='Enter')sendChatMsg_()">
+            <button class="btn" onclick="sendChatMsg_()" style="flex:0 0 auto;padding:10px 18px;">Send</button>
+          </div>
+        </div>
+
+      </div><!-- /page_chat -->
+
+      <!-- ── Chat modals ── -->
+
+      <!-- New Group Chat modal -->
+      <div id="chatGroupModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:9999;">
+        <div style="background:var(--card);border-radius:14px;padding:24px;width:92%;max-width:400px;max-height:80vh;overflow-y:auto;margin:auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+          <div style="font-weight:800;font-size:16px;margin-bottom:16px;">New Group Chat</div>
+          <label style="font-size:13px;font-weight:700;">Group Name</label>
+          <input id="chatGroupName" type="text" placeholder="e.g. Morning Crew" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--line);margin-bottom:12px;font-size:14px;">
+          <label style="font-size:13px;font-weight:700;">Add Members</label>
+          <input id="chatGroupSearch" type="text" placeholder="Search staff…" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--line);margin-bottom:8px;font-size:14px;" oninput="filterGroupList_()">
+          <div id="chatGroupMemberList" style="max-height:40vh;overflow-y:auto;margin-bottom:16px;"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn" onclick="createGroupChat_()" style="flex:1;">Create Group</button>
+            <button class="lbtn" onclick="el('chatGroupModal').style.display='none'" style="flex:0 0 auto;">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- New DM modal -->
+      <div id="chatDmModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:9999;">
+        <div style="background:var(--card);border-radius:14px;padding:24px;width:92%;max-width:400px;max-height:80vh;overflow-y:auto;margin:auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+          <div style="font-weight:800;font-size:16px;margin-bottom:16px;">New Message</div>
+          <input id="chatDmSearch" type="text" placeholder="Search staff…" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--line);margin-bottom:12px;font-size:14px;" oninput="filterDmList_()">
+          <div id="chatDmMemberList" style="max-height:50vh;overflow-y:auto;"></div>
+          <div style="margin-top:12px;">
+            <button class="lbtn" onclick="el('chatDmModal').style.display='none'" style="width:100%;">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Group Settings modal -->
+      <div id="chatGroupSettingsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:9999;">
+        <div style="background:var(--card);border-radius:14px;padding:24px;width:92%;max-width:400px;max-height:80vh;overflow-y:auto;margin:auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+          <div style="font-weight:800;font-size:16px;margin-bottom:16px;">Group Settings</div>
+          <label style="font-size:13px;font-weight:700;">Group Name</label>
+          <input id="chatGroupSettingsName" type="text" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--line);margin-bottom:12px;font-size:14px;">
+          <label style="font-size:13px;font-weight:700;">Members</label>
+          <div id="chatGroupSettingsMembers" style="max-height:30vh;overflow-y:auto;margin-bottom:12px;"></div>
+          <label style="font-size:13px;font-weight:700;">Add Members</label>
+          <div id="chatGroupSettingsAddList" style="max-height:20vh;overflow-y:auto;margin-bottom:16px;"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn" onclick="saveGroupSettings_()" style="flex:1;">Save</button>
+            <button class="lbtn" onclick="leaveGroupChat_()" style="flex:0 0 auto;color:var(--red);">Leave Group</button>
+            <button class="lbtn" id="chatDeleteGroupBtn" onclick="deleteGroupChat_()" style="flex:0 0 auto;color:var(--red);">Delete Group</button>
+            <button class="lbtn" onclick="el('chatGroupSettingsModal').style.display='none'" style="flex:0 0 auto;">Cancel</button>
+          </div>
+        </div>
+      </div>
 
       <!-- ════════════════════════════
            IMAGES PAGE
@@ -3052,6 +3188,17 @@
                   <label style="color:rgba(255,255,255,.6);">GST Number</label>
                   <input id="newStaffGst" placeholder="e.g. 123456789RT0001" style="background:#333;color:#fff;border-color:#444;" />
                 </div>
+                <div style="grid-column:1/-1;">
+                  <label style="color:rgba(255,255,255,.6);">What I teach</label>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+                    <div class="toggle-row" style="border-color:#444;padding:6px 0;margin:0;"><div class="toggle-label" style="color:rgba(255,255,255,.85);font-size:13px;">Pole</div><label class="admin-toggle"><input type="checkbox" class="newStaffTeachChk" value="pole"><span class="slider"></span></label></div>
+                    <div class="toggle-row" style="border-color:#444;padding:6px 0;margin:0;"><div class="toggle-label" style="color:rgba(255,255,255,.85);font-size:13px;">Aerial</div><label class="admin-toggle"><input type="checkbox" class="newStaffTeachChk" value="aerial"><span class="slider"></span></label></div>
+                    <div class="toggle-row" style="border-color:#444;padding:6px 0;margin:0;"><div class="toggle-label" style="color:rgba(255,255,255,.85);font-size:13px;">Dance</div><label class="admin-toggle"><input type="checkbox" class="newStaffTeachChk" value="dance"><span class="slider"></span></label></div>
+                    <div class="toggle-row" style="border-color:#444;padding:6px 0;margin:0;"><div class="toggle-label" style="color:rgba(255,255,255,.85);font-size:13px;">Fitness</div><label class="admin-toggle"><input type="checkbox" class="newStaffTeachChk" value="fitness"><span class="slider"></span></label></div>
+                    <div class="toggle-row" style="border-color:#444;padding:6px 0;margin:0;"><div class="toggle-label" style="color:rgba(255,255,255,.85);font-size:13px;">Front Desk</div><label class="admin-toggle"><input type="checkbox" class="newStaffTeachChk" value="front desk"><span class="slider"></span></label></div>
+                    <div class="toggle-row" style="border-color:#444;padding:6px 0;margin:0;"><div class="toggle-label" style="color:rgba(255,255,255,.85);font-size:13px;">Other</div><label class="admin-toggle"><input type="checkbox" class="newStaffTeachChk" value="other"><span class="slider"></span></label></div>
+                  </div>
+                </div>
               </div>
               <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px;">
                 <div class="toggle-row" style="border-color:#444;">
@@ -3393,6 +3540,17 @@
             <label>Default base rate ($/hr)</label>
             <input id="adminSetupCleanupRate" placeholder="21.75" inputmode="decimal" style="max-width:140px;" />
             <div class="muted" style="font-size:12px;margin-top:4px;">Staff are paid this rate for setup/cleanup time. Can be overridden per-staff in their profile.</div>
+          </div>
+
+          <div style="font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:8px;margin-top:18px;">Chat</div>
+          <div style="margin-bottom:14px;">
+            <label>Excluded from chat <span style="font-weight:400;color:var(--muted);font-size:11px;">— these users won't appear in chat lists or receive chat messages</span></label>
+            <div style="position:relative;">
+              <input id="adminChatExcludeInput" placeholder="Type to search staff…" style="margin-bottom:4px;" oninput="chatExcludeSearch_(this.value)" onkeydown="chatExcludeKey_(event)" autocomplete="off" />
+              <div id="chatExcludeDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:200;max-height:180px;overflow-y:auto;"></div>
+            </div>
+            <div id="chatExcludeChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:28px;"></div>
+            <div class="muted" style="font-size:11px;">Click a result to add. Click × on a chip to remove.</div>
           </div>
 
           </div><!-- /Pay & Bonuses body -->
@@ -4133,6 +4291,17 @@
               <label>GST Number</label>
               <input id="staffProfileGstNum" placeholder="e.g. 123456789RT0001" />
             </div>
+            <div style="grid-column:1/-1;">
+              <label>What I teach</label>
+              <div id="staffProfileTeachesWrap" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+                <div class="toggle-row" style="padding:6px 0;margin:0;"><div class="toggle-label" style="font-size:13px;">Pole</div><label class="admin-toggle"><input type="checkbox" class="staffTeachChk" value="pole"><span class="slider"></span></label></div>
+                <div class="toggle-row" style="padding:6px 0;margin:0;"><div class="toggle-label" style="font-size:13px;">Aerial</div><label class="admin-toggle"><input type="checkbox" class="staffTeachChk" value="aerial"><span class="slider"></span></label></div>
+                <div class="toggle-row" style="padding:6px 0;margin:0;"><div class="toggle-label" style="font-size:13px;">Dance</div><label class="admin-toggle"><input type="checkbox" class="staffTeachChk" value="dance"><span class="slider"></span></label></div>
+                <div class="toggle-row" style="padding:6px 0;margin:0;"><div class="toggle-label" style="font-size:13px;">Fitness</div><label class="admin-toggle"><input type="checkbox" class="staffTeachChk" value="fitness"><span class="slider"></span></label></div>
+                <div class="toggle-row" style="padding:6px 0;margin:0;"><div class="toggle-label" style="font-size:13px;">Front Desk</div><label class="admin-toggle"><input type="checkbox" class="staffTeachChk" value="front desk"><span class="slider"></span></label></div>
+                <div class="toggle-row" style="padding:6px 0;margin:0;"><div class="toggle-label" style="font-size:13px;">Other</div><label class="admin-toggle"><input type="checkbox" class="staffTeachChk" value="other"><span class="slider"></span></label></div>
+              </div>
+            </div>
           </div>
           <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px;">
             <div class="toggle-row">
@@ -4297,6 +4466,16 @@
               </div>
               <label class="admin-toggle">
                 <input type="checkbox" id="staffProfilePushShifts">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row" id="staffProfilePushChatRow">
+              <div>
+                <div class="toggle-label">Chat</div>
+                <div class="toggle-sub">New chat messages</div>
+              </div>
+              <label class="admin-toggle">
+                <input type="checkbox" id="staffProfilePushChat">
                 <span class="slider"></span>
               </label>
             </div>
@@ -4480,7 +4659,7 @@
   <!-- ── PWA BANNERS ──────────────────────────── -->
   <div id="installBanner">
     <div class="ib-text">
-      <b>Install Kronara</b>
+      <b>Install Aradia Time</b>
       Add to your home screen for quick access.
     </div>
     <div class="ib-actions">
@@ -4612,6 +4791,22 @@
         case "pushUnsubscribe":        return { email: args[0], pin: args[1], endpoint: args[2] };
         case "sendTestPush":           return { email: args[0], pin: args[1] };
         case "getEntriesByDate":       return { email: args[0], pin: args[1], date: args[2] };
+        case "getChatConversations":  return { email: args[0], pin: args[1], showArchived: args[2] || false };
+        case "getChatMessages":       return { email: args[0], pin: args[1], conversationId: args[2], before: args[3] || null };
+        case "sendChatMessage":       return { email: args[0], pin: args[1], conversationId: args[2], body: args[3] };
+        case "markChatRead":          return { email: args[0], pin: args[1], conversationId: args[2] };
+        case "createGroupChat":       return { email: args[0], pin: args[1], name: args[2], memberEmails: args[3] };
+        case "updateGroupChat":       return { email: args[0], pin: args[1], conversationId: args[2], updates: args[3] };
+        case "deleteGroupChat":       return { email: args[0], pin: args[1], conversationId: args[2] };
+        case "startDirectMessage":    return { email: args[0], pin: args[1], targetEmail: args[2] };
+        case "getChatUnreadTotal":    return { email: args[0], pin: args[1] };
+        case "getChatStaffList":      return { email: args[0], pin: args[1] };
+        case "leaveGroupChat":        return { email: args[0], pin: args[1], conversationId: args[2] };
+        case "archiveChatConvo":      return { email: args[0], pin: args[1], conversationId: args[2] };
+        case "unarchiveChatConvo":    return { email: args[0], pin: args[1], conversationId: args[2] };
+        case "editChatMessage":       return { email: args[0], pin: args[1], messageId: args[2], body: args[3] };
+        case "deleteChatMessage":     return { email: args[0], pin: args[1], messageId: args[2] };
+        case "searchChatMessages":    return { email: args[0], pin: args[1], q: args[2] };
         default: return args[0] || {};
       }
     }
@@ -4670,7 +4865,10 @@
       "getClassProposals","postClassProposal","updateClassProposal","deleteClassProposal","deleteClassProposalSeries",
       "getEntriesForMonth","getProposalsDashboard","archiveProposal","unarchiveProposal",
       "proposalSuggestChange","proposalDeny","proposalRespondToChange","getProposalMessages","getMyProposals","deleteProposalForever",
-      "getVapidKey","pushSubscribe","pushUnsubscribe","sendTestPush"];
+      "getVapidKey","pushSubscribe","pushUnsubscribe","sendTestPush",
+      "getChatConversations","getChatMessages","sendChatMessage","markChatRead",
+      "createGroupChat","updateGroupChat","deleteGroupChat","startDirectMessage","getChatUnreadTotal","getChatStaffList","leaveGroupChat",
+      "archiveChatConvo","unarchiveChatConvo","editChatMessage","deleteChatMessage","searchChatMessages"];
 
     _apiFns.forEach(function(fn) {
       window.api.call[fn] = function() {
@@ -4735,24 +4933,24 @@
     // ═══════════════════════════════════════
     //  BRAND CONFIG
     // ═══════════════════════════════════════
-    var BRAND = window.__BRAND || { name: "Kronara", sub: "Edmonton", colorPrimary: "#8b1e2d", demoMode: false };
+    var BRAND = window.__BRAND || { name: "Aradia Time", sub: "Edmonton", colorPrimary: "#8b1e2d", demoMode: false };
     (function initBrand(){
       // Update topbar name + subtitle
       var tn = document.querySelector('.t-name');
-      if (tn) tn.textContent = BRAND.name || "Kronara";
+      if (tn) tn.textContent = BRAND.name || "Aradia Time";
       if (BRAND.sub) { var ts = document.querySelector('.t-sub'); if (ts) ts.textContent = BRAND.sub; }
       // Update website link
       if (BRAND.site) { var wl = document.getElementById('deskWebsiteLink'); if (wl) wl.href = BRAND.site; }
+      // Update page title
+      document.title = BRAND.name || "Aradia Time";
       // Update meta tags
       var am = document.querySelector('meta[name="application-name"]');
-      if (am) am.setAttribute('content', BRAND.name || "Kronara");
+      if (am) am.setAttribute('content', BRAND.name || "Aradia Time");
       var at = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-      if (at) at.setAttribute('content', BRAND.name || "Kronara");
-      // Update page title
-      document.title = BRAND.name || "Kronara";
+      if (at) at.setAttribute('content', BRAND.name || "Aradia Time");
       // Update install prompt
       var ip = document.querySelector('#installPrompt b');
-      if (ip) ip.textContent = "Install " + (BRAND.name || "Kronara");
+      if (ip) ip.textContent = "Install " + (BRAND.name || "Aradia Time");
       // Show demo banner
       if (BRAND.demoMode) {
         var db = document.getElementById('demoBanner');
@@ -4774,7 +4972,7 @@
       localStorage.setItem('app_theme', theme);
 
       // Update PWA theme-color meta
-      var colors = { light: '#0b0b0b', dark: '#0e0e11', aradia: '#1a0a0e', kronara: '#0A0A1A' };
+      var colors = { light: '#0b0b0b', dark: '#0e0e11', aradia: '#1a0a0e', kronara: '#1A1A2E' };
       var mc = document.querySelector('meta[name="theme-color"]');
       if (mc) mc.setAttribute('content', colors[theme] || '#0b0b0b');
 
@@ -4805,7 +5003,7 @@
       });
       // Show/hide brand-specific theme buttons
       var B = window.__BRAND || {};
-      var isKronara = B.name && B.name !== 'Kronara';
+      var isKronara = B.name && B.name !== 'Aradia Time';
       ['themeBtn_aradia','adminThemeBtn_aradia'].forEach(function(id){ var e = el(id); if (e) e.style.display = isKronara ? 'none' : ''; });
       ['themeBtn_kronara','adminThemeBtn_kronara'].forEach(function(id){ var e = el(id); if (e) e.style.display = isKronara ? '' : 'none'; });
     }
@@ -5024,16 +5222,16 @@
       try {
         // Always hide the staff profile page when navigating normally
         const sp = el("page_staffProfile"); if (sp) sp.style.display = "none";
-        ["home","reports","profile","admin","support","images","tsps","proposals"].forEach(p=>{
+        ["home","reports","profile","admin","support","images","tsps","proposals","chat"].forEach(p=>{
           const pg = el("page_"+p); if (pg) pg.style.display = (p===page)?"":"none";
         });
         // bottom tabs
-        ["home","reports","profile","admin","support","images","tsps","proposals"].forEach(p=>{
+        ["home","reports","profile","admin","support","images","tsps","proposals","chat"].forEach(p=>{
           const t = el("tab"+cap(p));
           if (t) t.classList.toggle("active", p===page);
         });
         // desktop nav
-        ["home","reports","profile","admin","support","images","tsps","proposals"].forEach(p=>{
+        ["home","reports","profile","admin","support","images","tsps","proposals","chat"].forEach(p=>{
           const d = el("desk"+cap(p));
           if (d) d.classList.toggle("active", p===page);
         });
@@ -5046,14 +5244,15 @@
         if (page==="images")   { loadBackgrounds_(); if (!el("imgEntryRows").children.length) addImgEntryRow_(); }
         if (page==="tsps")     { loadTspsTab_(); }
         if (page==="proposals"){ loadProposalsTab_(); }
+        if (page==="chat"){ loadChatPage_(); }
 
         // Name header + flag banner: hide on admin/support/images/tsps (has its own header), show everywhere else
         const sc = el("statusCard");
-        if (sc) sc.style.display = (page === "admin" || page === "support" || page === "images" || page === "tsps" || page === "proposals") ? "none" : "";
+        if (sc) sc.style.display = (page === "admin" || page === "support" || page === "images" || page === "tsps" || page === "proposals" || page === "chat") ? "none" : "";
         // Flag banner: show on staff-facing pages when active flags exist
         const fb = el("flaggedBanner");
         if (fb) {
-          if (page === "admin" || page === "support" || page === "images" || page === "tsps" || page === "proposals" || _myActiveFlagCount <= 0) {
+          if (page === "admin" || page === "support" || page === "images" || page === "tsps" || page === "proposals" || page === "chat" || _myActiveFlagCount <= 0) {
             fb.style.display = "none";
           } else {
             fb.style.display = "block";
@@ -5062,7 +5261,7 @@
         // Change request banner: show on home/reports/proposals, hide on other tabs
         const crb2 = el("changeReqBanner");
         if (crb2) {
-          if (page === "admin" || page === "support" || page === "images" || page === "tsps") {
+          if (page === "admin" || page === "support" || page === "images" || page === "tsps" || page === "chat") {
             crb2.style.display = "none";
           }
           // stays visible on proposals page so staff can see it while reviewing
@@ -5070,13 +5269,13 @@
         // Proposal admin banner: hide on admin (they're already there), support, images
         const pab2 = el("proposalAdminBanner");
         if (pab2) {
-          if (page === "admin" || page === "support" || page === "images" || page === "tsps") {
+          if (page === "admin" || page === "support" || page === "images" || page === "tsps" || page === "chat") {
             pab2.style.display = "none";
           }
         }
         // What's New banner: hide on admin/support/images
         const wnb = el("whatsNewBanner");
-        if (wnb && (page === "admin" || page === "support" || page === "images" || page === "tsps" || page === "proposals")) wnb.style.display = "none";
+        if (wnb && (page === "admin" || page === "support" || page === "images" || page === "tsps" || page === "proposals" || page === "chat")) wnb.style.display = "none";
       } catch(err) {
         console.error("go("+page+") error:", err);
       }
@@ -5109,7 +5308,7 @@
       el("loginCard").style.display = "block";
 
       // Reset ALL page visibility so next login starts clean
-      ["home","reports","profile","admin","support","images"].forEach(function(p){
+      ["home","reports","profile","admin","support","images","chat"].forEach(function(p){
         const pg = el("page_"+p); if (pg) pg.style.display = "none";
       });
       // Hide Images tab
@@ -5139,6 +5338,10 @@
       // Reset tab/nav states
       const ta = el("tabAdmin");  if (ta) { ta.style.display = "none"; ta.classList.remove("active"); }
       const da = el("deskAdmin"); if (da) { da.style.display = "none"; da.classList.remove("active"); }
+      const tch = el("tabChat");  if (tch) { tch.style.display = "none"; tch.classList.remove("active"); }
+      const dch = el("deskChat"); if (dch) { dch.style.display = "none"; dch.classList.remove("active"); }
+      if (window._chatPollInterval) { clearInterval(window._chatPollInterval); window._chatPollInterval = null; }
+      if (window._chatBadgeInterval) { clearInterval(window._chatBadgeInterval); window._chatBadgeInterval = null; }
       const th = el("tabHome");   if (th) { th.style.display = ""; th.classList.remove("active"); }
       const dh = el("deskHome");  if (dh) { dh.style.display = ""; dh.classList.remove("active"); }
 
@@ -5307,6 +5510,16 @@
         const dp = el("deskProposals"); if (dp) dp.style.display = STATE.tspsEnabled ? "" : "none";
       }
 
+      // Chat tab: visible for all logged-in users
+      {
+        const tc = el("tabChat");  if (tc) tc.style.display = "";
+        const dc = el("deskChat"); if (dc) dc.style.display = "";
+        // Start badge polling
+        updateChatBadge_();
+        if (window._chatBadgeInterval) clearInterval(window._chatBadgeInterval);
+        window._chatBadgeInterval = setInterval(updateChatBadge_, 30000);
+      }
+
       // Everyone gets Home tab — admins just default to admin tab on first login
       const th = el("tabHome");    if (th) th.style.display = "";
       const dh = el("deskHome");   if (dh) dh.style.display = "";
@@ -5434,8 +5647,10 @@
       }
 
       // Route to correct starting page — check for ?tab= URL param (e.g. from email links)
-      var _urlTab = new URLSearchParams(window.location.search).get("tab");
-      var _validTabs = ["home","reports","profile","admin","support","images","tsps","proposals"];
+      var _urlParams = new URLSearchParams(window.location.search);
+      var _urlTab = _urlParams.get("tab");
+      var _urlConvo = _urlParams.get("convo");
+      var _validTabs = ["home","reports","profile","admin","support","images","tsps","proposals","chat"];
       const startPage = (_urlTab && _validTabs.indexOf(_urlTab) !== -1) ? _urlTab : (STATE.isAdmin && !STATE.isModerator) ? "admin" : "home";
       if (_urlTab) try { history.replaceState(null, "", window.location.pathname); } catch(e){}
       // Hide entry form for pure Admin (not moderator), show for everyone else
@@ -5490,6 +5705,11 @@
         loadPendingTab();
       }
       if (STATE.isAccountant) applyAccountantRestrictions_();
+
+      // Deep-link into a specific chat conversation from push notification
+      if (startPage === "chat" && _urlConvo) {
+        setTimeout(function(){ openConversation_(_urlConvo); }, 600);
+      }
       // Home content already rendered above via renderEntries()/renderPPSummary()
 
       // Show proposal change request banner for staff
@@ -6487,11 +6707,10 @@
         if (!String(total.value||"").trim()){ manualTotal=false; recalc(); }
       });
 
-      // Show/hide setup/cleanup wrap based on feature enabled + contractor check
+      // Show/hide setup/cleanup wrap based on feature enabled (all roles including contractors)
       const scWrap_ = wrap.querySelector(".lineSetupCleanupWrap");
       const scEnabled_ = STATE.adminSettings && STATE.adminSettings.setupCleanupEnabled;
-      const contractorScAllowed_ = isContractor_ && STATE.user && STATE.user.setupCleanupAllowed;
-      if (scWrap_ && scEnabled_ && (!isContractor_ || contractorScAllowed_)) {
+      if (scWrap_ && scEnabled_) {
         scWrap_.style.display = "block";
       }
 
@@ -7814,6 +8033,15 @@
       if (unEl) unEl.value = u.username || "";
       setMsg("usernameMsg","","");
 
+      // What I teach checkboxes
+      var myTeaches = (u.teaches || "").toLowerCase();
+      document.querySelectorAll(".profileTeachChk").forEach(function(cb) {
+        cb.checked = myTeaches.indexOf(cb.value) >= 0;
+      });
+      // Hide teaches card for pure admin
+      var ptc = el("profileTeachesCard");
+      if (ptc) ptc.style.display = (u.type||"").toLowerCase() === "admin" ? "none" : "";
+
       // Email reports
       const erEl = el("profileEmailReports");
       if (erEl) erEl.checked = !!u.emailReports;
@@ -7873,9 +8101,11 @@
         pushFlags:  el("profilePushFlags")?.checked  || false,
         pushPay:    el("profilePushPay")?.checked    || false,
         pushShifts: el("profilePushShifts")?.checked || false,
+        pushChat:   el("profilePushChat")?.checked   || false,
         emailShifts: el("profileEmailShifts")?.checked || false,
         emailShiftsUrgentOnly: el("profileEmailShiftsUrgentOnly")?.checked || false,
         shiftFilterKeywords: String(el("profileShiftFilterKeywords")?.value || "").trim(),
+        teaches: Array.from(document.querySelectorAll(".profileTeachChk:checked")).map(function(cb){ return cb.value; }).join(", "),
       };
       if (isContractor){
         updates.gstNumber = String(el("profileGST")?.value||"").trim();
@@ -9272,7 +9502,7 @@
         detailSections += employees.map(buildDetailSection).join("");
       }
 
-      const brand = BRAND.name || "Kronara";
+      const brand = BRAND.name || "Aradia Time";
       const generated = new Date().toLocaleDateString("en-CA");
 
       const docHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
@@ -9368,8 +9598,18 @@
       // Listen for navigation messages from service worker
       navigator.serviceWorker.addEventListener("message", function(event) {
         if (event.data && event.data.type === "PUSH_NAV") {
-          // Could navigate to a specific tab based on URL, for now just focus the app
           window.focus();
+          try {
+            var pushUrl = new URL(event.data.url, window.location.origin);
+            var pushTab = pushUrl.searchParams.get("tab");
+            var pushConvo = pushUrl.searchParams.get("convo");
+            if (pushTab && STATE.user) {
+              go(pushTab);
+              if (pushTab === "chat" && pushConvo) {
+                setTimeout(function(){ openConversation_(pushConvo); }, 500);
+              }
+            }
+          } catch(e) {}
         }
       });
     }
@@ -9390,6 +9630,7 @@
         el("profilePushFlags").checked = !!STATE.user.pushFlags;
         el("profilePushPay").checked = !!STATE.user.pushPay;
         el("profilePushShifts").checked = !!STATE.user.pushShifts;
+        el("profilePushChat").checked = !!STATE.user.pushChat;
       }
     }
 
@@ -11465,14 +11706,14 @@
         + '</div>'
         + '<div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">'
         + 'This is <strong>normal</strong> — it simply means we haven\'t gone through Google\'s lengthy app review process. '
-        + 'Kronara only requests <strong>read-only</strong> access to your calendar event names, times, and locations. '
+        + 'Aradia Fitness only requests <strong>read-only</strong> access to your calendar event names, times, and locations. '
         + 'We never modify, delete, or share your calendar data.'
         + '</div>'
         + '<div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:14px;">'
         + '<strong>To continue past the warning:</strong>'
         + '<ol style="margin:6px 0 0 0;padding-left:20px;">'
         + '<li>Click <strong>"Advanced"</strong></li>'
-        + '<li>Click <strong>"Go to Kronara (unsafe)"</strong></li>'
+        + '<li>Click <strong>"Go to Aradia Fitness (unsafe)"</strong></li>'
         + '<li>Click <strong>"Continue"</strong> to grant access</li>'
         + '</ol>'
         + '</div>'
@@ -11534,7 +11775,7 @@
             var m = el("gcalMsg");
             if (m) {
               m.className = "msg ok";
-              m.innerHTML = 'Google Calendar connected! Set your <strong>Default Calendar</strong> below to the calendar where you save your Kronara shifts.';
+              m.innerHTML = 'Google Calendar connected! Set your <strong>Default Calendar</strong> below to the calendar where you save your Aradia shifts.';
               m.style.display = "block";
               if (_msgTimers["gcalMsg"]) clearTimeout(_msgTimers["gcalMsg"]);
               _msgTimers["gcalMsg"] = setTimeout(function(){ m.innerHTML = ""; m.style.display = "none"; }, 10000);
@@ -12124,7 +12365,7 @@
       const u = _staffCache[idx];
       if (!u) return;
       // Navigate to staff profile page (hide all pages, show staffProfile)
-      ["home","reports","profile","admin","support","images"].forEach(function(p){
+      ["home","reports","profile","admin","support","images","chat"].forEach(function(p){
         const pg = el("page_"+p); if (pg) pg.style.display = "none";
       });
       el("page_staffProfile").style.display = "";
@@ -12165,9 +12406,15 @@
       const spf = el("staffProfilePushFlags");  if (spf) spf.checked = u.pushFlags !== false;
       const spp = el("staffProfilePushPay");    if (spp) spp.checked = u.pushPay !== false;
       const sps = el("staffProfilePushShifts"); if (sps) sps.checked = u.pushShifts !== false;
+      const spc = el("staffProfilePushChat");   if (spc) spc.checked = u.pushChat !== false;
       const ses = el("staffProfileEmailShifts"); if (ses) ses.checked = u.emailShifts !== false;
       const seu = el("staffProfileEmailShiftsUrgentOnly"); if (seu) seu.checked = !!u.emailShiftsUrgentOnly;
       const sfk = el("staffProfileShiftFilterKeywords"); if (sfk) sfk.value = u.shiftFilterKeywords || "";
+      // Load teaches checkboxes
+      var teachesVal = (u.teaches || "").toLowerCase();
+      document.querySelectorAll(".staffTeachChk").forEach(function(cb) {
+        cb.checked = teachesVal.indexOf(cb.value) >= 0;
+      });
       // Admin Permissions grid — only show for true admins editing non-admin users
       var apWrap = el("staffProfileAdminPermsWrap");
       var isTargetAdmin = String(u.type||"").toUpperCase() === "ADMIN";
@@ -12330,9 +12577,11 @@
         pushFlags:                el("staffProfilePushFlags") ? el("staffProfilePushFlags").checked : true,
         pushPay:                  el("staffProfilePushPay") ? el("staffProfilePushPay").checked : true,
         pushShifts:               el("staffProfilePushShifts") ? el("staffProfilePushShifts").checked : true,
+        pushChat:                 el("staffProfilePushChat") ? el("staffProfilePushChat").checked : true,
         emailShifts:              el("staffProfileEmailShifts") ? el("staffProfileEmailShifts").checked : true,
         emailShiftsUrgentOnly:    el("staffProfileEmailShiftsUrgentOnly") ? el("staffProfileEmailShiftsUrgentOnly").checked : false,
         shiftFilterKeywords:      String(el("staffProfileShiftFilterKeywords")?.value || "").trim(),
+        teaches:                  Array.from(document.querySelectorAll(".staffTeachChk:checked")).map(function(cb){ return cb.value; }).join(", "),
       };
       // Admin Permissions
       var apWrap2 = el("staffProfileAdminPermsWrap");
@@ -12422,6 +12671,7 @@
       const emailRpt    = el("newStaffEmailRpt").checked;
       const isActive    = el("newStaffActive").checked;
       const requirePinChange = el("newStaffRequirePinChange").checked;
+      const teaches = Array.from(document.querySelectorAll(".newStaffTeachChk:checked")).map(function(cb){ return cb.value; }).join(", ");
 
       if (!name)  return setMsg("addStaffMsg","err","Full name is required.");
       if (!email) return setMsg("addStaffMsg","err","Email is required.");
@@ -12448,13 +12698,14 @@
           const npc = el("newStaffRequirePinChange"); if (npc) npc.checked = true;
           el("newStaffType").value = "Employee";
           el("newStaffGstWrap").style.display = "none";
+          document.querySelectorAll(".newStaffTeachChk").forEach(function(cb){ cb.checked = false; });
         })
         .onError(function(err){
           if (btn){ btn.disabled = false; btn.textContent = "➕ Add staff member"; }
           setMsg("addStaffMsg","err","SERVER ERROR: "+(err?.message||err));
         })
         .addStaffMember(STATE.email, STATE.pin, {
-          name, email, username, pin, type, gst, chargeGst, emailRpt, isActive, requirePinChange
+          name, email, username, pin, type, gst, chargeGst, emailRpt, isActive, requirePinChange, teaches
         });
     }
 
@@ -14723,7 +14974,75 @@
       var inp = el("adminTestModeInput");
       var dd  = el("testModeDropdown");
       if (dd && inp && !inp.contains(e.target) && !dd.contains(e.target)) dd.style.display = "none";
+      var inp2 = el("adminChatExcludeInput");
+      var dd2  = el("chatExcludeDropdown");
+      if (dd2 && inp2 && !inp2.contains(e.target) && !dd2.contains(e.target)) dd2.style.display = "none";
     });
+
+    // ── Chat Exclude autocomplete chips ──
+    function chatExcludeGetEmails_() {
+      return Array.from(el("chatExcludeChips")?.querySelectorAll("[data-email]")||[])
+        .map(function(c){ return c.getAttribute("data-email"); }).filter(Boolean);
+    }
+
+    function chatExcludeSetEmails_(val) {
+      var chips = el("chatExcludeChips");
+      if (!chips) return;
+      chips.innerHTML = "";
+      (val||"").split(/[\n,]/).map(function(e){ return e.trim(); }).filter(Boolean)
+        .forEach(function(em){ chatExcludeAddChip_(em); });
+    }
+
+    function chatExcludeAddChip_(email) {
+      var chips = el("chatExcludeChips");
+      if (!chips || !email) return;
+      if (Array.from(chips.querySelectorAll("[data-email]")).some(function(c){ return c.getAttribute("data-email")===email; })) return;
+      var chip = document.createElement("div");
+      chip.setAttribute("data-email", email);
+      chip.style.cssText = "display:flex;align-items:center;gap:5px;background:#fce4ec;border:1px solid #ef9a9a;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600;color:#c62828;";
+      chip.innerHTML = esc(email) + ' <span style="cursor:pointer;font-size:15px;line-height:1;color:#888;" title="Remove">&times;</span>';
+      chip.querySelector("span").addEventListener("click", function(){ chip.remove(); });
+      chips.appendChild(chip);
+    }
+
+    var _chatExcludeSearchTimeout = null;
+    function chatExcludeSearch_(val) {
+      clearTimeout(_chatExcludeSearchTimeout);
+      var dd = el("chatExcludeDropdown");
+      if (!val || val.length < 1) { if(dd) dd.style.display="none"; return; }
+      _chatExcludeSearchTimeout = setTimeout(function(){
+        var q = val.toLowerCase();
+        var staff = (typeof _staffCache !== "undefined" && _staffCache) || STATE.staffList || [];
+        var results = staff.filter(function(u){
+          return (u.email||"").toLowerCase().includes(q) || (u.name||"").toLowerCase().includes(q) || (u.username||"").toLowerCase().includes(q);
+        }).slice(0, 8);
+        if (!dd) return;
+        if (!results.length) { dd.style.display="none"; return; }
+        dd.innerHTML = "";
+        results.forEach(function(u){
+          var item = document.createElement("div");
+          item.style.cssText = "padding:9px 14px;cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:13px;";
+          item.innerHTML = '<strong>'+esc(u.name||u.email)+'</strong> <span style="color:#888;font-size:12px;">'+esc(u.email)+'</span>';
+          item.addEventListener("mousedown", function(e){
+            e.preventDefault();
+            chatExcludeAddChip_(u.email);
+            el("adminChatExcludeInput").value = "";
+            dd.style.display = "none";
+          });
+          item.addEventListener("mouseover", function(){ item.style.background="#f5f5f5"; });
+          item.addEventListener("mouseout",  function(){ item.style.background=""; });
+          dd.appendChild(item);
+        });
+        dd.style.display = "";
+      }, 200);
+    }
+
+    function chatExcludeKey_(e) {
+      if (e.key === "Escape") {
+        var dd = el("chatExcludeDropdown");
+        if (dd) dd.style.display = "none";
+      }
+    }
 
     function debugEmail_(){
       var btn = el("debugEmailBtn");
@@ -14834,6 +15153,7 @@
         proposalDigestEmail: String(el("adminProposalDigestEmail")?.value||"").trim(),
         proposalDigestEnabled: el("adminProposalDigestEnabled")?.checked ? "true" : "false",
         proposalNotifyEmail: String(el("adminProposalNotifyEmail")?.value||"").trim(),
+        chatExcludedEmails: chatExcludeGetEmails_().join("\n"),
         autoRemindersEnabled: el("adminAutoReminders")?.checked ? "true" : "false",
         autoSendEnabled:      el("adminAutoSend")?.checked ? "true" : "false",
         autoSendPending:      el("adminAutoSendPending")?.checked ? "true" : "false",
@@ -14889,6 +15209,7 @@
       const pde = el("adminProposalDigestEmail"); if (pde) pde.value = s.proposalDigestEmail||"";
       const pdt = el("adminProposalDigestEnabled"); if (pdt) pdt.checked = !!s.proposalDigestEnabled;
       const pne = el("adminProposalNotifyEmail"); if (pne) pne.value = s.proposalNotifyEmail||"";
+      chatExcludeSetEmails_(s.chatExcludedEmails||"");
 
       const ar = el("adminAutoReminders");   if (ar) ar.checked = !!s.autoRemindersEnabled;
       const as = el("adminAutoSend");        if (as) as.checked = !!s.autoSendEnabled;
@@ -15151,7 +15472,7 @@
       _aiChatHistory = [];
       var wrap = el("aiChatMessages");
       wrap.innerHTML = '<div class="ai-msg ai-msg-bot">'
-        +'<div class="ai-bubble ai-bubble-bot">Hi! I\'m the Kronara Assistant 👋 Ask me anything about using the timesheet app — logging hours, pay periods, bonuses, exporting reports, and more.</div>'
+        +'<div class="ai-bubble ai-bubble-bot">Hi! I\'m the Aradia Assistant 👋 Ask me anything about using the timesheet app — logging hours, pay periods, bonuses, exporting reports, and more.</div>'
         +'</div>';
       el("aiChatClearBtn").style.display = "none";
       setMsg("aiChatMsg","","");
@@ -16650,11 +16971,608 @@
       });
     }
 
+    // ── Chat system functions ──
+    var _chatConversations = [];
+    var _chatCurrentConvoId = null;
+    var _chatCurrentConvo = null;
+    var _chatMessages = [];
+    var _chatStaffList = null;
+    var _chatOldestTs = null;
+
+    function esc_(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+    var _chatShowArchived = false;
+
+    function loadChatPage_() {
+      // Reset to list view
+      el("chatListView").style.display = "";
+      el("chatConvoView").style.display = "none";
+      if (window._chatPollInterval) { clearInterval(window._chatPollInterval); window._chatPollInterval = null; }
+      var searchInput = el("chatSearchInput");
+      if (searchInput) searchInput.value = "";
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) return;
+        _chatConversations = res.conversations || [];
+        renderChatConvoList_();
+        updateArchivedToggle_();
+      }).getChatConversations(STATE.email, STATE.pin, _chatShowArchived);
+    }
+
+    function renderChatConvoList_() {
+      var wrap = el("chatConvoList");
+      if (!wrap) return;
+      if (!_chatConversations.length) {
+        wrap.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px;">No conversations yet. Start a group or message someone!</div>';
+        return;
+      }
+      var html = "";
+      _chatConversations.forEach(function(c) {
+        var name = c.type === "dm" ? getDmName_(c) : (c.name || "Unnamed");
+        var preview = c.last_message ? (c.last_sender ? c.last_sender.split(" ")[0] + ": " : "") + (c.last_message.length > 40 ? c.last_message.slice(0, 37) + "..." : c.last_message) : "No messages yet";
+        var unread = parseInt(c.unread_count) || 0;
+        var timeStr = c.last_message_at ? formatChatTime_(c.last_message_at) : "";
+        var avatar;
+        if (c.type === "dm") {
+          var other = (c.members || []).find(function(m) { return m.user_email.toLowerCase() !== STATE.email.toLowerCase(); });
+          avatar = chatAvatar_(other ? (other.name || other.user_email) : "?", other ? other.profile_pic : "", 40);
+        } else if (c.type === "global") {
+          avatar = '<div style="width:40px;height:40px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🌐</div>';
+        } else {
+          avatar = '<div style="width:40px;height:40px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">👥</div>';
+        }
+        html += '<div class="chat-convo-item" onclick="openConversation_(\''+c.id+'\')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--line);">'
+          + avatar
+          + '<div style="flex:1;min-width:0;">'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+          + '<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc_(name)+'</div>'
+          + '<div style="font-size:11px;color:var(--muted);flex-shrink:0;margin-left:8px;">'+timeStr+'</div>'
+          + '</div>'
+          + '<div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;">'+esc_(preview)+'</div>'
+          + '</div>'
+          + (unread > 0 ? '<span style="background:var(--red);color:#fff;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:800;flex-shrink:0;">'+unread+'</span>' : '')
+          + '</div>';
+      });
+      wrap.innerHTML = html;
+    }
+
+    function getDmName_(convo) {
+      if (!convo.members) return "Direct Message";
+      var other = convo.members.find(function(m) { return m.user_email.toLowerCase() !== STATE.email.toLowerCase(); });
+      return other ? (other.name || other.user_email) : "Direct Message";
+    }
+
+    function formatChatTime_(ts) {
+      var d = new Date(ts);
+      var now = new Date();
+      var diff = now - d;
+      if (diff < 60000) return "now";
+      if (diff < 3600000) return Math.floor(diff/60000) + "m";
+      if (diff < 86400000 && d.getDate() === now.getDate()) return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+      if (diff < 604800000) return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+      return (d.getMonth()+1) + "/" + d.getDate();
+    }
+
+    function openConversation_(convoId) {
+      _chatCurrentConvoId = convoId;
+      _chatCurrentConvo = _chatConversations.find(function(c){ return c.id === convoId; });
+      _chatMessages = [];
+      _chatOldestTs = null;
+
+      el("chatListView").style.display = "none";
+      el("chatConvoView").style.display = "";
+
+      // Set title
+      var title = "Chat";
+      if (_chatCurrentConvo) {
+        if (_chatCurrentConvo.type === "dm") title = getDmName_(_chatCurrentConvo);
+        else title = _chatCurrentConvo.name || "General";
+      }
+      el("chatConvoTitle").textContent = title;
+
+      // Show settings button for groups
+      var settingsBtn = el("chatConvoSettingsBtn");
+      if (settingsBtn) {
+        settingsBtn.style.display = (_chatCurrentConvo && _chatCurrentConvo.type === "group") ? "" : "none";
+      }
+
+      // Show archive/unarchive button
+      var archBtn = el("chatArchiveBtn");
+      if (archBtn) {
+        if (_chatShowArchived) {
+          archBtn.innerHTML = "📤";
+          archBtn.title = "Unarchive";
+          archBtn.onclick = function() { unarchiveChatConvo_(); };
+        } else {
+          archBtn.innerHTML = "📥";
+          archBtn.title = "Archive";
+          archBtn.onclick = function() { archiveChatConvo_(); };
+        }
+      }
+
+      // Load messages
+      loadChatMessages_(false);
+
+      // Start polling for new messages
+      if (window._chatPollInterval) clearInterval(window._chatPollInterval);
+      window._chatPollInterval = setInterval(function() { pollNewMessages_(); }, 5000);
+    }
+
+    function loadChatMessages_(loadMore) {
+      var before = loadMore && _chatOldestTs ? _chatOldestTs : null;
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) return;
+        if (loadMore) {
+          if (res.messages.length) {
+            _chatMessages = res.messages.concat(_chatMessages);
+            renderChatMessages_();
+          }
+          el("chatLoadMore").style.display = res.messages.length >= 50 ? "" : "none";
+        } else {
+          _chatMessages = res.messages || [];
+          renderChatMessages_();
+          scrollChatToBottom_();
+          el("chatLoadMore").style.display = _chatMessages.length >= 50 ? "" : "none";
+        }
+        if (_chatMessages.length) _chatOldestTs = _chatMessages[0].created_at;
+      }).getChatMessages(STATE.email, STATE.pin, _chatCurrentConvoId, before);
+    }
+
+    function loadMoreChatMessages_() { loadChatMessages_(true); }
+
+    function pollNewMessages_() {
+      if (!_chatCurrentConvoId) return;
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) return;
+        var msgs = res.messages || [];
+        if (!msgs.length) return;
+        // Find messages newer than what we have
+        var lastTs = _chatMessages.length ? _chatMessages[_chatMessages.length - 1].created_at : null;
+        var newMsgs = lastTs ? msgs.filter(function(m){ return m.created_at > lastTs; }) : msgs;
+        if (newMsgs.length) {
+          _chatMessages = _chatMessages.concat(newMsgs);
+          renderChatMessages_();
+          scrollChatToBottom_();
+        }
+      }).getChatMessages(STATE.email, STATE.pin, _chatCurrentConvoId);
+    }
+
+    function renderChatMessages_() {
+      var wrap = el("chatMessages");
+      if (!wrap) return;
+      if (!_chatMessages.length) {
+        wrap.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px;">No messages yet. Say hello!</div>';
+        return;
+      }
+      var html = "";
+      var lastDate = "";
+      _chatMessages.forEach(function(m) {
+        var d = new Date(m.created_at);
+        var dateStr = d.toLocaleDateString();
+        if (dateStr !== lastDate) {
+          html += '<div style="text-align:center;font-size:11px;color:var(--muted);padding:8px 0;font-weight:600;">'+dateStr+'</div>';
+          lastDate = dateStr;
+        }
+        var isMe = m.sender_email.toLowerCase() === STATE.email.toLowerCase();
+        var timeStr = d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+        var editedLabel = m.edited_at ? ' <span style="font-style:italic;">(edited)</span>' : '';
+        if (isMe) {
+          html += '<div style="display:flex;flex-direction:column;align-items:flex-end;max-width:82%;" data-msg-id="'+m.id+'">'
+            + '<div style="background:var(--red);color:#fff;padding:8px 14px;border-radius:14px 14px 4px 14px;font-size:13px;line-height:1.45;word-break:break-word;">'+esc_(m.body)+'</div>'
+            + '<div style="font-size:10px;color:var(--muted);margin-top:2px;">'+timeStr+editedLabel
+            + ' <span style="cursor:pointer;margin-left:6px;" onclick="editChatMsg_(\''+m.id+'\')">✏️</span>'
+            + ' <span style="cursor:pointer;margin-left:2px;" onclick="deleteChatMsg_(\''+m.id+'\')">🗑️</span>'
+            + '</div>'
+            + '</div>';
+        } else {
+          html += '<div style="display:flex;gap:8px;align-items:flex-start;max-width:85%;">'
+            + chatAvatar_(m.sender_name || m.sender_email, m.sender_profile_pic || "", 30)
+            + '<div>'
+            + '<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px;">'+esc_(m.sender_name || m.sender_email)+'</div>'
+            + '<div style="background:var(--line);color:var(--text-primary,#333);padding:8px 14px;border-radius:14px 14px 14px 4px;font-size:13px;line-height:1.45;word-break:break-word;">'+esc_(m.body)+'</div>'
+            + '<div style="font-size:10px;color:var(--muted);margin-top:2px;">'+timeStr+editedLabel+'</div>'
+            + '</div>'
+            + '</div>';
+        }
+      });
+      wrap.innerHTML = html;
+    }
+
+    function scrollChatToBottom_() {
+      var wrap = el("chatMessages");
+      if (wrap) setTimeout(function(){ wrap.scrollTop = wrap.scrollHeight; }, 50);
+    }
+
+    function sendChatMsg_() {
+      var input = el("chatInput");
+      var body = (input.value || "").trim();
+      if (!body || !_chatCurrentConvoId) return;
+      input.value = "";
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) { alert(res && res.reason || "Failed to send"); return; }
+        if (res.message) {
+          _chatMessages.push(res.message);
+          renderChatMessages_();
+          scrollChatToBottom_();
+        }
+      }).sendChatMessage(STATE.email, STATE.pin, _chatCurrentConvoId, body);
+    }
+
+    function editChatMsg_(msgId) {
+      var msg = _chatMessages.find(function(m) { return m.id === msgId; });
+      if (!msg) return;
+      var newBody = prompt("Edit message:", msg.body);
+      if (newBody === null || newBody.trim() === "" || newBody.trim() === msg.body) return;
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) { alert(res && res.reason || "Failed to edit"); return; }
+        msg.body = newBody.trim();
+        msg.edited_at = new Date().toISOString();
+        renderChatMessages_();
+      }).editChatMessage(STATE.email, STATE.pin, msgId, newBody.trim());
+    }
+
+    function deleteChatMsg_(msgId) {
+      if (!confirm("Delete this message?")) return;
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) { alert(res && res.reason || "Failed to delete"); return; }
+        _chatMessages = _chatMessages.filter(function(m) { return m.id !== msgId; });
+        renderChatMessages_();
+      }).deleteChatMessage(STATE.email, STATE.pin, msgId);
+    }
+
+    function closeChatConvo_() {
+      if (window._chatPollInterval) { clearInterval(window._chatPollInterval); window._chatPollInterval = null; }
+      _chatCurrentConvoId = null;
+      _chatCurrentConvo = null;
+      el("chatConvoView").style.display = "none";
+      el("chatListView").style.display = "";
+      // Refresh conversation list
+      loadChatPage_();
+    }
+
+    function updateChatBadge_() {
+      if (!STATE.user || !STATE.email || !STATE.pin) return;
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) return;
+        var total = res.total || 0;
+        var badge = el("chatUnreadBadge");
+        var badgeDesk = el("chatUnreadBadgeDesk");
+        if (badge) { badge.textContent = total; badge.style.display = total > 0 ? "" : "none"; }
+        if (badgeDesk) { badgeDesk.textContent = total; badgeDesk.style.display = total > 0 ? "" : "none"; }
+      }).getChatUnreadTotal(STATE.email, STATE.pin);
+    }
+
+    // ── Staff list helper for chat modals ──
+    function loadChatStaffList_(cb) {
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) return;
+        _chatStaffList = res.staff || [];
+        cb(_chatStaffList);
+      }).getChatStaffList(STATE.email, STATE.pin);
+    }
+
+    function chatAvatar_(name, pic, size) {
+      size = size || 36;
+      if (pic) {
+        return '<img src="'+pic+'" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;">';
+      }
+      var initial = (name || "?").charAt(0).toUpperCase();
+      return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:'+(size*0.4)+'px;color:var(--muted);flex-shrink:0;">'+initial+'</div>';
+    }
+
+    // ── New Group Modal ──
+    var _chatCategoryMap = { "pole": "pole", "aerial": "aerial", "dance": "dance", "fitness": "fitness", "front desk": "front desk", "other": "other" };
+
+    function showNewGroupModal_() {
+      el("chatGroupName").value = "";
+      el("chatGroupSearch").value = "";
+      var list = el("chatGroupMemberList");
+      list.innerHTML = '<div style="padding:12px;color:var(--muted);font-size:13px;">Loading staff…</div>';
+      el("chatGroupModal").style.display = "block";
+      loadChatStaffList_(function(staff) {
+        // Quick-select category buttons
+        var catHtml = '<div style="margin-bottom:12px;">'
+          + '<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;">Quick select by category:</div>'
+          + '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+        ["Pole","Aerial","Dance","Fitness","Front Desk","Other"].forEach(function(cat) {
+          catHtml += '<button class="lbtn chatCatBtn" data-cat="'+cat.toLowerCase()+'" onclick="toggleChatCategory_(\''+cat.toLowerCase()+'\')" style="font-size:12px;padding:5px 12px;">'+cat+'</button>';
+        });
+        catHtml += '</div></div>';
+
+        var staffHtml = "";
+        staff.forEach(function(s) {
+          var teaches = (s.teaches || "").toLowerCase();
+          staffHtml += '<div class="toggle-row chatGroupStaffRow" data-teaches="'+esc_(teaches)+'" style="padding:8px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;">'
+            + chatAvatar_(s.name || s.email, s.profilePic, 28)
+            + '<div style="flex:1;min-width:0;"><div style="font-size:13px;">'+esc_(s.name || s.email)+'</div>'
+            + (teaches ? '<div style="font-size:10px;color:var(--muted);">'+esc_(s.teaches)+'</div>' : '')
+            + '</div>'
+            + '<label class="admin-toggle"><input type="checkbox" data-email="'+esc_(s.email)+'" class="chatGroupMemberChk"><span class="slider"></span></label>'
+            + '</div>';
+        });
+        list.innerHTML = catHtml + staffHtml || '<div style="padding:12px;color:var(--muted);font-size:13px;">No other staff found</div>';
+      });
+    }
+
+    function toggleChatCategory_(cat) {
+      var rows = el("chatGroupMemberList").querySelectorAll(".chatGroupStaffRow");
+      var knownCats = ["pole", "aerial", "dance", "fitness", "front desk"];
+      rows.forEach(function(row) {
+        var teaches = (row.getAttribute("data-teaches") || "").toLowerCase();
+        var cb = row.querySelector(".chatGroupMemberChk");
+        if (!cb) return;
+        var match = false;
+        if (cat === "other") {
+          // "Other" matches anyone whose teaches doesn't include any of the known categories (except front desk)
+          var hasKnown = knownCats.some(function(k) { return teaches.indexOf(k) >= 0; });
+          match = teaches && !hasKnown;
+        } else {
+          match = teaches.indexOf(cat) >= 0;
+        }
+        if (match) cb.checked = !cb.checked;
+      });
+      // Toggle button active state
+      var btn = el("chatGroupMemberList").querySelector('.chatCatBtn[data-cat="'+cat+'"]');
+      if (btn) btn.classList.toggle("active");
+    }
+
+    function filterGroupList_() {
+      var q = (el("chatGroupSearch").value || "").toLowerCase().trim();
+      var rows = el("chatGroupMemberList").querySelectorAll(".chatGroupStaffRow");
+      rows.forEach(function(row) {
+        if (!q) { row.style.display = ""; return; }
+        var text = (row.textContent || "").toLowerCase();
+        row.style.display = text.indexOf(q) >= 0 ? "" : "none";
+      });
+    }
+
+    function createGroupChat_() {
+      var name = el("chatGroupName").value.trim();
+      if (!name) { alert("Please enter a group name"); return; }
+      var checkboxes = el("chatGroupMemberList").querySelectorAll(".chatGroupMemberChk:checked");
+      var emails = [];
+      checkboxes.forEach(function(cb) { emails.push(cb.getAttribute("data-email")); });
+      if (!emails.length) { alert("Please select at least one member"); return; }
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) { alert(res && res.reason || "Failed to create group"); return; }
+        el("chatGroupModal").style.display = "none";
+        loadChatPage_();
+      }).createGroupChat(STATE.email, STATE.pin, name, emails);
+    }
+
+    // ── New DM Modal ──
+    function showNewDmModal_() {
+      var list = el("chatDmMemberList");
+      list.innerHTML = '<div style="padding:12px;color:var(--muted);font-size:13px;">Loading staff…</div>';
+      el("chatDmSearch").value = "";
+      el("chatDmModal").style.display = "block";
+      loadChatStaffList_(function(staff) {
+        renderDmList_(staff);
+      });
+    }
+
+    function renderDmList_(staff) {
+      var list = el("chatDmMemberList");
+      var html = "";
+      staff.forEach(function(s) {
+        html += '<div class="chat-dm-item" data-name="'+esc_((s.name||"").toLowerCase())+'" data-email="'+esc_(s.email.toLowerCase())+'" '
+          + 'onclick="startDm_(\''+esc_(s.email)+'\')" '
+          + 'style="padding:12px 8px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;align-items:center;gap:10px;">'
+          + chatAvatar_(s.name || s.email, s.profilePic, 36)
+          + '<div>'
+          + '<div style="font-weight:700;font-size:13px;">'+esc_(s.name || s.email)+'</div>'
+          + '<div style="font-size:11px;color:var(--muted);">'+esc_(s.email)+'</div>'
+          + '</div>'
+          + '</div>';
+      });
+      list.innerHTML = html || '<div style="padding:12px;color:var(--muted);font-size:13px;">No other staff found</div>';
+    }
+
+    function filterDmList_() {
+      var q = (el("chatDmSearch").value || "").toLowerCase().trim();
+      var items = el("chatDmMemberList").querySelectorAll(".chat-dm-item");
+      items.forEach(function(item) {
+        var name = item.getAttribute("data-name") || "";
+        var email = item.getAttribute("data-email") || "";
+        item.style.display = (!q || name.indexOf(q) >= 0 || email.indexOf(q) >= 0) ? "" : "none";
+      });
+    }
+
+    function startDm_(targetEmail) {
+      el("chatDmModal").style.display = "none";
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) { alert(res && res.reason || "Failed to start conversation"); return; }
+        // Refresh conversations then open the DM
+        api.call.onSuccess(function(res2) {
+          if (!res2 || !res2.ok) return;
+          _chatConversations = res2.conversations || [];
+          renderChatConvoList_();
+          openConversation_(res.conversationId);
+        }).getChatConversations(STATE.email, STATE.pin);
+      }).startDirectMessage(STATE.email, STATE.pin, targetEmail);
+    }
+
+    // ── Group Settings Modal ──
+    function showGroupSettingsModal_() {
+      if (!_chatCurrentConvo || _chatCurrentConvo.type !== "group") return;
+      el("chatGroupSettingsName").value = _chatCurrentConvo.name || "";
+
+      var isCreator = (_chatCurrentConvo.created_by || "").toLowerCase() === STATE.email.toLowerCase();
+      var isAppAdmin = STATE.isAdmin;
+      var canEdit = isCreator || isAppAdmin;
+
+      el("chatDeleteGroupBtn").style.display = canEdit ? "" : "none";
+      el("chatGroupSettingsName").disabled = !canEdit;
+
+      // Render current members
+      var membersWrap = el("chatGroupSettingsMembers");
+      var membersHtml = "";
+      (_chatCurrentConvo.members || []).forEach(function(m) {
+        var isOwner = m.user_email.toLowerCase() === (_chatCurrentConvo.created_by || "").toLowerCase();
+        membersHtml += '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);">'
+          + chatAvatar_(m.name || m.user_email, m.profile_pic, 28)
+          + '<div style="font-size:13px;flex:1;">'+esc_(m.name || m.user_email)+(isOwner ? ' <span style="color:var(--muted);font-size:11px;">(creator)</span>' : '')+'</div>'
+          + (canEdit && !isOwner ? '<button class="lbtn" style="font-size:11px;color:var(--red);padding:4px 8px;" onclick="removeGroupMember_(\''+esc_(m.user_email)+'\')">Remove</button>' : '')
+          + '</div>';
+      });
+      membersWrap.innerHTML = membersHtml || '<div style="color:var(--muted);font-size:13px;">No members</div>';
+
+      // Render add-members list (only for those who can edit)
+      var addWrap = el("chatGroupSettingsAddList");
+      if (canEdit) {
+        addWrap.style.display = "";
+        addWrap.innerHTML = '<div style="padding:8px;color:var(--muted);font-size:13px;">Loading…</div>';
+        loadChatStaffList_(function(staff) {
+          var currentEmails = (_chatCurrentConvo.members || []).map(function(m) { return m.user_email.toLowerCase(); });
+          var available = staff.filter(function(s) { return currentEmails.indexOf(s.email.toLowerCase()) < 0; });
+          var html = "";
+          available.forEach(function(s) {
+            html += '<div class="toggle-row" style="padding:6px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;">'
+              + chatAvatar_(s.name || s.email, s.profilePic, 28)
+              + '<span style="font-size:13px;flex:1;">'+esc_(s.name || s.email)+'</span>'
+              + '<label class="admin-toggle"><input type="checkbox" data-email="'+esc_(s.email)+'"><span class="slider"></span></label>'
+              + '</div>';
+          });
+          addWrap.innerHTML = html || '<div style="color:var(--muted);font-size:13px;">No more staff to add</div>';
+        });
+      } else {
+        addWrap.style.display = "none";
+      }
+
+      el("chatGroupSettingsModal").style.display = "block";
+    }
+
+    function removeGroupMember_(email) {
+      if (!_chatCurrentConvoId) return;
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) { alert(res && res.reason || "Failed"); return; }
+        // Refresh the conversation data
+        _chatCurrentConvo.members = (_chatCurrentConvo.members || []).filter(function(m) { return m.user_email.toLowerCase() !== email.toLowerCase(); });
+        showGroupSettingsModal_();
+      }).updateGroupChat(STATE.email, STATE.pin, _chatCurrentConvoId, { removeMembers: [email] });
+    }
+
+    function saveGroupSettings_() {
+      if (!_chatCurrentConvoId) return;
+      var newName = el("chatGroupSettingsName").value.trim();
+      var addCheckboxes = el("chatGroupSettingsAddList").querySelectorAll("input[type=checkbox]:checked");
+      var addEmails = [];
+      addCheckboxes.forEach(function(cb) { addEmails.push(cb.getAttribute("data-email")); });
+
+      var updates = {};
+      if (newName && newName !== _chatCurrentConvo.name) updates.name = newName;
+      if (addEmails.length) updates.addMembers = addEmails;
+
+      if (!Object.keys(updates).length) { el("chatGroupSettingsModal").style.display = "none"; return; }
+
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) { alert(res && res.reason || "Failed"); return; }
+        el("chatGroupSettingsModal").style.display = "none";
+        if (updates.name) {
+          _chatCurrentConvo.name = updates.name;
+          el("chatConvoTitle").textContent = updates.name;
+        }
+        // Refresh conversations
+        _chatStaffList = null;
+        api.call.onSuccess(function(res2) {
+          if (res2 && res2.ok) {
+            _chatConversations = res2.conversations || [];
+            _chatCurrentConvo = _chatConversations.find(function(c){ return c.id === _chatCurrentConvoId; });
+          }
+        }).getChatConversations(STATE.email, STATE.pin);
+      }).updateGroupChat(STATE.email, STATE.pin, _chatCurrentConvoId, updates);
+    }
+
+    function deleteGroupChat_() {
+      if (!_chatCurrentConvoId) return;
+      if (!confirm("Delete this group and all its messages? This cannot be undone.")) return;
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) { alert(res && res.reason || "Failed"); return; }
+        el("chatGroupSettingsModal").style.display = "none";
+        closeChatConvo_();
+      }).deleteGroupChat(STATE.email, STATE.pin, _chatCurrentConvoId);
+    }
+
+    function leaveGroupChat_() {
+      if (!_chatCurrentConvoId) return;
+      if (!confirm("Leave this group chat?")) return;
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) { alert(res && res.reason || "Failed"); return; }
+        el("chatGroupSettingsModal").style.display = "none";
+        closeChatConvo_();
+      }).leaveGroupChat(STATE.email, STATE.pin, _chatCurrentConvoId);
+    }
+
+    function archiveChatConvo_() {
+      if (!_chatCurrentConvoId) return;
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) { alert(res && res.reason || "Failed to archive"); return; }
+        closeChatConvo_();
+      }).archiveChatConvo(STATE.email, STATE.pin, _chatCurrentConvoId);
+    }
+
+    function unarchiveChatConvo_() {
+      if (!_chatCurrentConvoId) return;
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) { alert(res && res.reason || "Failed to unarchive"); return; }
+        closeChatConvo_();
+      }).unarchiveChatConvo(STATE.email, STATE.pin, _chatCurrentConvoId);
+    }
+
+    function toggleArchivedChats_() {
+      _chatShowArchived = !_chatShowArchived;
+      updateArchivedToggle_();
+      loadChatPage_();
+    }
+
+    function updateArchivedToggle_() {
+      var btn = el("chatArchivedToggle");
+      if (btn) {
+        btn.textContent = _chatShowArchived ? "Show Active Chats" : "Show Archived Chats";
+      }
+    }
+
+    var _chatSearchTimeout = null;
+    function filterChatConvos_() {
+      var q = (el("chatSearchInput").value || "").toLowerCase().trim();
+      var items = el("chatConvoList").querySelectorAll(".chat-convo-item");
+
+      // First filter by conversation name/preview text
+      items.forEach(function(item) {
+        if (!q) { item.style.display = ""; item.removeAttribute("data-search-match"); return; }
+        var text = (item.textContent || "").toLowerCase();
+        item.style.display = text.indexOf(q) >= 0 ? "" : "none";
+      });
+
+      // Then search message content server-side (debounced)
+      if (!q) { el("chatSearchResults").innerHTML = ""; el("chatSearchResults").style.display = "none"; return; }
+      clearTimeout(_chatSearchTimeout);
+      _chatSearchTimeout = setTimeout(function() {
+        api.call.onSuccess(function(res) {
+          if (!res || !res.ok) return;
+          var wrap = el("chatSearchResults");
+          if (!res.results || !res.results.length) { wrap.innerHTML = ""; wrap.style.display = "none"; return; }
+          var html = '<div style="font-size:11px;font-weight:700;color:var(--muted);padding:10px 16px 4px;">Messages matching "'+esc_(q)+'"</div>';
+          res.results.forEach(function(r) {
+            var timeStr = r.created_at ? formatChatTime_(r.created_at) : "";
+            html += '<div class="chat-convo-item" onclick="openConversation_(\''+r.conversation_id+'\')" style="display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--line);">'
+              + '<div style="flex:1;min-width:0;">'
+              + '<div style="font-size:13px;font-weight:700;">'+esc_(r.sender_name)+'</div>'
+              + '<div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc_(r.body.length > 60 ? r.body.slice(0,57)+"..." : r.body)+'</div>'
+              + '</div>'
+              + '<div style="font-size:11px;color:var(--muted);flex-shrink:0;">'+timeStr+'</div>'
+              + '</div>';
+          });
+          wrap.innerHTML = html;
+          wrap.style.display = "";
+        }).searchChatMessages(STATE.email, STATE.pin, q);
+      }, 400);
+    }
+
     (function init(){
-      // Check for a saved session (survives page refresh, expires after 1 hour)
+      // Check for a saved session (persists until explicit logout)
       var saved = null;
       try { saved = JSON.parse(localStorage.getItem("aradia_session")); } catch(e){}
-      if (saved && saved.email && saved.pin && (Date.now() - saved.ts) < 3600000) {
+      if (saved && saved.email && saved.pin) {
         hardReset(true); // keep the saved session
         api.call
           .onSuccess(function(res){
