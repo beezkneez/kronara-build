@@ -8271,7 +8271,7 @@ app.options("/api/onboarding", (req, res) => {
 app.post("/api/onboarding", async (req, res) => {
   res.set("Access-Control-Allow-Origin", "https://kronara.app");
   try {
-    const { businessName, ownerName, email, phone, numStaff, numLocations, numAdmins, specialRequests } = req.body;
+    const { businessName, ownerName, email, phone, numStaff, numLocations, locations, numAdmins, domainName, features, startDate, referral, specialRequests } = req.body;
     if (!businessName || !ownerName || !email) {
       return res.status(400).json({ ok: false, reason: "Missing required fields" });
     }
@@ -8279,6 +8279,9 @@ app.post("/api/onboarding", async (req, res) => {
     const resend = getResend();
     const onboardingFrom = `Kronara <noreply@kronara.app>`;
     const adminEmail = process.env.KRONARA_ADMIN_EMAIL || "admin@kronara.app";
+    const locationsList = (locations || []).join(', ') || 'Not provided';
+    const featuresList = (features || []).join(', ') || 'All features';
+    const domainDisplay = domainName ? `${domainName}.kronara.app` : 'Not specified';
 
     await resend.emails.send({
       from: onboardingFrom,
@@ -8294,8 +8297,12 @@ app.post("/api/onboarding", async (req, res) => {
             <tr><td style="padding: 8px 0; color: #8a8ea0;">Email</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${email}</td></tr>
             <tr><td style="padding: 8px 0; color: #8a8ea0;">Phone</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${phone || 'Not provided'}</td></tr>
             <tr><td style="padding: 8px 0; color: #8a8ea0;">Number of Staff</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numStaff}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Number of Locations</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numLocations}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Locations (${numLocations})</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${locationsList}</td></tr>
             <tr><td style="padding: 8px 0; color: #8a8ea0;">Admin Staff to Train</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numAdmins}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Requested Domain</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${domainDisplay}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Features</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${featuresList}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Preferred Start Date</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${startDate || 'ASAP'}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Referral Source</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${referral || 'Not specified'}</td></tr>
             <tr><td style="padding: 8px 0; color: #8a8ea0;">Special Requests</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${specialRequests || 'None'}</td></tr>
           </table>
         </div>
