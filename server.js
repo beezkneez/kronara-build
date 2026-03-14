@@ -8261,6 +8261,71 @@ api.post("/pushUnsubscribe", async (req, res) => {
   }
 });
 
+// ── Onboarding form submission (from marketing site after Stripe payment) ──
+app.options("/api/onboarding", (req, res) => {
+  res.set("Access-Control-Allow-Origin", "https://kronara.app");
+  res.set("Access-Control-Allow-Methods", "POST");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+  res.sendStatus(204);
+});
+app.post("/api/onboarding", async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "https://kronara.app");
+  try {
+    const { businessName, ownerName, email, phone, numStaff, numLocations, numAdmins, specialRequests } = req.body;
+    if (!businessName || !ownerName || !email) {
+      return res.status(400).json({ ok: false, reason: "Missing required fields" });
+    }
+
+    const resend = getResend();
+    const onboardingFrom = `Kronara <noreply@kronara.app>`;
+    const adminEmail = process.env.KRONARA_ADMIN_EMAIL || "admin@kronara.app";
+
+    await resend.emails.send({
+      from: onboardingFrom,
+      to: [adminEmail],
+      replyTo: [email],
+      subject: `New Kronara Signup: ${businessName}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #141428; color: #e8eaf0; padding: 32px; border-radius: 16px;">
+          <h1 style="color: #6C5CE7; margin-bottom: 24px;">New Client Signup</h1>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Business Name</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${businessName}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Owner Name</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${ownerName}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Email</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${email}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Phone</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${phone || 'Not provided'}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Number of Staff</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numStaff}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Number of Locations</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numLocations}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Admin Staff to Train</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numAdmins}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8a8ea0;">Special Requests</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${specialRequests || 'None'}</td></tr>
+          </table>
+        </div>
+      `,
+    });
+
+    // Also send a confirmation to the client
+    await resend.emails.send({
+      from: onboardingFrom,
+      replyTo: [adminEmail],
+      to: [email],
+      subject: `Welcome to Kronara, ${ownerName}!`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #141428; color: #e8eaf0; padding: 32px; border-radius: 16px;">
+          <h1 style="color: #6C5CE7; margin-bottom: 16px;">Welcome to Kronara!</h1>
+          <p style="color: #b0b4c4; line-height: 1.6;">Hi ${ownerName},</p>
+          <p style="color: #b0b4c4; line-height: 1.6;">Thank you for signing up! We've received your details for <strong style="color: #fff;">${businessName}</strong> and our team will have your studio set up within 24 hours.</p>
+          <p style="color: #b0b4c4; line-height: 1.6;">We'll reach out to your email with login credentials and next steps for onboarding and training.</p>
+          <p style="color: #b0b4c4; line-height: 1.6; margin-top: 24px;">Cheers,<br><strong style="color: #fff;">The Kronara Team</strong></p>
+        </div>
+      `,
+    });
+
+    res.json({ ok: true });
+  } catch (e) {
+    console.error("Onboarding email error:", e);
+    res.status(500).json({ ok: false, reason: "Failed to send notification" });
+  }
+});
+
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
