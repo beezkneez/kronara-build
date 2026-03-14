@@ -3093,6 +3093,7 @@
             <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;">
               <button class="btn" id="btnSendReport" onclick="sendPayrollReport()">📧 Send report to accountant</button>
               <button class="btn secondary" onclick="sendReminderEmails()">🔔 Send reminders to staff</button>
+              <button class="btn secondary" id="btnQboSync" onclick="syncToQuickBooks()" style="display:none;">📊 Sync to QuickBooks</button>
             </div>
           </div>
 
@@ -3599,6 +3600,30 @@
           </div><!-- /Pay & Bonuses body -->
 
           </div><!-- /settingsModReadonly -->
+
+          <!-- QuickBooks Integration -->
+          <div class="settings-section-header" onclick="toggleSettingsSection_(this)">
+            QuickBooks Integration <span class="chevron">▼</span>
+          </div>
+          <div class="settings-section-body">
+            <div id="qboStatus" style="margin-bottom:14px;">
+              <div id="qboNotConnected">
+                <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Connect your QuickBooks Online account to sync timesheet data directly. No more manual CSV imports.</p>
+                <a id="qboConnectBtn" href="/api/qbo/connect" class="btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:13px;background:var(--green);color:#fff;border:none;border-radius:8px;cursor:pointer;text-decoration:none;">
+                  Connect QuickBooks
+                </a>
+              </div>
+              <div id="qboConnected" style="display:none;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                  <span style="display:inline-block;width:10px;height:10px;background:#2ecc71;border-radius:50%;"></span>
+                  <span style="font-size:13px;font-weight:600;color:var(--green);">Connected to QuickBooks</span>
+                </div>
+                <p id="qboRealmInfo" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></p>
+                <button id="qboDisconnectBtn" class="btn" style="padding:6px 14px;font-size:12px;background:transparent;color:#e74c3c;border:1px solid #e74c3c;border-radius:8px;cursor:pointer;">Disconnect</button>
+              </div>
+            </div>
+            <div class="muted" style="font-size:11px;">When connected, you can sync timesheet entries to QuickBooks from the payroll report. Staff names must match between Kronara and QuickBooks.</div>
+          </div>
 
           <div id="settingsAdminOnly2">
 
@@ -4832,6 +4857,9 @@
         case "getVapidKey":            return {};
         case "pushSubscribe":          return { email: args[0], pin: args[1], subscription: args[2] };
         case "pushUnsubscribe":        return { email: args[0], pin: args[1], endpoint: args[2] };
+        case "qboStatus":              return { email: args[0], pin: args[1] };
+        case "qboDisconnect":          return { email: args[0], pin: args[1] };
+        case "qboSync":                return { email: args[0], pin: args[1], ppStart: args[2], ppEnd: args[3] };
         case "sendTestPush":           return { email: args[0], pin: args[1] };
         case "getEntriesByDate":       return { email: args[0], pin: args[1], date: args[2] };
         case "getChatConversations":  return { email: args[0], pin: args[1], showArchived: args[2] || false };
@@ -4911,7 +4939,8 @@
       "getVapidKey","pushSubscribe","pushUnsubscribe","sendTestPush",
       "getChatConversations","getChatMessages","sendChatMessage","markChatRead",
       "createGroupChat","updateGroupChat","deleteGroupChat","startDirectMessage","getChatUnreadTotal","getChatStaffList","leaveGroupChat",
-      "archiveChatConvo","unarchiveChatConvo","editChatMessage","deleteChatMessage","searchChatMessages"];
+      "archiveChatConvo","unarchiveChatConvo","editChatMessage","deleteChatMessage","searchChatMessages",
+      "qboStatus","qboDisconnect","qboSync"];
 
     _apiFns.forEach(function(fn) {
       window.api.call[fn] = function() {
@@ -5677,7 +5706,7 @@
       const vtw = el("viewToggleWrap"); if (vtw) vtw.style.display = "flex";
 
       // Pre-load admin settings into form
-      if (STATE.isAdmin && STATE.adminSettings) applyAdminSettingsToForm_(STATE.adminSettings);
+      if (STATE.isAdmin && STATE.adminSettings) { applyAdminSettingsToForm_(STATE.adminSettings); checkQboStatus_(); }
 
       // Mobile detection: add body class so CSS can adapt
       detectMobile_();
@@ -13450,6 +13479,31 @@
     }
 
 
+    // ── QuickBooks Sync ──────────────────
+    function syncToQuickBooks(){
+      var sel = el("adminPpSelect");
+      if (!sel||!sel.value) return setMsg("adminMsg","err","Select a pay period first.");
+      var parts = sel.value.split("|");
+      if (!confirm("Sync all entries for this pay period to QuickBooks?")) return;
+      var btn = el("btnQboSync");
+      if (btn) { btn.disabled = true; btn.textContent = "Syncing..."; }
+      setMsg("adminMsg","","");
+      api.call
+        .onSuccess(function(res){
+          if (btn) { btn.disabled = false; btn.textContent = "📊 Sync to QuickBooks"; }
+          if (!res||!res.ok) return setMsg("adminMsg","err", res?.reason||"Sync failed.");
+          var msg = "Synced " + res.synced + " of " + res.total + " entries to QuickBooks.";
+          if (res.skipped > 0) msg += " (" + res.skipped + " skipped)";
+          if (res.warning) msg += "\n⚠️ " + res.warning;
+          setMsg("adminMsg", res.unmatched ? "warn" : "ok", msg);
+        })
+        .onError(function(err){
+          if (btn) { btn.disabled = false; btn.textContent = "📊 Sync to QuickBooks"; }
+          setMsg("adminMsg","err","SERVER ERROR: "+(err?.message||err));
+        })
+        .qboSync(STATE.email, STATE.pin, parts[0], parts[1]);
+    }
+
     // ── My Earnings ──────────────────────
     var _earningsData = null;
     var _earningsView = "summary";
@@ -15344,6 +15398,41 @@
         if (wnPrev) { wnPrev.style.display = "none"; wnPrev.removeAttribute("src"); }
         if (wnRm) wnRm.style.display = "none";
       }
+    }
+
+    // QuickBooks connection status check
+    function checkQboStatus_() {
+      if (!STATE.isAdmin) return;
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) return;
+        var nc = el("qboNotConnected");
+        var co = el("qboConnected");
+        var ri = el("qboRealmInfo");
+        var syncBtn = el("btnQboSync");
+        if (res.connected) {
+          if (nc) nc.style.display = "none";
+          if (co) co.style.display = "";
+          if (ri) ri.textContent = "Company ID: " + res.realmId;
+          if (syncBtn) syncBtn.style.display = "";
+        } else {
+          if (nc) nc.style.display = "";
+          if (co) co.style.display = "none";
+          if (syncBtn) syncBtn.style.display = "none";
+        }
+      }).qboStatus(STATE.email, STATE.pin);
+    }
+    // Check on settings load
+    document.addEventListener("click", function(e) {
+      if (e.target && e.target.id === "qboDisconnectBtn") {
+        if (!confirm("Disconnect QuickBooks? You can reconnect anytime.")) return;
+        api.call.onSuccess(function(res) {
+          if (res && res.ok) checkQboStatus_();
+        }).qboDisconnect(STATE.email, STATE.pin);
+      }
+    });
+    // Check status when URL has qbo param (after OAuth redirect)
+    if (location.hash.includes("qbo=connected") || location.hash.includes("qbo=error")) {
+      setTimeout(function() { checkQboStatus_(); }, 500);
     }
 
     // Toggle show/hide for settings sections

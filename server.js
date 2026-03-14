@@ -8,6 +8,8 @@ const { v4: uuidv4 } = require("uuid");
 const path       = require("path");
 const cron       = require("node-cron");
 const webpush    = require("web-push");
+const OAuthClient = require("intuit-oauth");
+const QuickBooks  = require("node-quickbooks");
 
 const app  = express();
 app.use(express.json({ limit: "10mb" }));
@@ -198,6 +200,21 @@ async function setupDatabase() {
       key       TEXT NOT NULL,
       value     TEXT,
       UNIQUE(tenant_id, key)
+    )
+  `);
+
+  // QuickBooks Online integration tokens
+  await query(`
+    CREATE TABLE IF NOT EXISTS qbo_tokens (
+      id            SERIAL PRIMARY KEY,
+      tenant_id     INTEGER REFERENCES tenants(id) ON DELETE CASCADE UNIQUE,
+      realm_id      TEXT NOT NULL,
+      access_token  TEXT NOT NULL,
+      refresh_token TEXT NOT NULL,
+      token_type    TEXT DEFAULT 'bearer',
+      expires_at    TIMESTAMPTZ,
+      created_at    TIMESTAMPTZ DEFAULT NOW(),
+      updated_at    TIMESTAMPTZ DEFAULT NOW()
     )
   `);
 
@@ -8266,6 +8283,236 @@ api.post("/pushUnsubscribe", async (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// ══════════════════════════════════════════════════════
+//  QUICKBOOKS ONLINE INTEGRATION
+// ══════════════════════════════════════════════════════
+
+function getQboOAuthClient() {
+  return new OAuthClient({
+    clientId:     process.env.QBO_CLIENT_ID,
+    clientSecret: process.env.QBO_CLIENT_SECRET,
+    environment:  process.env.QBO_ENVIRONMENT || "sandbox", // "sandbox" or "production"
+    redirectUri:  process.env.QBO_REDIRECT_URI || `${process.env.APP_URL || "https://app.kronara.app"}/api/qbo/callback`,
+  });
+}
+
+// Start OAuth flow — admin clicks "Connect QuickBooks"
+app.get("/api/qbo/connect", async (req, res) => {
+  try {
+    const oauthClient = getQboOAuthClient();
+    const authUri = oauthClient.authorizeUri({
+      scope: [OAuthClient.scopes.Accounting],
+      state: "kronara-qbo",
+    });
+    res.redirect(authUri);
+  } catch (e) {
+    console.error("QBO connect error:", e);
+    res.status(500).send("Failed to start QuickBooks connection.");
+  }
+});
+
+// OAuth callback — Intuit redirects here after user authorizes
+app.get("/api/qbo/callback", async (req, res) => {
+  try {
+    const oauthClient = getQboOAuthClient();
+    const authResponse = await oauthClient.createToken(req.url);
+    const token = authResponse.getJson();
+    const tid = await getDefaultTenantId();
+
+    await query(`
+      INSERT INTO qbo_tokens (tenant_id, realm_id, access_token, refresh_token, expires_at, updated_at)
+      VALUES ($1, $2, $3, $4, NOW() + INTERVAL '1 hour', NOW())
+      ON CONFLICT (tenant_id) DO UPDATE SET
+        realm_id = EXCLUDED.realm_id,
+        access_token = EXCLUDED.access_token,
+        refresh_token = EXCLUDED.refresh_token,
+        expires_at = NOW() + INTERVAL '1 hour',
+        updated_at = NOW()
+    `, [tid, token.realmId || req.query.realmId, token.access_token, token.refresh_token]);
+
+    // Redirect back to admin settings with success
+    res.redirect("/#settings?qbo=connected");
+  } catch (e) {
+    console.error("QBO callback error:", e);
+    res.redirect("/#settings?qbo=error");
+  }
+});
+
+// Check QBO connection status
+api.post("/qboStatus", async (req, res) => {
+  try {
+    const { email, pin } = req.body;
+    const user = await getAuthorizedUser(email, pin);
+    if (!user) return res.json({ ok: false, reason: "Invalid credentials." });
+    const uType = String(user.type || "").toUpperCase();
+    if (uType !== "ADMIN") return res.json({ ok: false, reason: "Admin access required." });
+
+    const tid = await getDefaultTenantId();
+    const r = await query(`SELECT realm_id, expires_at, updated_at FROM qbo_tokens WHERE tenant_id=$1`, [tid]);
+    if (r.rows.length === 0) return res.json({ ok: true, connected: false });
+
+    res.json({ ok: true, connected: true, realmId: r.rows[0].realm_id, lastUpdated: r.rows[0].updated_at });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Disconnect QuickBooks
+api.post("/qboDisconnect", async (req, res) => {
+  try {
+    const { email, pin } = req.body;
+    const user = await getAuthorizedUser(email, pin);
+    if (!user) return res.json({ ok: false, reason: "Invalid credentials." });
+    const uType = String(user.type || "").toUpperCase();
+    if (uType !== "ADMIN") return res.json({ ok: false, reason: "Admin access required." });
+
+    const tid = await getDefaultTenantId();
+    await query(`DELETE FROM qbo_tokens WHERE tenant_id=$1`, [tid]);
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
+// Helper: get a refreshed QBO client
+async function getQboClient() {
+  const tid = await getDefaultTenantId();
+  const r = await query(`SELECT * FROM qbo_tokens WHERE tenant_id=$1`, [tid]);
+  if (r.rows.length === 0) throw new Error("QuickBooks is not connected.");
+
+  const row = r.rows[0];
+  const oauthClient = getQboOAuthClient();
+
+  // Check if token needs refresh (expired or expiring in next 5 min)
+  const expiresAt = new Date(row.expires_at);
+  if (expiresAt < new Date(Date.now() + 5 * 60 * 1000)) {
+    oauthClient.setToken({
+      access_token: row.access_token,
+      refresh_token: row.refresh_token,
+      token_type: "bearer",
+      expires_in: 0,
+    });
+    const refreshResponse = await oauthClient.refresh();
+    const newToken = refreshResponse.getJson();
+
+    await query(`
+      UPDATE qbo_tokens SET access_token=$1, refresh_token=$2, expires_at=NOW() + INTERVAL '1 hour', updated_at=NOW()
+      WHERE tenant_id=$3
+    `, [newToken.access_token, newToken.refresh_token, tid]);
+
+    row.access_token = newToken.access_token;
+    row.refresh_token = newToken.refresh_token;
+  }
+
+  const useSandbox = (process.env.QBO_ENVIRONMENT || "sandbox") === "sandbox";
+  return new QuickBooks(
+    process.env.QBO_CLIENT_ID,
+    process.env.QBO_CLIENT_SECRET,
+    row.access_token,
+    false, // no token secret (OAuth2)
+    row.realm_id,
+    useSandbox,
+    true,  // debug
+    null,  // minor version
+    "2.0", // OAuth version
+    row.refresh_token
+  );
+}
+
+// Sync timesheet entries to QuickBooks as TimeActivities
+api.post("/qboSync", async (req, res) => {
+  try {
+    const { email, pin, ppStart, ppEnd } = req.body;
+    const user = await getAuthorizedUser(email, pin);
+    if (!user) return res.json({ ok: false, reason: "Invalid credentials." });
+    const uType = String(user.type || "").toUpperCase();
+    if (uType !== "ADMIN") return res.json({ ok: false, reason: "Admin access required." });
+
+    const tid = await getDefaultTenantId();
+    const qb = await getQboClient();
+
+    // Get all entries for the pay period
+    const entries = await query(`
+      SELECT e.*, u.name as user_name, u.type as user_type
+      FROM entries e
+      JOIN users u ON LOWER(u.email) = LOWER(e.user_email) AND u.tenant_id = e.tenant_id
+      WHERE e.tenant_id=$1 AND e.pay_period_start=$2 AND e.pay_period_end=$3
+      ORDER BY e.user_email, e.date
+    `, [tid, ppStart, ppEnd]);
+
+    if (entries.rows.length === 0) return res.json({ ok: false, reason: "No entries found for this pay period." });
+
+    // Get QBO employees to match by name
+    const qboEmployees = await new Promise((resolve, reject) => {
+      qb.findEmployees({ fetchAll: true }, (err, data) => {
+        if (err) return reject(err);
+        resolve(data.QueryResponse.Employee || []);
+      });
+    });
+
+    // Build name->ID map (case-insensitive)
+    const empMap = {};
+    for (const emp of qboEmployees) {
+      const fullName = `${emp.GivenName || ""} ${emp.FamilyName || ""}`.trim().toLowerCase();
+      empMap[fullName] = emp.Id;
+      // Also map display name
+      if (emp.DisplayName) empMap[emp.DisplayName.toLowerCase()] = emp.Id;
+    }
+
+    let synced = 0;
+    let skipped = 0;
+    const unmatchedNames = new Set();
+
+    for (const entry of entries.rows) {
+      const name = (entry.user_name || "").trim().toLowerCase();
+      const empId = empMap[name];
+
+      if (!empId) {
+        unmatchedNames.add(entry.user_name || entry.user_email);
+        skipped++;
+        continue;
+      }
+
+      const hours = parseFloat(entry.hours_offered) || 0;
+      if (hours <= 0) { skipped++; continue; }
+
+      const timeActivity = {
+        TxnDate: entry.date,
+        NameOf: entry.user_type === "Contractor" ? "Vendor" : "Employee",
+        EmployeeRef: entry.user_type !== "Contractor" ? { value: empId } : undefined,
+        VendorRef: entry.user_type === "Contractor" ? { value: empId } : undefined,
+        Hours: Math.floor(hours),
+        Minutes: Math.round((hours % 1) * 60),
+        Description: `${entry.class_party || ""}${entry.location ? " @ " + entry.location : ""}${entry.notes ? " — " + entry.notes : ""}`.trim(),
+        HourlyRate: parseFloat(entry.hourly_rate) || 0,
+      };
+
+      try {
+        await new Promise((resolve, reject) => {
+          qb.createTimeActivity(timeActivity, (err, data) => {
+            if (err) return reject(err);
+            resolve(data);
+          });
+        });
+        synced++;
+      } catch (syncErr) {
+        console.error("QBO sync entry error:", syncErr.Fault || syncErr);
+        skipped++;
+      }
+    }
+
+    const result = { ok: true, synced, skipped, total: entries.rows.length };
+    if (unmatchedNames.size > 0) {
+      result.unmatched = Array.from(unmatchedNames);
+      result.warning = `${unmatchedNames.size} staff member(s) could not be matched to QuickBooks employees. Make sure their names match exactly.`;
+    }
+    res.json(result);
+  } catch (e) {
+    console.error("QBO sync error:", e);
+    res.json({ ok: false, reason: e.message || "Failed to sync with QuickBooks." });
   }
 });
 
