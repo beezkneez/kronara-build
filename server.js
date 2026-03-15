@@ -8488,7 +8488,13 @@ api.post("/qboSync", async (req, res) => {
     for (const entry of entries.rows) {
       const name = (entry.user_name || "").trim().toLowerCase();
       const isContractor = (entry.user_type || "").toLowerCase() === "contractor";
-      const empId = isContractor ? vendorMap[name] : empMap[name];
+      // Check both Employees and Vendors — different QBO setups handle contractors differently
+      let empId = empMap[name];
+      let matchedAsVendor = false;
+      if (!empId && vendorMap[name]) {
+        empId = vendorMap[name];
+        matchedAsVendor = true;
+      }
 
       if (!empId) {
         unmatchedNames.add(entry.user_name || entry.user_email);
@@ -8501,9 +8507,9 @@ api.post("/qboSync", async (req, res) => {
 
       const timeActivity = {
         TxnDate: entry.date,
-        NameOf: entry.user_type === "Contractor" ? "Vendor" : "Employee",
-        EmployeeRef: entry.user_type !== "Contractor" ? { value: empId } : undefined,
-        VendorRef: entry.user_type === "Contractor" ? { value: empId } : undefined,
+        NameOf: matchedAsVendor ? "Vendor" : "Employee",
+        EmployeeRef: !matchedAsVendor ? { value: empId } : undefined,
+        VendorRef: matchedAsVendor ? { value: empId } : undefined,
         Hours: Math.floor(hours),
         Minutes: Math.round((hours % 1) * 60),
         Description: `${entry.class_party || ""}${entry.location ? " @ " + entry.location : ""}${entry.notes ? " — " + entry.notes : ""}`.trim(),
