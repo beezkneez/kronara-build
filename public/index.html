@@ -13492,6 +13492,7 @@
         .onSuccess(function(res){
           if (btn) { btn.disabled = false; btn.textContent = "📊 Sync to QuickBooks"; }
           if (!res||!res.ok) return setMsg("adminMsg","err", res?.reason||"Sync failed.");
+          if (res.message) return setMsg("adminMsg","ok", res.message);
           var msg = "Synced " + res.synced + " of " + res.total + " entries to QuickBooks.";
           if (res.skipped > 0) msg += " (" + res.skipped + " skipped)";
           if (res.warning) msg += "\n⚠️ " + res.warning;

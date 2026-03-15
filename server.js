@@ -407,6 +407,7 @@ async function setupDatabase() {
   await query(`ALTER TABLE entries ADD COLUMN IF NOT EXISTS rigging_minutes INTEGER DEFAULT 0`).catch(()=>{});
   await query(`ALTER TABLE pending_submissions ADD COLUMN IF NOT EXISTS rigging_minutes INTEGER DEFAULT 0`).catch(()=>{});
   await query(`ALTER TABLE entries ADD COLUMN IF NOT EXISTS studio_rental_fee NUMERIC(8,2) DEFAULT 0`).catch(()=>{});
+  await query(`ALTER TABLE entries ADD COLUMN IF NOT EXISTS qbo_synced BOOLEAN DEFAULT FALSE`).catch(()=>{});
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS shift_filter_keywords TEXT DEFAULT ''`).catch(()=>{});
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS can_create_images BOOLEAN DEFAULT FALSE`).catch(()=>{});
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS tsps_enabled BOOLEAN DEFAULT TRUE`).catch(()=>{});
@@ -8434,16 +8435,22 @@ api.post("/qboSync", async (req, res) => {
     const tid = await getDefaultTenantId();
     const qb = await getQboClient();
 
-    // Get all entries for the pay period
+    // Get all entries for the pay period that haven't been synced yet
     const entries = await query(`
       SELECT e.*, u.name as user_name, u.type as user_type
       FROM entries e
       JOIN users u ON LOWER(u.email) = LOWER(e.user_email) AND u.tenant_id = e.tenant_id
-      WHERE e.tenant_id=$1 AND e.pay_period_start=$2 AND e.pay_period_end=$3
+      WHERE e.tenant_id=$1 AND e.pay_period_start=$2 AND e.pay_period_end=$3 AND (e.qbo_synced IS NOT TRUE)
       ORDER BY e.user_email, e.date
     `, [tid, ppStart, ppEnd]);
 
-    if (entries.rows.length === 0) return res.json({ ok: false, reason: "No entries found for this pay period." });
+    if (entries.rows.length === 0) {
+      // Check if there are entries that were already synced
+      const allEntries = await query(`SELECT COUNT(*) as cnt FROM entries WHERE tenant_id=$1 AND pay_period_start=$2 AND pay_period_end=$3`, [tid, ppStart, ppEnd]);
+      const total = parseInt(allEntries.rows[0].cnt) || 0;
+      if (total > 0) return res.json({ ok: true, synced: 0, skipped: 0, total: 0, message: "All entries for this pay period have already been synced to QuickBooks." });
+      return res.json({ ok: false, reason: "No entries found for this pay period." });
+    }
 
     // Get QBO employees and vendors to match by name
     const qboEmployees = await new Promise((resolve, reject) => {
@@ -8509,6 +8516,8 @@ api.post("/qboSync", async (req, res) => {
             resolve(data);
           });
         });
+        // Mark as synced
+        await query(`UPDATE entries SET qbo_synced=TRUE WHERE id=$1 AND tenant_id=$2`, [entry.id, tid]);
         synced++;
       } catch (syncErr) {
         console.error("QBO sync entry error:", syncErr.Fault || syncErr);
