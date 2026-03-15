@@ -8445,21 +8445,32 @@ api.post("/qboSync", async (req, res) => {
 
     if (entries.rows.length === 0) return res.json({ ok: false, reason: "No entries found for this pay period." });
 
-    // Get QBO employees to match by name
+    // Get QBO employees and vendors to match by name
     const qboEmployees = await new Promise((resolve, reject) => {
       qb.findEmployees({ fetchAll: true }, (err, data) => {
         if (err) return reject(err);
         resolve(data.QueryResponse.Employee || []);
       });
     });
+    const qboVendors = await new Promise((resolve, reject) => {
+      qb.findVendors({ fetchAll: true }, (err, data) => {
+        if (err) return reject(err);
+        resolve(data.QueryResponse.Vendor || []);
+      });
+    });
 
-    // Build name->ID map (case-insensitive)
+    // Build name->ID maps (case-insensitive)
     const empMap = {};
     for (const emp of qboEmployees) {
       const fullName = `${emp.GivenName || ""} ${emp.FamilyName || ""}`.trim().toLowerCase();
       empMap[fullName] = emp.Id;
-      // Also map display name
       if (emp.DisplayName) empMap[emp.DisplayName.toLowerCase()] = emp.Id;
+    }
+    const vendorMap = {};
+    for (const v of qboVendors) {
+      const fullName = `${v.GivenName || ""} ${v.FamilyName || ""}`.trim().toLowerCase();
+      vendorMap[fullName] = v.Id;
+      if (v.DisplayName) vendorMap[v.DisplayName.toLowerCase()] = v.Id;
     }
 
     let synced = 0;
@@ -8468,7 +8479,8 @@ api.post("/qboSync", async (req, res) => {
 
     for (const entry of entries.rows) {
       const name = (entry.user_name || "").trim().toLowerCase();
-      const empId = empMap[name];
+      const isContractor = (entry.user_type || "").toLowerCase() === "contractor";
+      const empId = isContractor ? vendorMap[name] : empMap[name];
 
       if (!empId) {
         unmatchedNames.add(entry.user_name || entry.user_email);
