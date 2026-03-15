@@ -15501,6 +15501,17 @@
     // QuickBooks connection status check
     function checkQboStatus_() {
       if (!STATE.isAdmin) return;
+      // Hide QBO section entirely if feature is disabled
+      var qboSection = document.querySelector('#qboStatus')?.closest('.settings-section-body');
+      var qboHeader = qboSection?.previousElementSibling;
+      if (STATE.adminSettings && !STATE.adminSettings.qboEnabled) {
+        if (qboSection) qboSection.style.display = "none";
+        if (qboHeader) qboHeader.style.display = "none";
+        var syncBtn = el("btnQboSync"); if (syncBtn) syncBtn.style.display = "none";
+        return;
+      }
+      if (qboSection) qboSection.style.display = "";
+      if (qboHeader) qboHeader.style.display = "";
       api.call.onSuccess(function(res) {
         if (!res || !res.ok) return;
         var nc = el("qboNotConnected");

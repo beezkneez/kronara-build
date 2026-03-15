@@ -2086,6 +2086,7 @@ async function getAdminSettings() {
     setupLabel:           map.setupLabel || "",
     cleanupLabel:         map.cleanupLabel || "",
     riggingLabel:         map.riggingLabel || "",
+    qboEnabled:           map.qboEnabled === "true",
     // What's New announcement banner
     whatsNewEnabled: map.whatsNewEnabled === "true",
     whatsNewContent: map.whatsNewContent || "",
@@ -3503,7 +3504,7 @@ api.post("/saveAdminSettings", async (req, res) => {
       "adminEmailsWhitelistExempt",
       "youtubeLink","autoRemindDaysBeforeEnabled","autoRemindDaysBefore",
       "autoSendTime","autoRemindersTime","autoRemindBeforeTime",
-      "setupCleanupEnabled","setupCleanupBaseRate","setupEnabled","cleanupEnabled","riggingEnabled","setupLabel","cleanupLabel","riggingLabel",
+      "setupCleanupEnabled","setupCleanupBaseRate","setupEnabled","cleanupEnabled","riggingEnabled","setupLabel","cleanupLabel","riggingLabel","qboEnabled",
       "whatsNewEnabled","whatsNewContent","whatsNewVersion","whatsNewImage",
       "lateGraceDays",
       "schedulingManagerEmail",
