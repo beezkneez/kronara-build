@@ -1704,7 +1704,7 @@
       <a href="#" onclick="hardReset();return false;" style="margin-left:auto;color:#c0392b;font-weight:800;">Log out</a>
       <a href="#" id="deskImages" style="display:none;" onclick="go('images');return false;">🖼 Images</a>
       <a href="#" id="deskTsps" style="display:none;" onclick="go('tsps');return false;">🔄 TSPS</a>
-      <a href="#" id="deskProposals" style="display:none;" onclick="go('proposals');return false;">📝 Proposals</a>
+      <a href="#" id="deskProposals" style="display:none;" onclick="go('proposals');return false;">📝 Requests</a>
       <a href="#" id="deskAdmin" style="display:none;" onclick="go('admin');return false;">⚙ Admin</a>
       
         <a id="deskWebsiteLink" href="https://edmonton.aradiafitness.com" target="_blank" rel="noopener">Website ↗</a>
@@ -1750,7 +1750,7 @@
     </button>
     <button class="tab-btn" id="tabProposals" style="display:none;" onclick="go('proposals')">
       <span class="tab-icon">📝</span>
-      <span>Proposals</span>
+      <span>Requests</span>
       <span id="cpChangeBadge" style="display:none;background:#e65100;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:800;margin-left:2px;">0</span>
     </button>
     <button class="tab-btn" id="tabAdmin" style="display:none;" onclick="go('admin')">
@@ -1933,7 +1933,7 @@
           <span style="font-size:20px;">📝</span>
           <div style="flex:1;">
             <div style="font-weight:800;font-size:14px;color:#fff;">Changes Suggested</div>
-            <div style="font-size:12px;color:rgba(255,255,255,.8);" id="changeReqBannerText">Admin has suggested changes to your class proposal.</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.8);" id="changeReqBannerText">Admin has suggested changes to your schedule request.</div>
           </div>
           <div style="background:rgba(255,255,255,.2);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:800;color:#fff;white-space:nowrap;">View →</div>
         </div>
@@ -1944,7 +1944,7 @@
         <div style="background:#e65100;padding:10px 16px;display:flex;align-items:center;gap:10px;">
           <span style="font-size:20px;">📋</span>
           <div style="flex:1;">
-            <div style="font-weight:800;font-size:14px;color:#fff;">Proposals Need Attention</div>
+            <div style="font-weight:800;font-size:14px;color:#fff;">Requests Need Attention</div>
             <div style="font-size:12px;color:rgba(255,255,255,.8);" id="proposalAdminBannerText">Staff have responded to change requests.</div>
           </div>
           <div style="background:rgba(255,255,255,.2);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:800;color:#fff;white-space:nowrap;">Review →</div>
@@ -3040,7 +3040,7 @@
             <button id="adminTab_staff"    onclick="switchAdminTab('staff')"    style="flex:1;padding:12px 8px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);">Staff</button>
             <button id="adminTab_settings" onclick="switchAdminTab('settings')" style="flex:1;padding:12px 8px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);">Settings</button>
             <button id="adminTab_sent"    onclick="switchAdminTab('sent')"    style="flex:1;padding:12px 8px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);">Sent</button>
-            <button id="adminTab_proposals" onclick="switchAdminTab('proposals')" style="flex:1;padding:12px 8px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);">Proposals <span id="proposalsDashBadge" style="display:none;background:var(--red);color:#fff;border-radius:10px;padding:2px 7px;font-size:11px;font-weight:800;margin-left:2px;">0</span></button>
+            <button id="adminTab_proposals" onclick="switchAdminTab('proposals')" style="flex:1;padding:12px 8px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);">Requests <span id="proposalsDashBadge" style="display:none;background:var(--red);color:#fff;border-radius:10px;padding:2px 7px;font-size:11px;font-weight:800;margin-left:2px;">0</span></button>
             <button id="adminTab_export"  onclick="switchAdminTab('export')"  style="flex:1;padding:12px 8px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);">Export</button>
           </div>
         </div>
@@ -3362,12 +3362,12 @@
           </div>
 
           <div style="margin-bottom:4px;margin-top:12px;">
-            <label style="font-size:12px;">Class Proposals digest email <span style="font-weight:400;color:var(--muted);font-size:11px;">— receives weekly summary of proposed classes</span></label>
+            <label style="font-size:12px;">Schedule Requests digest email <span style="font-weight:400;color:var(--muted);font-size:11px;">— receives weekly summary of requested classes</span></label>
             <input id="adminProposalDigestEmail" placeholder="scheduling@example.com" type="email" style="margin:0;" />
           </div>
           <div class="toggle-row" style="margin-bottom:10px;">
             <div>
-              <div class="toggle-label" style="font-size:12px;">Enable weekly proposals digest</div>
+              <div class="toggle-label" style="font-size:12px;">Enable weekly requests digest</div>
               <div class="toggle-sub" style="font-size:11px;">Send a summary email every Monday at 9 AM MST</div>
             </div>
             <label class="admin-toggle">
@@ -3377,7 +3377,7 @@
           </div>
 
           <div style="margin-top:10px;">
-            <label style="font-size:12px;">Instant proposal notification email <span style="font-weight:400;color:var(--muted);font-size:11px;">— receives an email every time a new proposal is submitted</span></label>
+            <label style="font-size:12px;">Instant request notification email <span style="font-weight:400;color:var(--muted);font-size:11px;">— receives an email every time a new request is submitted</span></label>
             <input id="adminProposalNotifyEmail" placeholder="admin@example.com" type="email" style="margin:0;" />
           </div>
 
@@ -3927,13 +3927,13 @@
         <div id="adminSection_proposals" style="display:none;">
           <div class="card">
             <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
-              <span>Class Proposals Dashboard</span>
+              <span>Schedule Requests Dashboard</span>
               <div style="display:flex;gap:8px;align-items:center;">
                 <button id="pdTogglePending" class="btn secondary" onclick="pdToggleView_(false)" style="font-size:11px;padding:6px 14px;font-weight:800;background:var(--red);color:#fff;border-color:var(--red);">Pending</button>
                 <button id="pdToggleArchived" class="btn secondary" onclick="pdToggleView_(true)" style="font-size:11px;padding:6px 14px;">Archived</button>
               </div>
             </div>
-            <div class="muted" style="margin-bottom:12px;">Staff proposals awaiting scheduling. Click <strong>Class Created</strong> to archive once added to the schedule.</div>
+            <div class="muted" style="margin-bottom:12px;">Staff requests awaiting scheduling. Click <strong>Class Created</strong> to archive once added to the schedule.</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
               <select id="pdFilterInstructor" onchange="pdApplyFilters_()" style="padding:6px 10px;border-radius:6px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--input-text);font-size:12px;">
                 <option value="">All Instructors</option>
@@ -4158,7 +4158,7 @@
       <div id="page_proposals" style="display:none;">
         <div class="card">
           <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
-            <span>Class Proposals</span>
+            <span>Schedule Requests</span>
             <a href="javascript:void(0)" id="cpAdminLink" onclick="go('admin');setTimeout(function(){switchAdminTab('proposals');},100);" style="display:none;font-size:12px;font-weight:600;color:var(--red);">Admin Dashboard →</a>
           </div>
           <div class="muted" style="margin-bottom:12px;">Propose classes you'd like to teach. Help build the schedule!</div>
@@ -4277,7 +4277,7 @@
             <div class="toggle-row" style="margin-bottom:8px;" id="cpRecurringRow">
               <div>
                 <div class="toggle-label" style="font-size:12px;">Repeat</div>
-                <div class="toggle-sub" style="font-size:11px;">Create multiple proposals on a recurring schedule</div>
+                <div class="toggle-sub" style="font-size:11px;">Create multiple requests on a recurring schedule</div>
               </div>
               <label class="admin-toggle">
                 <input type="checkbox" id="cpRecurring" onchange="el('cpRecurringOpts').style.display=this.checked?'block':'none'">
@@ -4317,9 +4317,9 @@
             <div id="cpPostMsg" class="msg" style="margin-top:8px;"></div>
           </div>
         </div>
-        <!-- ── My Proposals Section ── -->
+        <!-- ── My Requests Section ── -->
         <div class="card" id="myProposalsCard" style="margin-top:16px;">
-          <div class="card-title" style="margin-bottom:8px;">My Proposals</div>
+          <div class="card-title" style="margin-bottom:8px;">My Requests</div>
           <div id="myProposalsFilterBar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
             <button class="btn" id="mpFilterAll" onclick="cpFilterMyProposals_('all')" style="font-size:11px;padding:5px 12px;font-weight:700;">Show All</button>
             <button class="btn secondary" id="mpFilterPending" onclick="cpFilterMyProposals_('pending')" style="font-size:11px;padding:5px 12px;">Pending</button>
@@ -4327,7 +4327,7 @@
             <button class="btn secondary" id="mpFilterDenied" onclick="cpFilterMyProposals_('denied')" style="font-size:11px;padding:5px 12px;">Denied</button>
           </div>
           <div id="myProposalsLoading" style="display:none;height:3px;background:linear-gradient(90deg,var(--red) 30%,#e0e0e0 30%);background-size:200% 100%;animation:loading 1.2s linear infinite;border-radius:3px;margin-bottom:10px;"></div>
-          <div id="myProposalsEmpty" class="muted" style="display:none;text-align:center;padding:20px;font-size:13px;">You haven't submitted any proposals yet.</div>
+          <div id="myProposalsEmpty" class="muted" style="display:none;text-align:center;padding:20px;font-size:13px;">You haven't submitted any requests yet.</div>
           <div id="myProposalsList"></div>
         </div>
 
@@ -4506,7 +4506,7 @@
                     <td style="text-align:center;padding:8px;"><label class="admin-toggle" style="transform:scale(.8);"><input type="checkbox" id="staffPerm_sent_w"><span class="slider"></span></label></td>
                   </tr>
                   <tr style="border-bottom:1px solid var(--line);">
-                    <td style="padding:8px;">Proposals Dashboard</td>
+                    <td style="padding:8px;">Requests Dashboard</td>
                     <td style="text-align:center;padding:8px;"><label class="admin-toggle" style="transform:scale(.8);"><input type="checkbox" id="staffPerm_proposals_r"><span class="slider"></span></label></td>
                     <td style="text-align:center;padding:8px;"><label class="admin-toggle" style="transform:scale(.8);"><input type="checkbox" id="staffPerm_proposals_w"><span class="slider"></span></label></td>
                   </tr>
@@ -5804,7 +5804,7 @@
       var crt = el("changeReqBannerText");
       if (crCount > 0) {
         if (crb) crb.style.display = "block";
-        if (crt) crt.textContent = crCount + " proposal" + (crCount === 1 ? "" : "s") + " with suggested changes — tap to review and respond.";
+        if (crt) crt.textContent = crCount + " request" + (crCount === 1 ? "" : "s") + " with suggested changes — tap to review and respond.";
       } else {
         if (crb) crb.style.display = "none";
       }
@@ -5815,7 +5815,7 @@
       var pat = el("proposalAdminBannerText");
       if (paCount > 0) {
         if (pab) pab.style.display = "block";
-        if (pat) pat.textContent = paCount + " proposal" + (paCount === 1 ? "" : "s") + " where staff declined your changes — tap to review.";
+        if (pat) pat.textContent = paCount + " request" + (paCount === 1 ? "" : "s") + " where staff declined your changes — tap to review.";
       } else {
         if (pab) pab.style.display = "none";
       }
@@ -10605,7 +10605,7 @@
 
     function cpRenderList_() {
       var container = el("cpListView");
-      if (!_cpProposals.length) { container.innerHTML = '<div class="muted" style="padding:16px;text-align:center;">No proposals this month.</div>'; return; }
+      if (!_cpProposals.length) { container.innerHTML = '<div class="muted" style="padding:16px;text-align:center;">No requests this month.</div>'; return; }
       var sorted = _cpProposals.slice().sort(function(a,b){ return (a.proposal_date + a.start_time).localeCompare(b.proposal_date + b.start_time); });
       var html = "";
       var lastDate = "";
@@ -10639,7 +10639,7 @@
       var dayProposals = _cpProposals.filter(function(p){ return p.proposal_date === dateStr; });
       dayProposals.sort(function(a,b){ return (a.start_time||"").localeCompare(b.start_time||""); });
       if (dayProposals.length === 0) {
-        container.innerHTML = '<div class="muted" style="padding:10px;text-align:center;font-size:13px;">No proposals for this day.</div>';
+        container.innerHTML = '<div class="muted" style="padding:10px;text-align:center;font-size:13px;">No requests for this day.</div>';
         return;
       }
 
@@ -10690,7 +10690,7 @@
       // Denied banner
       if (st === "denied") {
         html += '<div style="background:#ffebee;border:1px solid #ef9a9a;border-radius:8px;padding:10px 14px;margin-bottom:10px;">';
-        html += '<div style="font-weight:800;font-size:13px;color:#c62828;margin-bottom:4px;">Proposal Denied</div>';
+        html += '<div style="font-weight:800;font-size:13px;color:#c62828;margin-bottom:4px;">Request Denied</div>';
         if (p.latest_message) html += '<div style="font-size:12px;"><em>"' + esc(p.latest_message) + '"</em></div>';
         html += '</div>';
       }
@@ -10780,7 +10780,7 @@
       var crt = el("changeReqBannerText");
       if (crCount > 0) {
         if (crb) crb.style.display = "block";
-        if (crt) crt.textContent = crCount + " proposal" + (crCount === 1 ? "" : "s") + " with suggested changes — tap to review and respond.";
+        if (crt) crt.textContent = crCount + " request" + (crCount === 1 ? "" : "s") + " with suggested changes — tap to review and respond.";
       } else {
         if (crb) crb.style.display = "none";
       }
@@ -10826,7 +10826,7 @@
       }
 
       if (filtered.length === 0) {
-        el("myProposalsList").innerHTML = '<div class="muted" style="text-align:center;padding:20px;font-size:13px;">No proposals match this filter.</div>';
+        el("myProposalsList").innerHTML = '<div class="muted" style="text-align:center;padding:20px;font-size:13px;">No requests match this filter.</div>';
         return;
       }
 
@@ -11051,7 +11051,7 @@
       if (!p) return;
       _cpEditingId = id;
 
-      el("cpFormTitle").textContent = "Edit Proposal";
+      el("cpFormTitle").textContent = "Edit Request";
       el("cpSubmitBtn").textContent = "Save Changes";
       el("cpRecurringRow").style.display = "none";
       el("cpRecurringOpts").style.display = "none";
@@ -11125,7 +11125,7 @@
         var updates = { class_name: className, proposal_date: date, start_time: startDisplay, duration: duration, location: loc, room: room, color: color, notes: notes };
         api.call.onSuccess(function(res){
           if (!res || !res.ok) { setMsg("cpPostMsg","err",res?.reason||"Failed to save."); return; }
-          setMsg("cpPostMsg","ok","Proposal updated!");
+          setMsg("cpPostMsg","ok","Request updated!");
           el("cpPostForm").style.display = "none";
           _cpEditingId = null;
           cpLoadMonth_();
@@ -11165,7 +11165,7 @@
 
       api.call.onSuccess(function(res){
         if (!res || !res.ok) { setMsg("cpPostMsg","err",res?.reason||"Failed to post."); return; }
-        setMsg("cpPostMsg","ok","Proposal" + (proposals.length>1?"s":"") + " submitted!");
+        setMsg("cpPostMsg","ok","Request" + (proposals.length>1?"s":"") + " submitted!");
         el("cpPostForm").style.display = "none";
         cpLoadMonth_();
         cpLoadMyProposals_();
@@ -11176,7 +11176,7 @@
     }
 
     function cpDeleteProposal_(id) {
-      if (!confirm("Delete this class proposal?")) return;
+      if (!confirm("Delete this schedule request?")) return;
       api.call.onSuccess(function(res){
         if (!res || !res.ok) { alert(res?.reason||"Failed to delete."); return; }
         cpLoadMonth_();
@@ -11188,10 +11188,10 @@
     }
 
     function cpDeleteSeries_(seriesId) {
-      if (!confirm("Delete ALL proposals in this recurring series?")) return;
+      if (!confirm("Delete ALL requests in this recurring series?")) return;
       api.call.onSuccess(function(res){
         if (!res || !res.ok) { alert(res?.reason||"Failed to delete series."); return; }
-        alert("Deleted " + (res.deleted || 0) + " proposals in the series.");
+        alert("Deleted " + (res.deleted || 0) + " requests in the series.");
         cpLoadMonth_();
         cpLoadMyProposals_();
         if (_cpSelectedDate) setTimeout(function(){ cpDayClick_(_cpSelectedDate); }, 500);
@@ -11320,7 +11320,7 @@
       if (!wrap || !_pdData) return;
       var displayData = pdGetFilteredData_();
       if (displayData.length === 0) {
-        var noMsg = (_pdFilterInstructor || _pdFilterLocation || _pdFilterClass) ? 'No proposals match the current filters.' : (_pdShowArchived ? 'No archived proposals.' : 'No pending proposals — all caught up!');
+        var noMsg = (_pdFilterInstructor || _pdFilterLocation || _pdFilterClass) ? 'No requests match the current filters.' : (_pdShowArchived ? 'No archived requests.' : 'No pending requests — all caught up!');
         wrap.innerHTML = '<div class="muted" style="text-align:center;padding:30px;font-size:14px;">' + noMsg + '</div>';
         return;
       }
@@ -11488,7 +11488,7 @@
       html += '</div>';
       // Inline deny form (hidden by default)
       html += '<div id="pdDeny_' + p.id + '" style="display:none;margin-top:10px;padding:12px;background:rgba(198,40,40,.06);border-radius:8px;border:1px solid #ef9a9a;">';
-      html += '<div style="font-weight:700;font-size:12px;margin-bottom:8px;color:#c62828;">Deny Proposal</div>';
+      html += '<div style="font-weight:700;font-size:12px;margin-bottom:8px;color:#c62828;">Deny Request</div>';
       html += '<textarea id="pdDenyMsg_' + p.id + '" rows="2" placeholder="Reason for denial..." style="width:100%;padding:6px;border:1px solid var(--line);border-radius:4px;font-size:12px;box-sizing:border-box;resize:vertical;"></textarea>';
       html += '<div style="display:flex;gap:6px;margin-top:8px;"><button class="btn" onclick="pdSendDeny_(\'' + p.id + '\')" style="font-size:11px;padding:5px 14px;background:#c62828;border-color:#c62828;color:#fff;">Confirm Deny</button>';
       html += '<button class="btn secondary" onclick="el(\'pdDeny_' + p.id + '\').style.display=\'none\'" style="font-size:11px;padding:5px 12px;">Cancel</button></div>';
@@ -11533,7 +11533,7 @@
     }
 
     function pdDeleteForever_(proposalId, seriesId) {
-      var msg = seriesId ? "PERMANENTLY delete this entire series? This cannot be undone." : "PERMANENTLY delete this proposal? This cannot be undone.";
+      var msg = seriesId ? "PERMANENTLY delete this entire series? This cannot be undone." : "PERMANENTLY delete this request? This cannot be undone.";
       if (!confirm(msg)) return;
       api.call.onSuccess(function(res) {
         if (!res || !res.ok) { alert(res?.reason || "Failed to delete."); return; }
