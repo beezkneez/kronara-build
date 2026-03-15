@@ -2086,7 +2086,7 @@ async function getAdminSettings() {
     setupLabel:           map.setupLabel || "",
     cleanupLabel:         map.cleanupLabel || "",
     riggingLabel:         map.riggingLabel || "",
-    qboEnabled:           map.qboEnabled === "true",
+    qboEnabled:           map.qboEnabled !== "false",
     // What's New announcement banner
     whatsNewEnabled: map.whatsNewEnabled === "true",
     whatsNewContent: map.whatsNewContent || "",
