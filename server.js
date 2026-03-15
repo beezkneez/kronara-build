@@ -8537,6 +8537,41 @@ api.post("/qboSync", async (req, res) => {
   }
 });
 
+// QBO sync status for a pay period
+api.post("/qboSyncStatus", async (req, res) => {
+  try {
+    const { email, pin, ppStart, ppEnd } = req.body;
+    const user = await getAuthorizedUser(email, pin);
+    if (!user) return res.json({ ok: false, reason: "Invalid credentials." });
+    const uType = String(user.type || "").toUpperCase();
+    if (uType !== "ADMIN" && uType !== "MODERATOR") return res.json({ ok: false, reason: "Admin access required." });
+
+    const tid = await getDefaultTenantId();
+
+    // Get all staff with their entry counts and sync status for this period
+    const result = await query(`
+      SELECT
+        u.name,
+        u.email,
+        u.type,
+        COUNT(e.id) as total_entries,
+        COUNT(CASE WHEN e.qbo_synced = TRUE THEN 1 END) as synced_entries,
+        COALESCE(SUM(e.hours_offered), 0) as total_hours,
+        COALESCE(SUM(CASE WHEN e.qbo_synced = TRUE THEN e.hours_offered ELSE 0 END), 0) as synced_hours
+      FROM users u
+      LEFT JOIN entries e ON LOWER(e.user_email) = LOWER(u.email) AND e.tenant_id = u.tenant_id
+        AND e.pay_period_start = $2 AND e.pay_period_end = $3
+      WHERE u.tenant_id = $1 AND u.is_active = TRUE AND u.type IN ('Employee', 'Contractor')
+      GROUP BY u.name, u.email, u.type
+      ORDER BY u.name
+    `, [tid, ppStart, ppEnd]);
+
+    res.json({ ok: true, staff: result.rows });
+  } catch (e) {
+    res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
+  }
+});
+
 // ── Onboarding form submission (from marketing site after Stripe payment) ──
 app.options("/api/onboarding", (req, res) => {
   res.set("Access-Control-Allow-Origin", "https://kronara.app");

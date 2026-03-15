@@ -3909,6 +3909,19 @@
             <div id="sentReportsMsg" class="msg" style="margin-bottom:8px;"></div>
             <div id="sentReportsWrap"></div>
           </div>
+          <!-- QuickBooks Sync Status -->
+          <div id="qboSyncCard" class="card" style="display:none;margin-top:14px;">
+            <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+              QuickBooks Sync Status
+              <div style="display:flex;gap:8px;">
+                <select id="qboSyncPpSelect" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--line);"></select>
+                <button class="btn secondary" onclick="loadQboSyncStatus_()" style="font-size:12px;padding:6px 14px;">↻ Refresh</button>
+              </div>
+            </div>
+            <div class="muted" style="margin-bottom:14px;">Overview of QuickBooks sync status for each staff member in the selected pay period.</div>
+            <div id="qboSyncMsg" class="msg" style="margin-bottom:8px;"></div>
+            <div id="qboSyncWrap"></div>
+          </div>
         </div><!-- /adminSection_sent -->
 
         <div id="adminSection_proposals" style="display:none;">
@@ -4860,6 +4873,7 @@
         case "qboStatus":              return { email: args[0], pin: args[1] };
         case "qboDisconnect":          return { email: args[0], pin: args[1] };
         case "qboSync":                return { email: args[0], pin: args[1], ppStart: args[2], ppEnd: args[3] };
+        case "qboSyncStatus":          return { email: args[0], pin: args[1], ppStart: args[2], ppEnd: args[3] };
         case "sendTestPush":           return { email: args[0], pin: args[1] };
         case "getEntriesByDate":       return { email: args[0], pin: args[1], date: args[2] };
         case "getChatConversations":  return { email: args[0], pin: args[1], showArchived: args[2] || false };
@@ -4940,7 +4954,7 @@
       "getChatConversations","getChatMessages","sendChatMessage","markChatRead",
       "createGroupChat","updateGroupChat","deleteGroupChat","startDirectMessage","getChatUnreadTotal","getChatStaffList","leaveGroupChat",
       "archiveChatConvo","unarchiveChatConvo","editChatMessage","deleteChatMessage","searchChatMessages",
-      "qboStatus","qboDisconnect","qboSync"];
+      "qboStatus","qboDisconnect","qboSync","qboSyncStatus"];
 
     _apiFns.forEach(function(fn) {
       window.api.call[fn] = function() {
@@ -8586,6 +8600,89 @@
 
 
     // ── Reports tab ──────────────────────────
+    // ── QBO Sync Status ────────────────────
+    function initQboSyncCard_() {
+      var card = el("qboSyncCard");
+      if (!card) return;
+      // Show card only if QBO is connected
+      api.call.onSuccess(function(res) {
+        if (res && res.ok && res.connected) {
+          card.style.display = "";
+          // Populate pay period dropdown
+          var sel = el("qboSyncPpSelect");
+          var ppSel = el("adminPpSelect");
+          if (sel && ppSel) {
+            sel.innerHTML = ppSel.innerHTML;
+            sel.value = ppSel.value;
+          }
+          loadQboSyncStatus_();
+        }
+      }).qboStatus(STATE.email, STATE.pin);
+    }
+    function loadQboSyncStatus_() {
+      var sel = el("qboSyncPpSelect");
+      var wrap = el("qboSyncWrap");
+      var msg = el("qboSyncMsg");
+      if (!sel || !sel.value || !wrap) return;
+      var parts = sel.value.split("|");
+      wrap.innerHTML = '<div class="muted">Loading…</div>';
+      if (msg) msg.textContent = "";
+      api.call.onSuccess(function(res) {
+        if (!res || !res.ok) { wrap.innerHTML = '<div class="muted">' + (res?.reason || "Failed to load.") + '</div>'; return; }
+        var staff = res.staff || [];
+        if (!staff.length) { wrap.innerHTML = '<div class="muted">No staff found.</div>'; return; }
+        var html = '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+        html += '<tr style="border-bottom:2px solid var(--line);text-align:left;">';
+        html += '<th style="padding:8px 6px;">Staff</th>';
+        html += '<th style="padding:8px 6px;">Type</th>';
+        html += '<th style="padding:8px 6px;text-align:center;">Entries</th>';
+        html += '<th style="padding:8px 6px;text-align:center;">Hours</th>';
+        html += '<th style="padding:8px 6px;text-align:center;">Status</th>';
+        html += '</tr>';
+        var allGood = true;
+        staff.forEach(function(s) {
+          var total = parseInt(s.total_entries) || 0;
+          var synced = parseInt(s.synced_entries) || 0;
+          var hours = parseFloat(s.total_hours) || 0;
+          var syncedHours = parseFloat(s.synced_hours) || 0;
+          var status, statusColor, statusBg;
+          if (total === 0) {
+            status = "No hours logged";
+            statusColor = "var(--muted)";
+            statusBg = "transparent";
+          } else if (synced === total) {
+            status = "Synced";
+            statusColor = "#2ecc71";
+            statusBg = "rgba(46,204,113,.1)";
+          } else if (synced > 0) {
+            status = synced + "/" + total + " synced";
+            statusColor = "#f39c12";
+            statusBg = "rgba(243,156,18,.1)";
+            allGood = false;
+          } else {
+            status = "Not synced";
+            statusColor = "#e74c3c";
+            statusBg = "rgba(231,76,60,.1)";
+            allGood = false;
+          }
+          html += '<tr style="border-bottom:1px solid var(--line);">';
+          html += '<td style="padding:8px 6px;font-weight:600;">' + (s.name || s.email) + '</td>';
+          html += '<td style="padding:8px 6px;color:var(--muted);font-size:12px;">' + (s.type || "") + '</td>';
+          html += '<td style="padding:8px 6px;text-align:center;">' + (total > 0 ? synced + '/' + total : '—') + '</td>';
+          html += '<td style="padding:8px 6px;text-align:center;">' + (hours > 0 ? hours.toFixed(1) : '—') + '</td>';
+          html += '<td style="padding:8px 6px;text-align:center;"><span style="display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;color:' + statusColor + ';background:' + statusBg + ';">' + status + '</span></td>';
+          html += '</tr>';
+        });
+        html += '</table>';
+        if (allGood) {
+          html += '<div style="margin-top:10px;padding:8px 12px;background:rgba(46,204,113,.1);border-radius:8px;font-size:12px;color:#2ecc71;font-weight:600;">All staff accounted for this pay period.</div>';
+        }
+        wrap.innerHTML = html;
+      }).onError(function() {
+        wrap.innerHTML = '<div class="muted">Failed to load sync status.</div>';
+      }).qboSyncStatus(STATE.email, STATE.pin, parts[0], parts[1]);
+    }
+
     // ── Sent Reports Tab ────────────────────
     async function loadSentReports_(){
       var wrap = el("sentReportsWrap");
@@ -9668,7 +9765,7 @@
       if (tab === "staff")    loadStaffList();
       if (tab === "pending")  loadPendingTab();
       if (tab === "flagged")  loadFlaggedTab_();
-      if (tab === "sent")     loadSentReports_();
+      if (tab === "sent")     { loadSentReports_(); initQboSyncCard_(); }
       if (tab === "export")   initReportsTab();
       if (tab === "proposals") loadProposalsDashboard_();
       if (tab === "settings") { loadLocations_(); loadStaffCacheForSettings_(); applyModSettingsRestrictions_(); updateThemeButtons_(); }
