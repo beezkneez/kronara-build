@@ -4057,8 +4057,16 @@
 
             <!-- No subscription -->
             <div id="billingNone" style="display:none;">
-              <div class="muted" style="margin-bottom:12px;">No active subscription found for this account.</div>
-              <p style="font-size:14px;">Contact <a href="mailto:support@kronara.app">support@kronara.app</a> to set up billing.</p>
+              <div class="muted" style="margin-bottom:16px;">No active subscription linked to this account yet.</div>
+              <div style="background:var(--stat-bg,#f4f4f7);border-radius:10px;padding:16px;">
+                <div style="font-weight:700;font-size:13px;margin-bottom:8px;">🔗 Link Stripe Customer</div>
+                <div class="muted" style="font-size:12px;margin-bottom:10px;">Paste the Stripe Customer ID (starts with cus_) from the Stripe Dashboard to connect billing.</div>
+                <div style="display:flex;gap:8px;">
+                  <input id="linkStripeId" placeholder="cus_xxxxxxxxx" style="flex:1;" />
+                  <button class="btn secondary" onclick="linkStripeCustomer_()">Link</button>
+                </div>
+                <div id="linkStripeMsg" class="msg" style="margin-top:8px;"></div>
+              </div>
             </div>
 
             <!-- Active subscription -->
@@ -4908,6 +4916,7 @@
         case "replyToTicket":              return { email: args[0], pin: args[1], ticketId: args[2], body: args[3] };
         case "getSubscription":            return { email: args[0], pin: args[1] };
         case "createBillingPortal":        return { email: args[0], pin: args[1] };
+        case "linkStripeCustomer":         return { email: args[0], pin: args[1], stripeCustomerId: args[2] };
         case "triggerAutoSend":            return { email: args[0], pin: args[1] };
         case "triggerFlagRollover":        return { email: args[0], pin: args[1] };
         case "addCommission":              return args[0] || {};
@@ -5032,7 +5041,7 @@
       "getStaffList","addStaffMember","updateStaffMember","deleteStaffMember","archiveStaffMember","sendReminderEmails",
       "getLocations","addLocation","updateLocation","deleteLocation","reorderLocations",
       "getPendingSubmissions","sendPendingReport","notifyLatePeriodSubmission",
-      "submitSupportMessage","supportChat","getSupportMessages","getMyTickets","getTicketMessages","replyToTicket","getSubscription","createBillingPortal","triggerAutoSend","addCommission","getMyEarnings","saveUserProfile","saveUserFlags","restoreEntries","deleteSupportMessage","updateSupportMessage","saveChangelog","getChangelog","publishChangelog","deleteChangelog","deleteAllEntries","sendTestEmail","debugEmail","sendMassMessage","setPayrollApproval","getPayrollApprovals","adminChangeEmail","adminResetPin",
+      "submitSupportMessage","supportChat","getSupportMessages","getMyTickets","getTicketMessages","replyToTicket","getSubscription","createBillingPortal","linkStripeCustomer","triggerAutoSend","addCommission","getMyEarnings","saveUserProfile","saveUserFlags","restoreEntries","deleteSupportMessage","updateSupportMessage","saveChangelog","getChangelog","publishChangelog","deleteChangelog","deleteAllEntries","sendTestEmail","debugEmail","sendMassMessage","setPayrollApproval","getPayrollApprovals","adminChangeEmail","adminResetPin",
       "flagEntry","respondToFlag","resolveFlag","approveFlag","unflagEntry","correctFlagEntry","getFlags","getMyFlags","getFlagsForPeriod","clearCorrectedFlags","clearFlagHistory","triggerFlagRollover",
       "googleAuthUrl","googleCalendarDisconnect","googleCalendarList","googleCalendarEvents","updateLocationAddress",
       "massResetPins","calendarCounts","getEntriesByDate",
@@ -9960,6 +9969,22 @@
           if (none) none.style.display = "";
         })
         .getSubscription(STATE.email, STATE.pin);
+    }
+
+    function linkStripeCustomer_() {
+      var cusId = (el("linkStripeId").value || "").trim();
+      if (!cusId) return setMsg("linkStripeMsg", "err", "Please enter a Stripe Customer ID.");
+      setMsg("linkStripeMsg", "", "");
+      api.call
+        .onSuccess(function(res) {
+          if (!res || !res.ok) return setMsg("linkStripeMsg", "err", res?.reason || "Failed to link.");
+          setMsg("linkStripeMsg", "ok", "✅ Linked! Plan: " + res.planName + " (" + res.status + ")");
+          setTimeout(function(){ loadBillingTab_(); }, 1500);
+        })
+        .onError(function(err) {
+          setMsg("linkStripeMsg", "err", "Error: " + (err?.message || err));
+        })
+        .linkStripeCustomer(STATE.email, STATE.pin, cusId);
     }
 
     function openBillingPortal_() {

@@ -8776,6 +8776,69 @@ api.post("/createBillingPortal", async (req, res) => {
   }
 });
 
+// Link a Stripe customer to this tenant (admin setup)
+api.post("/linkStripeCustomer", async (req, res) => {
+  try {
+    const { email, pin, stripeCustomerId } = req.body;
+    const user = await getAuthorizedUser(email, pin);
+    if (!user || user.role !== "admin")
+      return res.json({ ok: false, reason: "Admin access required." });
+
+    if (!stripeCustomerId || !stripeCustomerId.startsWith("cus_"))
+      return res.json({ ok: false, reason: "Invalid Stripe customer ID. Must start with cus_" });
+
+    const stripe = getStripe();
+    if (!stripe) return res.json({ ok: false, reason: "Stripe not configured." });
+
+    // Verify customer exists in Stripe
+    let customer;
+    try {
+      customer = await stripe.customers.retrieve(stripeCustomerId);
+    } catch(e) {
+      return res.json({ ok: false, reason: "Customer not found in Stripe." });
+    }
+
+    const tid = await getDefaultTenantId();
+
+    // Fetch subscription info
+    const subs = await stripe.subscriptions.list({ customer: stripeCustomerId, limit: 1 });
+    const sub = subs.data[0] || null;
+    const plan = sub?.items?.data?.[0]?.plan || {};
+    const planName = plan.nickname || (plan.amount <= 4000 ? "starter" : plan.amount <= 8000 ? "studio" : "enterprise");
+
+    // Get default payment method card info
+    let cardBrand = null, cardLast4 = null;
+    const pmId = customer.invoice_settings?.default_payment_method;
+    if (pmId) {
+      try {
+        const pm = await stripe.paymentMethods.retrieve(typeof pmId === "string" ? pmId : pmId.id);
+        cardBrand = pm.card?.brand || null;
+        cardLast4 = pm.card?.last4 || null;
+      } catch(e) {}
+    }
+
+    // Upsert billing row
+    await query(`
+      INSERT INTO billing (tenant_id, stripe_customer_id, stripe_subscription_id, plan_name, plan_price, plan_interval, status, current_period_start, current_period_end, card_brand, card_last4, cancel_at_period_end)
+      VALUES ($1,$2,$3,$4,$5,$6,$7, ${sub ? "to_timestamp($8), to_timestamp($9)" : "NULL, NULL"}, $10,$11,$12)
+      ON CONFLICT (tenant_id) DO UPDATE SET
+        stripe_customer_id=$2, stripe_subscription_id=$3, plan_name=$4, plan_price=$5, plan_interval=$6, status=$7,
+        ${sub ? "current_period_start=to_timestamp($8), current_period_end=to_timestamp($9)," : ""}
+        card_brand=$10, card_last4=$11, cancel_at_period_end=$12, updated_at=NOW()
+    `, [
+      tid, stripeCustomerId, sub?.id || null, planName, plan.amount || 0, plan.interval || "month",
+      sub?.status || "active",
+      ...(sub ? [sub.current_period_start, sub.current_period_end] : []),
+      cardBrand, cardLast4, sub?.cancel_at_period_end || false
+    ]);
+
+    res.json({ ok: true, planName, status: sub?.status || "active" });
+  } catch(e) {
+    console.error("[linkStripeCustomer]", e);
+    res.json({ ok: false, reason: "Server error: " + e.message });
+  }
+});
+
 // Stripe webhook — keeps billing table in sync
 app.post("/api/stripe-webhook", async (req, res) => {
   const stripe = getStripe();
