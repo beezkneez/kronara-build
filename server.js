@@ -5008,6 +5008,15 @@ api.post("/submitSupportMessage", async (req, res) => {
     // Respond immediately — email is best-effort async so it never blocks the user
     res.json({ ok: true });
 
+    // Forward to centralized support dashboard (non-blocking)
+    if (process.env.SUPPORT_DASHBOARD_URL && process.env.SUPPORT_DASHBOARD_API_KEY) {
+      fetch(process.env.SUPPORT_DASHBOARD_URL + '/api/hooks/ticket', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': process.env.SUPPORT_DASHBOARD_API_KEY },
+        body: JSON.stringify({ tenantId: tid, fromEmail: user.email, fromName: user.name, type, subject, body })
+      }).catch(err => console.error('[dashboard] Forward failed:', err.message));
+    }
+
     // Notify payroll admin if this user is unapproved for this period
     const pp_ = getPayPeriodForDate(String(req.body?.data?.date || todayStr()));
     if (pp_) {
@@ -5065,6 +5074,72 @@ api.post("/submitSupportMessage", async (req, res) => {
   }
 });
 
+
+// ── My Tickets (user-facing, reads from centralized dashboard) ──────
+api.post("/getMyTickets", async (req, res) => {
+  try {
+    const { email, pin } = req.body;
+    const user = await getAuthorizedUser(email, pin);
+    if (!user) return res.json({ ok: false, reason: "Invalid credentials." });
+    if (!process.env.SUPPORT_DASHBOARD_URL || !process.env.SUPPORT_DASHBOARD_API_KEY) {
+      return res.json({ ok: true, tickets: [] });
+    }
+    const r = await fetch(
+      `${process.env.SUPPORT_DASHBOARD_URL}/api/hooks/tickets?email=${encodeURIComponent(user.email)}`,
+      { headers: { 'X-API-Key': process.env.SUPPORT_DASHBOARD_API_KEY } }
+    );
+    const data = await r.json();
+    res.json({ ok: true, tickets: data.tickets || [] });
+  } catch (e) {
+    console.error('[getMyTickets]', e.message);
+    res.json({ ok: false, reason: "Failed to load tickets." });
+  }
+});
+
+api.post("/getTicketMessages", async (req, res) => {
+  try {
+    const { email, pin, ticketId } = req.body;
+    const user = await getAuthorizedUser(email, pin);
+    if (!user) return res.json({ ok: false, reason: "Invalid credentials." });
+    if (!process.env.SUPPORT_DASHBOARD_URL || !process.env.SUPPORT_DASHBOARD_API_KEY) {
+      return res.json({ ok: false, reason: "Dashboard not configured." });
+    }
+    const r = await fetch(
+      `${process.env.SUPPORT_DASHBOARD_URL}/api/hooks/ticket/${ticketId}/messages`,
+      { headers: { 'X-API-Key': process.env.SUPPORT_DASHBOARD_API_KEY } }
+    );
+    const data = await r.json();
+    res.json({ ok: true, ticket: data.ticket, messages: data.messages || [] });
+  } catch (e) {
+    console.error('[getTicketMessages]', e.message);
+    res.json({ ok: false, reason: "Failed to load messages." });
+  }
+});
+
+api.post("/replyToTicket", async (req, res) => {
+  try {
+    const { email, pin, ticketId, body } = req.body;
+    const user = await getAuthorizedUser(email, pin);
+    if (!user) return res.json({ ok: false, reason: "Invalid credentials." });
+    if (!body || !body.trim()) return res.json({ ok: false, reason: "Reply cannot be empty." });
+    if (!process.env.SUPPORT_DASHBOARD_URL || !process.env.SUPPORT_DASHBOARD_API_KEY) {
+      return res.json({ ok: false, reason: "Dashboard not configured." });
+    }
+    const r = await fetch(
+      `${process.env.SUPPORT_DASHBOARD_URL}/api/hooks/ticket/${ticketId}/reply`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': process.env.SUPPORT_DASHBOARD_API_KEY },
+        body: JSON.stringify({ fromEmail: user.email, fromName: user.name, body: body.trim() })
+      }
+    );
+    const data = await r.json();
+    res.json({ ok: data.ok, reason: data.reason });
+  } catch (e) {
+    console.error('[replyToTicket]', e.message);
+    res.json({ ok: false, reason: "Failed to send reply." });
+  }
+});
 
 // ── AI Support Chat ──────────────────────
 const SUPPORT_KNOWLEDGE_BASE = `

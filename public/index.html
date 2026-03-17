@@ -2538,6 +2538,26 @@
           </div>
         </div>
 
+        <!-- My Tickets -->
+        <div class="card" id="myTicketsCard">
+          <div class="card-title">🎫 My Tickets</div>
+          <div class="muted" style="margin-bottom:12px;">Track your support requests and replies from the team.</div>
+          <div id="myTicketsList" style="font-size:14px;color:#888;">Loading…</div>
+          <!-- Ticket detail view (hidden by default) -->
+          <div id="myTicketDetail" style="display:none;">
+            <div style="margin-bottom:10px;">
+              <a href="#" onclick="closeMyTicketDetail_();return false;" style="font-size:13px;">← Back to tickets</a>
+            </div>
+            <div id="myTicketThread"></div>
+            <div style="margin-top:12px;">
+              <label>Reply</label>
+              <textarea id="myTicketReplyBody" placeholder="Type your reply…" style="min-height:70px;"></textarea>
+              <button class="btn secondary full" style="margin-top:8px;" onclick="replyToMyTicket_()">📤 Send reply</button>
+              <div id="myTicketReplyMsg" class="msg" style="margin-top:6px;"></div>
+            </div>
+          </div>
+        </div>
+
         <!-- Report a bug -->
         <div class="card">
           <div class="card-title">🐛 Report a Bug</div>
@@ -4816,6 +4836,9 @@
         case "submitSupportMessage":       return { email: args[0], pin: args[1], data: args[2] };
         case "supportChat":                return { email: args[0], pin: args[1], message: args[2], history: args[3] };
         case "getSupportMessages":         return { email: args[0], pin: args[1] };
+        case "getMyTickets":               return { email: args[0], pin: args[1] };
+        case "getTicketMessages":          return { email: args[0], pin: args[1], ticketId: args[2] };
+        case "replyToTicket":              return { email: args[0], pin: args[1], ticketId: args[2], body: args[3] };
         case "triggerAutoSend":            return { email: args[0], pin: args[1] };
         case "triggerFlagRollover":        return { email: args[0], pin: args[1] };
         case "addCommission":              return args[0] || {};
@@ -4940,7 +4963,7 @@
       "getStaffList","addStaffMember","updateStaffMember","deleteStaffMember","archiveStaffMember","sendReminderEmails",
       "getLocations","addLocation","updateLocation","deleteLocation","reorderLocations",
       "getPendingSubmissions","sendPendingReport","notifyLatePeriodSubmission",
-      "submitSupportMessage","supportChat","getSupportMessages","triggerAutoSend","addCommission","getMyEarnings","saveUserProfile","saveUserFlags","restoreEntries","deleteSupportMessage","updateSupportMessage","saveChangelog","getChangelog","publishChangelog","deleteChangelog","deleteAllEntries","sendTestEmail","debugEmail","sendMassMessage","setPayrollApproval","getPayrollApprovals","adminChangeEmail","adminResetPin",
+      "submitSupportMessage","supportChat","getSupportMessages","getMyTickets","getTicketMessages","replyToTicket","triggerAutoSend","addCommission","getMyEarnings","saveUserProfile","saveUserFlags","restoreEntries","deleteSupportMessage","updateSupportMessage","saveChangelog","getChangelog","publishChangelog","deleteChangelog","deleteAllEntries","sendTestEmail","debugEmail","sendMassMessage","setPayrollApproval","getPayrollApprovals","adminChangeEmail","adminResetPin",
       "flagEntry","respondToFlag","resolveFlag","approveFlag","unflagEntry","correctFlagEntry","getFlags","getMyFlags","getFlagsForPeriod","clearCorrectedFlags","clearFlagHistory","triggerFlagRollover",
       "googleAuthUrl","googleCalendarDisconnect","googleCalendarList","googleCalendarEvents","updateLocationAddress",
       "massResetPins","calendarCounts","getEntriesByDate",
@@ -15691,7 +15714,113 @@
       // Hide "Message Support" form for admins (they have inbox)
       const msgCard = el("supportMessageCard");
       if (msgCard) msgCard.style.display = (STATE.isAdmin || STATE.isModerator) ? "none" : "";
+      // Load My Tickets for non-admin users
+      loadMyTickets_();
     }
+
+    // ── My Tickets ──────────────────────
+    var _openTicketId = null;
+
+    function loadMyTickets_() {
+      var container = el("myTicketsList");
+      var detailEl = el("myTicketDetail");
+      if (!container) return;
+      if (detailEl) detailEl.style.display = "none";
+      container.style.display = "";
+      container.innerHTML = '<span style="color:#888;">Loading…</span>';
+      api.call
+        .onSuccess(function(res) {
+          if (!res || !res.ok || !res.tickets || res.tickets.length === 0) {
+            container.innerHTML = '<span style="color:#888;">No tickets yet. Submit a message or bug report below!</span>';
+            return;
+          }
+          container.innerHTML = res.tickets.map(function(t) {
+            var statusColor = t.status === 'open' ? '#f59e0b' : t.status === 'in_progress' ? '#3b82f6' : t.status === 'resolved' ? '#22c55e' : '#94a3b8';
+            var replyBadge = parseInt(t.reply_count) > 0 ? ' <span style="background:#eef2ff;color:#4f46e5;padding:1px 8px;border-radius:10px;font-size:11px;">'+t.reply_count+' reply</span>' : '';
+            return '<div onclick="openMyTicket_(\''+t.id+'\')" style="padding:10px 0;border-bottom:1px solid #eee;cursor:pointer;">'
+              + '<div style="display:flex;align-items:center;gap:8px;">'
+              + '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+statusColor+';"></span>'
+              + '<strong style="flex:1;">'+escHtml(t.subject||"(no subject)")+'</strong>'
+              + '<span style="font-size:11px;color:#888;text-transform:uppercase;">'+t.status.replace('_',' ')+'</span>'
+              + replyBadge
+              + '</div>'
+              + '<div style="font-size:12px;color:#999;margin-top:2px;">'+new Date(t.created_at).toLocaleDateString()+'</div>'
+              + '</div>';
+          }).join('');
+        })
+        .onError(function() {
+          container.innerHTML = '<span style="color:#888;">Could not load tickets.</span>';
+        })
+        .getMyTickets(STATE.email, STATE.pin);
+    }
+
+    function openMyTicket_(ticketId) {
+      _openTicketId = ticketId;
+      var container = el("myTicketsList");
+      var detailEl = el("myTicketDetail");
+      var threadEl = el("myTicketThread");
+      if (container) container.style.display = "none";
+      if (detailEl) detailEl.style.display = "";
+      if (threadEl) threadEl.innerHTML = '<span style="color:#888;">Loading…</span>';
+      setMsg("myTicketReplyMsg", "", "");
+      var replyBody = el("myTicketReplyBody");
+      if (replyBody) replyBody.value = "";
+
+      api.call
+        .onSuccess(function(res) {
+          if (!res || !res.ok) { threadEl.innerHTML = '<span style="color:#c00;">Failed to load.</span>'; return; }
+          var t = res.ticket || {};
+          var msgs = res.messages || [];
+          var html = '<div style="margin-bottom:12px;">'
+            + '<strong style="font-size:15px;">'+escHtml(t.subject||"(no subject)")+'</strong>'
+            + ' <span style="font-size:11px;text-transform:uppercase;color:#888;">'+((t.status||'open').replace('_',' '))+'</span>'
+            + '</div>';
+          msgs.forEach(function(m) {
+            var isAdmin = m.sender_type === 'admin';
+            html += '<div style="padding:12px;border-radius:8px;margin-bottom:8px;'
+              + (isAdmin ? 'background:#eef2ff;border:1px solid #c7d2fe;' : 'background:#f8fafc;border:1px solid #e2e8f0;')
+              + '">'
+              + '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;">'
+              + '<strong style="'+(isAdmin?'color:#4f46e5;':'')+'">'+escHtml(m.sender_name||m.sender_type)+'</strong>'
+              + '<span style="color:#999;">'+new Date(m.created_at).toLocaleString()+'</span>'
+              + '</div>'
+              + '<div style="white-space:pre-wrap;font-size:14px;line-height:1.5;">'+escHtml(m.body)+'</div>'
+              + '</div>';
+          });
+          threadEl.innerHTML = html;
+        })
+        .onError(function() {
+          threadEl.innerHTML = '<span style="color:#c00;">Failed to load messages.</span>';
+        })
+        .getTicketMessages(STATE.email, STATE.pin, ticketId);
+    }
+
+    function closeMyTicketDetail_() {
+      var detailEl = el("myTicketDetail");
+      if (detailEl) detailEl.style.display = "none";
+      loadMyTickets_();
+    }
+
+    function replyToMyTicket_() {
+      if (!_openTicketId) return;
+      var body = (el("myTicketReplyBody").value || "").trim();
+      if (!body) return setMsg("myTicketReplyMsg", "err", "Please type a reply.");
+      setMsg("myTicketReplyMsg", "", "");
+
+      api.call
+        .onSuccess(function(res) {
+          if (!res || !res.ok) return setMsg("myTicketReplyMsg", "err", res?.reason || "Failed to send.");
+          setMsg("myTicketReplyMsg", "ok", "✅ Reply sent!");
+          el("myTicketReplyBody").value = "";
+          openMyTicket_(_openTicketId);
+        })
+        .onError(function(err) {
+          setMsg("myTicketReplyMsg", "err", "Error: " + (err?.message || err));
+        })
+        .replyToTicket(STATE.email, STATE.pin, _openTicketId, body);
+    }
+
+    function escHtml(s) { if(!s)return''; var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
     // ── AI Support Chat ──────────────────────
     var _aiChatHistory = []; // {role, content}
