@@ -673,6 +673,7 @@
     }
     .btn.red{ background: var(--red); }
     .btn:disabled{ opacity: .5; cursor: not-allowed; }
+    .ticketTypeBtn.active { background: var(--red) !important; color: #fff !important; border-color: var(--red) !important; }
 
     /* small text-style link button */
     .lbtn{
@@ -2547,10 +2548,38 @@
           </div>
         </div>
 
+        <!-- Submit a Ticket (unified) -->
+        <div class="card" id="submitTicketCard">
+          <div class="card-title">🎫 Submit a Support Ticket</div>
+          <div class="muted" style="margin-bottom:12px;">Have a question, issue, or found a bug? Let us know and we'll get back to you.</div>
+
+          <label>Reason</label>
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <button class="btn secondary ticketTypeBtn active" id="ticketTypeSupport" onclick="setTicketType_('message')" style="flex:1;">💬 Support</button>
+            <button class="btn secondary ticketTypeBtn" id="ticketTypeBug" onclick="setTicketType_('bug')" style="flex:1;">🐛 Bug Report</button>
+          </div>
+
+          <input id="supportReplyEmail" type="email" placeholder="your@email.com" style="margin-bottom:10px;display:none;" />
+
+          <label>Subject</label>
+          <input id="supportSubject" placeholder="e.g. Question about my pay" style="margin-bottom:10px;" />
+
+          <label id="ticketBodyLabel">What do you need help with?</label>
+          <textarea id="supportBody" placeholder="Describe your question or issue…" style="min-height:90px;"></textarea>
+
+          <button class="btn secondary full" style="margin-top:10px;" onclick="submitSupportMsg_(STATE._ticketType||'message')">📤 Submit ticket</button>
+          <div id="supportProgress" style="display:none;margin-top:8px;">
+            <div style="height:4px;background:#e0e0e0;border-radius:4px;overflow:hidden;">
+              <div style="height:100%;background:var(--red);border-radius:4px;animation:progress-indeterminate 1.2s ease-in-out infinite;"></div>
+            </div>
+          </div>
+          <div id="supportMsg" class="msg" style="margin-top:6px;"></div>
+          <div id="bugMsg" class="msg" style="margin-top:6px;"></div>
+        </div>
+
         <!-- My Tickets -->
         <div class="card" id="myTicketsCard">
-          <div class="card-title">🎫 My Tickets</div>
-          <div class="muted" style="margin-bottom:12px;">Track your support requests and replies from the team.</div>
+          <div class="card-title">📋 My Tickets</div>
           <div id="myTicketsList" style="font-size:14px;color:#888;">Loading…</div>
           <!-- Ticket detail view (hidden by default) -->
           <div id="myTicketDetail" style="display:none;">
@@ -2565,40 +2594,6 @@
               <div id="myTicketReplyMsg" class="msg" style="margin-top:6px;"></div>
             </div>
           </div>
-        </div>
-
-        <!-- Report a bug -->
-        <div class="card">
-          <div class="card-title">🐛 Report a Bug</div>
-          <div class="muted" style="margin-bottom:12px;">Something not working right? Let us know and we'll get it fixed.</div>
-          <label>What happened?</label>
-          <textarea id="bugDesc" placeholder="Describe what went wrong, what you expected, and what page you were on…" style="min-height:90px;"></textarea>
-          <button class="btn secondary full" style="margin-top:10px;" onclick="submitSupportMsg_('bug')">📤 Submit bug report</button>
-          <div id="bugProgress" style="display:none;margin-top:8px;">
-            <div style="height:4px;background:#e0e0e0;border-radius:4px;overflow:hidden;">
-              <div style="height:100%;background:var(--red);border-radius:4px;animation:progress-indeterminate 1.2s ease-in-out infinite;"></div>
-            </div>
-          </div>
-          <div id="bugMsg" class="msg" style="margin-top:6px;"></div>
-        </div>
-
-        <!-- Send a message -->
-        <div class="card" id="supportMessageCard">
-          <div class="card-title">✉️ Message Support</div>
-          <div class="muted" style="margin-bottom:12px;">Have a question that's not in the FAQ? Send us a message and an admin will reply to your email.</div>
-          <label>Your email</label>
-          <input id="supportReplyEmail" type="email" placeholder="your@email.com" style="margin-bottom:10px;" />
-          <label>Subject</label>
-          <input id="supportSubject" placeholder="e.g. Question about my pay" style="margin-bottom:10px;" />
-          <label>Message</label>
-          <textarea id="supportBody" placeholder="Type your message here…" style="min-height:90px;"></textarea>
-          <button class="btn secondary full" style="margin-top:10px;" onclick="submitSupportMsg_('message')">📤 Send message</button>
-          <div id="supportProgress" style="display:none;margin-top:8px;">
-            <div style="height:4px;background:#e0e0e0;border-radius:4px;overflow:hidden;">
-              <div style="height:100%;background:var(--red);border-radius:4px;animation:progress-indeterminate 1.2s ease-in-out infinite;"></div>
-            </div>
-          </div>
-          <div id="supportMsg" class="msg" style="margin-top:6px;"></div>
         </div>
 
         <!-- AI Support Chat -->
@@ -15720,9 +15715,9 @@
         cl.style.display = (STATE.isAdmin || STATE.isModerator) ? "" : "none";
         if (STATE.isAdmin || STATE.isModerator) loadChangelog_();
       }
-      // Hide "Message Support" form for admins (they have inbox)
-      const msgCard = el("supportMessageCard");
-      if (msgCard) msgCard.style.display = (STATE.isAdmin || STATE.isModerator) ? "none" : "";
+      // Hide submit ticket form for admins (they have inbox)
+      const ticketCard = el("submitTicketCard");
+      if (ticketCard) ticketCard.style.display = (STATE.isAdmin || STATE.isModerator) ? "none" : "";
       // Load My Tickets for non-admin users
       loadMyTickets_();
     }
@@ -15915,40 +15910,52 @@
       setMsg("aiChatMsg","","");
     }
 
+    // Unified ticket type toggle
+    STATE._ticketType = "message";
+    function setTicketType_(type) {
+      STATE._ticketType = type;
+      document.querySelectorAll('.ticketTypeBtn').forEach(function(b) { b.classList.remove('active'); });
+      el(type === 'bug' ? 'ticketTypeBug' : 'ticketTypeSupport').classList.add('active');
+      var label = el('ticketBodyLabel');
+      if (label) label.textContent = type === 'bug' ? 'What went wrong?' : 'What do you need help with?';
+      var bodyEl = el('supportBody');
+      if (bodyEl) bodyEl.placeholder = type === 'bug' ? 'Describe the bug — what happened, what you expected, and what page you were on…' : 'Describe your question or issue…';
+      var subjectEl = el('supportSubject');
+      if (subjectEl) subjectEl.placeholder = type === 'bug' ? 'e.g. Page won\'t load after submitting' : 'e.g. Question about my pay';
+    }
+
     function submitSupportMsg_(type){
-      const isBug = type === "bug";
-      const msgEl = isBug ? "bugMsg" : "supportMsg";
+      const msgEl = "supportMsg";
       setMsg(msgEl, "", "");
+      setMsg("bugMsg", "", "");
 
-      const subject = isBug
-        ? "Bug Report from " + (STATE.user?.name || STATE.email)
+      const subject = type === "bug"
+        ? (String(el("supportSubject").value||"").trim() || "Bug Report from " + (STATE.user?.name || STATE.email))
         : String(el("supportSubject").value||"").trim();
-      const body = String(el(isBug ? "bugDesc" : "supportBody").value||"").trim();
-      const replyEmail = isBug ? STATE.email : String(el("supportReplyEmail").value||"").trim();
+      const body = String(el("supportBody").value||"").trim();
+      const replyEmail = STATE.email;
 
-      if (!body) return setMsg(msgEl, "err", "Please describe your " + (isBug ? "bug" : "message") + ".");
-      if (!isBug && !subject) return setMsg(msgEl, "err", "Please add a subject.");
-      if (!isBug && !replyEmail) return setMsg(msgEl, "err", "Please enter your email so we can reply.");
+      if (!body) return setMsg(msgEl, "err", "Please describe your " + (type === "bug" ? "bug" : "issue") + ".");
+      if (!subject && type !== "bug") return setMsg(msgEl, "err", "Please add a subject.");
 
-      if (!body) return setMsg(msgEl, "err", "Please describe your " + (isBug ? "bug" : "message") + ".");
-      if (!isBug && !subject) return setMsg(msgEl, "err", "Please add a subject.");
-
-      const btn = document.querySelector("[onclick=\"submitSupportMsg_('" + type + "')\"]");
-      const prog = el(isBug ? "bugProgress" : "supportProgress");
+      const btn = document.querySelector("[onclick*=\"submitSupportMsg_\"]");
+      const prog = el("supportProgress");
       if (btn) { btn.disabled = true; btn.textContent = "Sending…"; }
       if (prog) prog.style.display = "";
 
       api.call
         .onSuccess(function(res){
-          if (btn) { btn.disabled = false; btn.textContent = isBug ? "📤 Submit bug report" : "📤 Send message"; }
+          if (btn) { btn.disabled = false; btn.textContent = "📤 Submit ticket"; }
           if (prog) prog.style.display = "none";
           if (!res || !res.ok) return setMsg(msgEl, "err", res?.reason || "Failed to send.");
-          setMsg(msgEl, "ok", "✅ Submitted! An admin will follow up with you.");
-          el(isBug ? "bugDesc" : "supportBody").value = "";
-          if (!isBug) { el("supportSubject").value = ""; }
+          setMsg(msgEl, "ok", "✅ Ticket submitted! We'll get back to you soon.");
+          el("supportBody").value = "";
+          el("supportSubject").value = "";
+          // Refresh tickets list
+          setTimeout(function(){ loadMyTickets_(); }, 1500);
         })
         .onError(function(err){
-          if (btn) { btn.disabled = false; btn.textContent = isBug ? "📤 Submit bug report" : "📤 Send message"; }
+          if (btn) { btn.disabled = false; btn.textContent = "📤 Submit ticket"; }
           if (prog) prog.style.display = "none";
           setMsg(msgEl, "err", "SERVER ERROR: " + (err?.message || err));
         })
