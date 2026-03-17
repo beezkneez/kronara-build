@@ -10,9 +10,16 @@ const cron       = require("node-cron");
 const webpush    = require("web-push");
 const OAuthClient = require("intuit-oauth");
 const QuickBooks  = require("node-quickbooks");
+const Stripe      = require("stripe");
 
 const app  = express();
-app.use(express.json({ limit: "10mb" }));
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/stripe-webhook") {
+    express.raw({ type: "application/json" })(req, res, next);
+  } else {
+    express.json({ limit: "10mb" })(req, res, next);
+  }
+});
 
 // Serve index.html with injected brand config (before static middleware)
 const fs = require("fs");
@@ -463,6 +470,27 @@ async function setupDatabase() {
       p256dh     TEXT NOT NULL,
       auth       TEXT NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `).catch(()=>{});
+
+  // Billing / Subscription
+  await query(`
+    CREATE TABLE IF NOT EXISTS billing (
+      id                    SERIAL PRIMARY KEY,
+      tenant_id             INTEGER REFERENCES tenants(id) ON DELETE CASCADE UNIQUE,
+      stripe_customer_id    TEXT,
+      stripe_subscription_id TEXT,
+      plan_name             TEXT DEFAULT 'starter',
+      plan_price            INTEGER DEFAULT 3900,
+      plan_interval         TEXT DEFAULT 'month',
+      status                TEXT DEFAULT 'active',
+      current_period_start  TIMESTAMPTZ,
+      current_period_end    TIMESTAMPTZ,
+      card_brand            TEXT,
+      card_last4            TEXT,
+      cancel_at_period_end  BOOLEAN DEFAULT FALSE,
+      created_at            TIMESTAMPTZ DEFAULT NOW(),
+      updated_at            TIMESTAMPTZ DEFAULT NOW()
     )
   `).catch(()=>{});
 
@@ -8652,6 +8680,185 @@ api.post("/qboSyncStatus", async (req, res) => {
   } catch (e) {
     res.json({ ok: false, reason: "SERVER ERROR: " + e.message });
   }
+});
+
+// ── Stripe Billing ──────────────────────────────────────────────────
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) return null;
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+}
+
+// Get subscription info for admin
+api.post("/getSubscription", async (req, res) => {
+  try {
+    const { email, pin } = req.body;
+    const user = await getAuthorizedUser(email, pin);
+    if (!user || (user.role !== "admin" && user.role !== "moderator"))
+      return res.json({ ok: false, reason: "Admin access required." });
+
+    const tid = await getDefaultTenantId();
+    const result = await query("SELECT * FROM billing WHERE tenant_id=$1", [tid]);
+
+    if (result.rows.length === 0) {
+      return res.json({ ok: true, subscription: null });
+    }
+
+    const bill = result.rows[0];
+    let invoices = [];
+
+    // Fetch recent invoices from Stripe if connected
+    const stripe = getStripe();
+    if (stripe && bill.stripe_customer_id) {
+      try {
+        const inv = await stripe.invoices.list({
+          customer: bill.stripe_customer_id,
+          limit: 12
+        });
+        invoices = inv.data.map(i => ({
+          id: i.id,
+          date: i.created,
+          amount: i.amount_paid,
+          currency: i.currency,
+          status: i.status,
+          pdf: i.invoice_pdf,
+          number: i.number
+        }));
+      } catch(e) { console.error("[stripe] Invoice fetch error:", e.message); }
+    }
+
+    res.json({
+      ok: true,
+      subscription: {
+        planName: bill.plan_name,
+        planPrice: bill.plan_price,
+        planInterval: bill.plan_interval,
+        status: bill.status,
+        currentPeriodStart: bill.current_period_start,
+        currentPeriodEnd: bill.current_period_end,
+        cardBrand: bill.card_brand,
+        cardLast4: bill.card_last4,
+        cancelAtPeriodEnd: bill.cancel_at_period_end,
+        stripeCustomerId: bill.stripe_customer_id
+      },
+      invoices
+    });
+  } catch(e) {
+    console.error("[getSubscription]", e);
+    res.json({ ok: false, reason: "Server error." });
+  }
+});
+
+// Create Stripe billing portal session (manage card, cancel, etc.)
+api.post("/createBillingPortal", async (req, res) => {
+  try {
+    const { email, pin } = req.body;
+    const user = await getAuthorizedUser(email, pin);
+    if (!user || (user.role !== "admin" && user.role !== "moderator"))
+      return res.json({ ok: false, reason: "Admin access required." });
+
+    const stripe = getStripe();
+    if (!stripe) return res.json({ ok: false, reason: "Stripe not configured." });
+
+    const tid = await getDefaultTenantId();
+    const result = await query("SELECT stripe_customer_id FROM billing WHERE tenant_id=$1", [tid]);
+    if (result.rows.length === 0 || !result.rows[0].stripe_customer_id)
+      return res.json({ ok: false, reason: "No billing account found. Contact support." });
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: result.rows[0].stripe_customer_id,
+      return_url: (process.env.APP_URL || "https://kronara.app") + "/#admin"
+    });
+
+    res.json({ ok: true, url: session.url });
+  } catch(e) {
+    console.error("[billingPortal]", e);
+    res.json({ ok: false, reason: "Failed to open billing portal." });
+  }
+});
+
+// Stripe webhook — keeps billing table in sync
+app.post("/api/stripe-webhook", async (req, res) => {
+  const stripe = getStripe();
+  if (!stripe) return res.sendStatus(400);
+
+  let event;
+  const sig = req.headers["stripe-signature"];
+  try {
+    if (process.env.STRIPE_WEBHOOK_SECRET) {
+      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    } else {
+      event = JSON.parse(req.body);
+    }
+  } catch(e) {
+    console.error("[stripe webhook] Signature verification failed:", e.message);
+    return res.sendStatus(400);
+  }
+
+  try {
+    const obj = event.data.object;
+
+    if (event.type === "customer.subscription.created" ||
+        event.type === "customer.subscription.updated" ||
+        event.type === "customer.subscription.deleted") {
+
+      const customerId = obj.customer;
+      const existing = await query("SELECT id, tenant_id FROM billing WHERE stripe_customer_id=$1", [customerId]);
+
+      if (existing.rows.length > 0) {
+        const plan = obj.items?.data?.[0]?.plan || {};
+        const planName = plan.nickname || (plan.amount <= 4000 ? "starter" : plan.amount <= 8000 ? "studio" : "enterprise");
+
+        await query(`
+          UPDATE billing SET
+            stripe_subscription_id=$1, status=$2, plan_name=$3, plan_price=$4, plan_interval=$5,
+            current_period_start=to_timestamp($6), current_period_end=to_timestamp($7),
+            cancel_at_period_end=$8, updated_at=NOW()
+          WHERE stripe_customer_id=$9
+        `, [
+          obj.id, obj.status, planName, plan.amount || 0, plan.interval || 'month',
+          obj.current_period_start, obj.current_period_end,
+          obj.cancel_at_period_end || false, customerId
+        ]);
+        console.log(`[stripe] Subscription ${event.type} for customer ${customerId}`);
+      }
+    }
+
+    if (event.type === "customer.updated") {
+      const customerId = obj.id;
+      const pm = obj.invoice_settings?.default_payment_method;
+      if (pm && typeof pm === "object") {
+        await query(
+          "UPDATE billing SET card_brand=$1, card_last4=$2, updated_at=NOW() WHERE stripe_customer_id=$3",
+          [pm.card?.brand || null, pm.card?.last4 || null, customerId]
+        );
+      } else if (pm && typeof pm === "string") {
+        // Fetch the payment method details
+        try {
+          const pmObj = await stripe.paymentMethods.retrieve(pm);
+          await query(
+            "UPDATE billing SET card_brand=$1, card_last4=$2, updated_at=NOW() WHERE stripe_customer_id=$3",
+            [pmObj.card?.brand || null, pmObj.card?.last4 || null, customerId]
+          );
+        } catch(e) { console.error("[stripe] PM fetch error:", e.message); }
+      }
+    }
+
+    if (event.type === "payment_method.attached") {
+      // Update card info when a new payment method is attached
+      const card = obj.card;
+      if (card && obj.customer) {
+        await query(
+          "UPDATE billing SET card_brand=$1, card_last4=$2, updated_at=NOW() WHERE stripe_customer_id=$3",
+          [card.brand || null, card.last4 || null, obj.customer]
+        );
+      }
+    }
+
+  } catch(e) {
+    console.error("[stripe webhook] Processing error:", e);
+  }
+
+  res.json({ received: true });
 });
 
 // ── Onboarding form submission (from marketing site after Stripe payment) ──

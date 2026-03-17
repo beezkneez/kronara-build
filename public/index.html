@@ -3066,6 +3066,7 @@
             <button id="adminTab_sent"    onclick="switchAdminTab('sent')"    style="flex:1;padding:12px 8px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);">Sent</button>
             <button id="adminTab_proposals" onclick="switchAdminTab('proposals')" style="flex:1;padding:12px 8px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);">Requests <span id="proposalsDashBadge" style="display:none;background:var(--red);color:#fff;border-radius:10px;padding:2px 7px;font-size:11px;font-weight:800;margin-left:2px;">0</span></button>
             <button id="adminTab_export"  onclick="switchAdminTab('export')"  style="flex:1;padding:12px 8px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);">Export</button>
+            <button id="adminTab_billing"  onclick="switchAdminTab('billing')"  style="flex:1;padding:12px 8px;border:none;background:none;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);">Billing</button>
           </div>
         </div>
 
@@ -4048,6 +4049,68 @@
           </div>
         </div><!-- /adminSection_export -->
 
+        <!-- ── BILLING tab ── -->
+        <div id="adminSection_billing" style="display:none;">
+          <div class="card">
+            <div class="card-title">💳 Subscription & Billing</div>
+            <div id="billingLoading" style="color:#888;font-size:14px;">Loading subscription info…</div>
+
+            <!-- No subscription -->
+            <div id="billingNone" style="display:none;">
+              <div class="muted" style="margin-bottom:12px;">No active subscription found for this account.</div>
+              <p style="font-size:14px;">Contact <a href="mailto:support@kronara.app">support@kronara.app</a> to set up billing.</p>
+            </div>
+
+            <!-- Active subscription -->
+            <div id="billingActive" style="display:none;">
+              <!-- Plan overview -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;">
+                <div style="background:var(--stat-bg,#f4f4f7);border-radius:10px;padding:14px;">
+                  <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Plan</div>
+                  <div style="font-size:20px;font-weight:800;margin-top:2px;" id="billPlanName">—</div>
+                </div>
+                <div style="background:var(--stat-bg,#f4f4f7);border-radius:10px;padding:14px;">
+                  <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Amount</div>
+                  <div style="font-size:20px;font-weight:800;margin-top:2px;" id="billAmount">—</div>
+                </div>
+                <div style="background:var(--stat-bg,#f4f4f7);border-radius:10px;padding:14px;">
+                  <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Status</div>
+                  <div style="font-size:20px;font-weight:800;margin-top:2px;" id="billStatus">—</div>
+                </div>
+                <div style="background:var(--stat-bg,#f4f4f7);border-radius:10px;padding:14px;">
+                  <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Next Payment</div>
+                  <div style="font-size:20px;font-weight:800;margin-top:2px;" id="billNextDate">—</div>
+                </div>
+              </div>
+
+              <!-- Card on file -->
+              <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--stat-bg,#f4f4f7);border-radius:10px;margin-bottom:16px;">
+                <div style="font-size:28px;" id="billCardIcon">💳</div>
+                <div>
+                  <div style="font-weight:700;font-size:14px;" id="billCardInfo">No card on file</div>
+                  <div style="font-size:12px;color:#888;">Payment method</div>
+                </div>
+              </div>
+
+              <!-- Cancel notice -->
+              <div id="billCancelNotice" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;">
+                ⚠️ Your subscription is set to cancel at the end of the current billing period.
+              </div>
+
+              <!-- Manage button -->
+              <button class="btn secondary full" style="margin-bottom:8px;" onclick="openBillingPortal_()">⚙️ Manage Subscription</button>
+              <div class="muted" style="font-size:11px;text-align:center;">Update payment method, change plan, view invoices, or cancel</div>
+              <div id="billingPortalMsg" class="msg" style="margin-top:8px;"></div>
+            </div>
+          </div>
+
+          <!-- Billing History -->
+          <div class="card" id="billingHistoryCard" style="display:none;">
+            <div class="card-title">📄 Recent Invoices</div>
+            <div id="billingInvoicesList"></div>
+          </div>
+        </div><!-- /adminSection_billing -->
+
       </div><!-- /page_admin -->
 
       <!-- ════════════════════════════
@@ -4843,6 +4906,8 @@
         case "getMyTickets":               return { email: args[0], pin: args[1] };
         case "getTicketMessages":          return { email: args[0], pin: args[1], ticketId: args[2] };
         case "replyToTicket":              return { email: args[0], pin: args[1], ticketId: args[2], body: args[3] };
+        case "getSubscription":            return { email: args[0], pin: args[1] };
+        case "createBillingPortal":        return { email: args[0], pin: args[1] };
         case "triggerAutoSend":            return { email: args[0], pin: args[1] };
         case "triggerFlagRollover":        return { email: args[0], pin: args[1] };
         case "addCommission":              return args[0] || {};
@@ -4967,7 +5032,7 @@
       "getStaffList","addStaffMember","updateStaffMember","deleteStaffMember","archiveStaffMember","sendReminderEmails",
       "getLocations","addLocation","updateLocation","deleteLocation","reorderLocations",
       "getPendingSubmissions","sendPendingReport","notifyLatePeriodSubmission",
-      "submitSupportMessage","supportChat","getSupportMessages","getMyTickets","getTicketMessages","replyToTicket","triggerAutoSend","addCommission","getMyEarnings","saveUserProfile","saveUserFlags","restoreEntries","deleteSupportMessage","updateSupportMessage","saveChangelog","getChangelog","publishChangelog","deleteChangelog","deleteAllEntries","sendTestEmail","debugEmail","sendMassMessage","setPayrollApproval","getPayrollApprovals","adminChangeEmail","adminResetPin",
+      "submitSupportMessage","supportChat","getSupportMessages","getMyTickets","getTicketMessages","replyToTicket","getSubscription","createBillingPortal","triggerAutoSend","addCommission","getMyEarnings","saveUserProfile","saveUserFlags","restoreEntries","deleteSupportMessage","updateSupportMessage","saveChangelog","getChangelog","publishChangelog","deleteChangelog","deleteAllEntries","sendTestEmail","debugEmail","sendMassMessage","setPayrollApproval","getPayrollApprovals","adminChangeEmail","adminResetPin",
       "flagEntry","respondToFlag","resolveFlag","approveFlag","unflagEntry","correctFlagEntry","getFlags","getMyFlags","getFlagsForPeriod","clearCorrectedFlags","clearFlagHistory","triggerFlagRollover",
       "googleAuthUrl","googleCalendarDisconnect","googleCalendarList","googleCalendarEvents","updateLocationAddress",
       "massResetPins","calendarCounts","getEntriesByDate",
@@ -9778,7 +9843,7 @@
     // ── End Reports tab ──────────────────────
 
     function switchAdminTab(tab){
-      ["payroll","pending","flagged","staff","settings","sent","proposals","export"].forEach(function(t){
+      ["payroll","pending","flagged","staff","settings","sent","proposals","export","billing"].forEach(function(t){
         const sec = el("adminSection_"+t);
         const btn = el("adminTab_"+t);
         if (!sec || !btn) return;
@@ -9796,6 +9861,118 @@
       if (tab === "export")   initReportsTab();
       if (tab === "proposals") loadProposalsDashboard_();
       if (tab === "settings") { loadLocations_(); loadStaffCacheForSettings_(); applyModSettingsRestrictions_(); updateThemeButtons_(); }
+      if (tab === "billing") loadBillingTab_();
+    }
+
+    // ═══════════════════════════════════════
+    //  BILLING / SUBSCRIPTION
+    // ═══════════════════════════════════════
+    function loadBillingTab_() {
+      var loading = el("billingLoading");
+      var none = el("billingNone");
+      var active = el("billingActive");
+      var histCard = el("billingHistoryCard");
+      if (loading) loading.style.display = "";
+      if (none) none.style.display = "none";
+      if (active) active.style.display = "none";
+      if (histCard) histCard.style.display = "none";
+
+      api.call
+        .onSuccess(function(res) {
+          if (loading) loading.style.display = "none";
+          if (!res || !res.ok || !res.subscription) {
+            if (none) none.style.display = "";
+            return;
+          }
+          if (active) active.style.display = "";
+
+          var sub = res.subscription;
+
+          // Plan name
+          var nameEl = el("billPlanName");
+          if (nameEl) nameEl.textContent = (sub.planName || "starter").charAt(0).toUpperCase() + (sub.planName || "starter").slice(1);
+
+          // Amount
+          var amtEl = el("billAmount");
+          if (amtEl) {
+            var price = (sub.planPrice || 0) / 100;
+            amtEl.textContent = "$" + price.toFixed(2) + " CAD/" + (sub.planInterval === "year" ? "yr" : "mo");
+          }
+
+          // Status
+          var statusEl = el("billStatus");
+          if (statusEl) {
+            var s = sub.status || "unknown";
+            statusEl.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+            statusEl.style.color = s === "active" ? "var(--green,#22c55e)" : s === "past_due" ? "#e65100" : s === "canceled" ? "var(--red,#e53935)" : "";
+          }
+
+          // Next payment date
+          var nextEl = el("billNextDate");
+          if (nextEl) {
+            if (sub.currentPeriodEnd) {
+              nextEl.textContent = new Date(sub.currentPeriodEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+            } else {
+              nextEl.textContent = "—";
+            }
+          }
+
+          // Card info
+          var cardEl = el("billCardInfo");
+          var iconEl = el("billCardIcon");
+          if (cardEl && sub.cardLast4) {
+            var brand = (sub.cardBrand || "card").charAt(0).toUpperCase() + (sub.cardBrand || "card").slice(1);
+            cardEl.textContent = brand + " ending in " + sub.cardLast4;
+          }
+          if (iconEl && sub.cardBrand) {
+            var icons = { visa: "💳", mastercard: "💳", amex: "💳", discover: "💳" };
+            iconEl.textContent = icons[sub.cardBrand] || "💳";
+          }
+
+          // Cancel notice
+          var cancelEl = el("billCancelNotice");
+          if (cancelEl) cancelEl.style.display = sub.cancelAtPeriodEnd ? "" : "none";
+
+          // Invoices
+          if (res.invoices && res.invoices.length > 0 && histCard) {
+            histCard.style.display = "";
+            var listEl = el("billingInvoicesList");
+            if (listEl) {
+              listEl.innerHTML = '<div style="border:1px solid var(--line,#e0e0e0);border-radius:10px;overflow:hidden;">' +
+                res.invoices.map(function(inv) {
+                  var date = new Date(inv.date * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+                  var amount = "$" + ((inv.amount || 0) / 100).toFixed(2) + " " + (inv.currency || "cad").toUpperCase();
+                  var statusColor = inv.status === "paid" ? "var(--green,#22c55e)" : inv.status === "open" ? "#e65100" : "#888";
+                  return '<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line,#eee);">'
+                    + '<div style="flex:1;">'
+                    + '<div style="font-weight:600;font-size:14px;">' + amount + '</div>'
+                    + '<div style="font-size:12px;color:#888;">' + date + (inv.number ? ' — ' + inv.number : '') + '</div>'
+                    + '</div>'
+                    + '<span style="font-size:12px;font-weight:600;color:' + statusColor + ';text-transform:uppercase;">' + (inv.status || "—") + '</span>'
+                    + (inv.pdf ? ' <a href="' + inv.pdf + '" target="_blank" style="font-size:12px;margin-left:8px;">PDF</a>' : '')
+                    + '</div>';
+                }).join('') + '</div>';
+            }
+          }
+        })
+        .onError(function() {
+          if (loading) loading.style.display = "none";
+          if (none) none.style.display = "";
+        })
+        .getSubscription(STATE.email, STATE.pin);
+    }
+
+    function openBillingPortal_() {
+      setMsg("billingPortalMsg", "", "");
+      api.call
+        .onSuccess(function(res) {
+          if (!res || !res.ok) return setMsg("billingPortalMsg", "err", res?.reason || "Failed to open portal.");
+          window.open(res.url, "_blank");
+        })
+        .onError(function(err) {
+          setMsg("billingPortalMsg", "err", "Error: " + (err?.message || err));
+        })
+        .createBillingPortal(STATE.email, STATE.pin);
     }
 
     // ═══════════════════════════════════════
