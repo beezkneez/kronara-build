@@ -1868,6 +1868,22 @@
   <div class="wrap">
 
     <!-- ══════════════════════════════
+         SECURITY BRIEF (landing, near top)
+    ══════════════════════════════ -->
+    <div class="card" id="securityBrief" style="border-left:4px solid #b0294a; margin-bottom:16px;">
+      <div style="display:flex; align-items:flex-start; gap:12px;">
+        <div style="font-size:22px; line-height:1;">🔒</div>
+        <div>
+          <div style="font-weight:700; margin-bottom:4px;">Your security matters</div>
+          <div class="muted" style="font-size:13px; line-height:1.6;">
+            Kronara is protected by enterprise-grade security — encrypted connections, an active firewall &amp; DDoS protection, and secure account access. <strong>All payments are processed by Stripe</strong>; we never store your card details.
+            <a href="/security.html" style="color:#d15873; font-weight:600; text-decoration:none; white-space:nowrap;">Learn more →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
          LOGIN
     ══════════════════════════════ -->
     <div class="card" id="loginCard">
@@ -5491,6 +5507,7 @@
       el("tabBar").style.display    = "none";
       el("deskNav").style.display   = "none";
       el("loginCard").style.display = "block";
+      { var _sb = el("securityBrief"); if (_sb) _sb.style.display = "block"; }
 
       // Reset ALL page visibility so next login starts clean
       ["home","reports","profile","admin","support","images","chat"].forEach(function(p){
@@ -5651,6 +5668,7 @@
 
     function bootstrapApp(){
       el("loginCard").style.display = "none";
+      { var _sb = el("securityBrief"); if (_sb) _sb.style.display = "none"; }
       el("app").style.display       = "block";
       el("tabBar").style.display    = "flex";
       el("deskNav").style.display   = ""; /* let media query decide */
