@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security - Kronara</title>
+  <script>
+    // Match the app's theme: same localStorage keys, default to the Kronara look.
+    (function () {
+      try {
+        var t = localStorage.getItem('app_theme') || localStorage.getItem('aradia_theme') || 'kronara';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) { document.documentElement.setAttribute('data-theme', 'kronara'); }
+    })();
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* Light (default) palette */
+    :root {
+      --bg: #f2f3f6; --card: #ffffff; --text: #23243a; --muted: #555;
+      --line: #e7e8ee; --accent: #b0294a; --badge-bg: #fbeef0; --badge-border: #f0d4da;
+    }
+    /* Dark variants — Kronara / dark / aradia all use the Kronara dark palette here */
+    [data-theme="kronara"], [data-theme="dark"], [data-theme="aradia"] {
+      --bg: #12121e; --card: #1e1e30; --text: #e8eaf0; --muted: #8a8ea0;
+      --line: #2c2c44; --accent: #e2708a; --badge-bg: rgba(226,112,138,0.12); --badge-border: rgba(226,112,138,0.35);
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+    .container { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
+    .logo { text-align: center; margin-bottom: 32px; }
+    .logo img { height: 48px; }
+    h1 { font-size: 2rem; margin-bottom: 8px; }
+    .lead { color: var(--muted); font-size: 1.05rem; margin-bottom: 32px; }
+    h2 { font-size: 1.25rem; margin-top: 32px; margin-bottom: 8px; color: var(--accent); }
+    p, li { margin-bottom: 12px; }
+    ul { padding-left: 24px; }
+    a { color: var(--accent); }
+    .back { display: inline-block; margin-top: 40px; color: var(--accent); text-decoration: none; font-weight: 600; }
+    .back:hover { text-decoration: underline; }
+    /* Feature grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 24px 0 8px; }
+    .item { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+    .item .ico { font-size: 1.4rem; }
+    .item h3 { font-size: 1rem; margin: 6px 0 4px; color: var(--text); }
+    .item p { font-size: 0.92rem; color: var(--muted); margin: 0; }
+    /* Stripe highlight */
+    .highlight { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; padding: 18px 22px; margin: 20px 0; }
+    .highlight h2 { margin-top: 0; }
+    .badge-row { text-align: center; margin: 8px 0 28px; }
+    .badge { display: inline-block; background: var(--badge-bg); border: 1px solid var(--badge-border); border-radius: 999px; padding: 8px 16px; font-size: 0.85rem; font-weight: 600; color: var(--accent); }
+    .note { color: var(--muted); font-size: 0.85rem; margin-top: 24px; opacity: 0.85; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo"><img src="/logo.png" alt="Kronara"></div>
+    <h1>Security &amp; Privacy</h1>
+    <p class="lead">Your studio&rsquo;s data &mdash; and your members&rsquo; personal and payment information &mdash; deserve serious protection. Here&rsquo;s how Kronara keeps it safe.</p>
+
+    <div class="badge-row"><span class="badge">🔒 Protected by enterprise-grade security</span></div>
+
+    <div class="grid">
+      <div class="item"><div class="ico">🔐</div><h3>Encrypted connections</h3><p>Every page and request uses secure HTTPS/TLS encryption, so information is protected in transit &mdash; the padlock in your browser is real and verified.</p></div>
+      <div class="item"><div class="ico">🛡️</div><h3>Firewall &amp; attack protection</h3><p>Kronara sits behind Cloudflare &mdash; the same network that protects millions of major websites &mdash; with an active web application firewall and DDoS protection running around the clock.</p></div>
+      <div class="item"><div class="ico">🤖</div><h3>Bot &amp; abuse defense</h3><p>Automated bot-filtering blocks malicious scrapers and abusive traffic before it ever reaches the app.</p></div>
+      <div class="item"><div class="ico">🕶️</div><h3>Hidden, hardened servers</h3><p>Our application servers sit behind Cloudflare, so their real location is shielded and can&rsquo;t be targeted directly.</p></div>
+      <div class="item"><div class="ico">🔑</div><h3>Secure account access</h3><p>Accounts are protected by personal PINs, sessions expire automatically, and access to studio data is limited by role.</p></div>
+      <div class="item"><div class="ico">📧</div><h3>Authenticated email</h3><p>Our emails are cryptographically signed (SPF, DKIM &amp; DMARC) so you can trust messages that come from us &mdash; and scammers can&rsquo;t impersonate us.</p></div>
+    </div>
+
+    <div class="highlight">
+      <h2>💳 Secure payments &mdash; powered by Stripe</h2>
+      <p><strong>All payments on Kronara are processed by <a href="https://stripe.com" target="_blank" rel="noopener">Stripe</a></strong>, one of the world&rsquo;s most trusted payment providers, used by millions of businesses globally.</p>
+      <p>This means your card details go <strong>directly and securely to Stripe</strong> &mdash; Kronara never sees or stores your full card number. Stripe is certified to the highest industry standard for handling card data (PCI-DSS Level 1), so every transaction is protected by bank-grade security.</p>
+    </div>
+
+    <h2>Reliable &amp; always-on</h2>
+    <p>Kronara runs on a global network that keeps the app fast and available wherever you and your members are &mdash; with protection that automatically adapts to new threats.</p>
+
+    <h2>Questions?</h2>
+    <p>If you have any questions about how we protect your data, please use the Support tab within the app or contact us at <a href="mailto:admin@kronara.app">admin@kronara.app</a>. For details on what we collect and how it&rsquo;s used, see our <a href="/privacy.html">Privacy Policy</a>.</p>
+
+    <p class="note">Kronara uses industry-standard security practices including encrypted connections, a web application firewall, DDoS protection, and PCI-DSS-compliant payment processing via Stripe. This page describes our security measures in general terms and does not itself constitute a certification or warranty.</p>
+
+    <a class="back" href="/">&larr; Back to Kronara</a>
+  </div>
+</body>
+</html>
