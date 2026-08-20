@@ -1,6 +1,13 @@
-# Kronara — Application (kronara-build)
+# kronara-build
 
-**This is the app**, not the marketing website.
+> **This is not the app studios run.** Tenant Railway services are deployed
+> from **`beezkneez/aradia-time`** (`C:\dev\aradia-time`) — `kronara-admin`
+> sets `GITHUB_REPO=beezkneez/aradia-time`. That repo has ~200 tables:
+> bookings, events, ticketing, newsletter, storefronts, parties, subleases.
+> This one has ~23 and none of those. It is an earlier, much smaller build.
+>
+> Check which repo you want before editing. For the company website, see
+> `C:\dev\kronara-website`.
 
 - **GitHub repo:** `beezkneez/kronara-build`
 - **Stack:** Node/Express + Postgres, deployed on Railway
@@ -43,7 +50,8 @@ block in `server.js` and can be overridden per tenant with `BRAND_*` env vars.
 
 | Folder | Repo | What it is |
 |---|---|---|
-| `C:\dev\kronara` | `beezkneez/kronara-build` | **This** — the app |
-| `C:\dev\kronara-website` | `beezkneez/kronara` | The marketing site at kronara.app |
-| `C:\dev\kronara-admin` | `beezkneez/kronara-admin` | Tenant provisioning / admin tooling |
+| `C:\dev\kronara` | `beezkneez/kronara-build` | **This** — an earlier build; tenants are not deployed from it |
+| `C:\dev\aradia-time` | `beezkneez/aradia-time` | **The studio app** every tenant is deployed from |
+| `C:\dev\kronara-website` | `beezkneez/kronara` | The Kronara company site at kronara.app |
+| `C:\dev\kronara-admin` | `beezkneez/kronara-admin` | Tenant provisioning — deploys `aradia-time` to Railway |
 | `C:\dev\kronara-mobile` | — | Capacitor mobile shell |
