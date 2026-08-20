@@ -4,95 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Guide - Kronara</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f2f3f6; color: #23243a; line-height: 1.7; }
-    .container { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
-    .logo { text-align: center; margin-bottom: 32px; }
-    .logo img { height: 90px; }
-    h1 { font-size: 2rem; margin-bottom: 4px; text-align: center; }
-    .subtitle { text-align: center; color: #888; font-size: 1rem; margin-bottom: 36px; }
-    h2 {
-      font-size: 1.35rem; margin-top: 48px; margin-bottom: 16px; color: #8b1e2d;
-      padding-bottom: 8px; border-bottom: 2px solid #f0d0d8;
-    }
-    h3 { font-size: 1.05rem; margin-top: 24px; margin-bottom: 8px; color: #23243a; }
-    p, li { margin-bottom: 10px; font-size: 0.95rem; }
-    ul, ol { padding-left: 24px; margin-bottom: 16px; }
-    a { color: #8b1e2d; }
-    strong { color: #23243a; }
-    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.88rem; }
-
-    /* Table of contents */
-    .toc {
-      background: #fff; border: 1px solid #e4e4e8; border-radius: 14px;
-      padding: 24px 28px; margin-bottom: 40px;
-    }
-    .toc-title { font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #8b1e2d; }
-    .toc ol { padding-left: 20px; margin: 0; }
-    .toc li { margin-bottom: 6px; font-size: 0.93rem; }
-    .toc a { text-decoration: none; font-weight: 600; }
-    .toc a:hover { text-decoration: underline; }
-
-    /* Info cards / callouts */
-    .tip, .note, .warn {
-      border-radius: 10px; padding: 14px 18px; margin: 16px 0; font-size: 0.93rem;
-    }
-    .tip  { background: #e8f5e9; border-left: 4px solid #2e7d32; }
-    .note { background: #e3f2fd; border-left: 4px solid #1565c0; }
-    .warn { background: #fff8e1; border-left: 4px solid #f9a825; }
-    .tip strong, .note strong, .warn strong { display: block; margin-bottom: 4px; }
-
-    /* Step lists */
-    .steps { counter-reset: step; list-style: none; padding-left: 0; }
-    .steps li {
-      counter-increment: step; position: relative; padding-left: 40px; margin-bottom: 14px;
-    }
-    .steps li::before {
-      content: counter(step);
-      position: absolute; left: 0; top: 1px;
-      width: 28px; height: 28px; border-radius: 50%;
-      background: #8b1e2d; color: #fff; font-weight: 800; font-size: 13px;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    /* Feature cards */
-    .feature-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 14px; margin: 16px 0;
-    }
-    .feature-card {
-      background: #fff; border: 1px solid #e4e4e8; border-radius: 12px;
-      padding: 16px; text-align: center;
-    }
-    .feature-card .icon { font-size: 28px; margin-bottom: 8px; }
-    .feature-card .label { font-weight: 800; font-size: 0.9rem; margin-bottom: 4px; }
-    .feature-card .desc { font-size: 0.82rem; color: #666; line-height: 1.5; }
-
-    /* Key-value description */
-    .field-list { margin: 12px 0; }
-    .field-list dt { font-weight: 800; font-size: 0.9rem; margin-top: 10px; }
-    .field-list dd { font-size: 0.9rem; color: #555; margin-left: 16px; }
-
-    /* Divider */
-    hr { border: none; border-top: 1px solid #e4e4e8; margin: 40px 0; }
-
-    /* Back link */
-    .back { display: inline-block; margin-top: 40px; color: #8b1e2d; text-decoration: none; font-weight: 600; }
-    .back:hover { text-decoration: underline; }
-
-    /* Print styles */
-    @media print {
-      body { background: #fff; }
-      .toc { break-after: page; }
-      h2 { break-before: page; }
-      .back { display: none; }
-    }
-  </style>
+  <meta name="theme-color" content="#070A0F">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <script>
+    // Follow the app's theme choice (same localStorage keys). Anything that
+    // isn't the light theme gets the Kronara charcoal-and-gold treatment.
+    (function () {
+      try {
+        var t = localStorage.getItem('app_theme') || localStorage.getItem('aradia_theme') || 'kronara';
+        document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'kronara');
+      } catch (e) { document.documentElement.setAttribute('data-theme', 'kronara'); }
+    })();
+  </script>
+  <link rel="stylesheet" href="/brand.css">
 </head>
 <body>
   <div class="container">
-    <div class="logo"><img src="/logo.png" alt="Kronara"></div>
+    <div class="logo"><img src="/logo-on-dark.png" alt="Kronara"></div>
     <h1>Kronara &mdash; User Guide</h1>
     <p class="subtitle">Everything you need to know about using the timesheet app</p>
 
@@ -687,7 +617,7 @@
 
     <hr>
 
-    <p style="text-align:center;color:#888;font-size:0.85rem;">
+    <p style="text-align:center;color:var(--muted);font-size:0.85rem;">
       Kronara User Guide &mdash; Last updated March 2026<br>
       Questions? Use the <strong>Support</strong> tab in the app or ask the AI Assistant.
     </p>

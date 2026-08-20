@@ -5,14 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <!-- PWA metadata -->
-  <meta name="application-name"  content="Aradia Time" />
-  <meta name="theme-color"       content="#0b0b0b" />
+  <meta name="application-name"  content="Kronara" />
+  <meta name="theme-color"       content="#070A0F" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable"            content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style"   content="black-translucent" />
-  <meta name="apple-mobile-web-app-title"              content="Aradia Time" />
+  <meta name="apple-mobile-web-app-title"              content="Kronara" />
   <link rel="manifest" href="/manifest.json" />
-  <link rel="apple-touch-icon" href="/logo.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
 
   <!-- Google Fonts for Layout Editor -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;600;700&family=Lato:wght@400;700&family=Dancing+Script:wght@400;700&family=Oswald:wght@400;600;700&family=Raleway:wght@400;600;700&display=swap" />
@@ -28,7 +31,7 @@
       var t = localStorage.getItem('app_theme') || localStorage.getItem('aradia_theme') || dflt;
       if (t !== 'light' && t !== 'dark' && t !== 'aradia' && t !== 'kronara') t = dflt;
       document.documentElement.setAttribute('data-theme', t);
-      var colors = { light: '#0b0b0b', dark: '#0e0e11', aradia: '#1a0a0e', kronara: '#1A1A2E' };
+      var colors = { light: '#0b0b0b', dark: '#0e0e11', aradia: '#1a0a0e', kronara: '#070A0F' };
       if (B.colorDarkBg) colors[dflt] = B.colorDarkBg;
       var mc = document.querySelector('meta[name="theme-color"]');
       if (mc) mc.setAttribute('content', colors[t] || '#0b0b0b');
@@ -226,62 +229,68 @@
        KRONARA THEME — deep teal + warm gold
     ═══════════════════════════════════════ */
     [data-theme="kronara"] {
-      --red:    #0C7C80;
-      --green:  #7ac4a0;
-      --green-bg: #162e28;
-      --ink:    #1A1A2E;
-      --card:   #1e1e30;
-      --muted:  #8a8ea0;
-      --line:   #2a2a40;
-      --bg:     #12121e;
-      --shadow: 0 2px 16px rgba(12,124,128,.15);
+      /* Brand ramp — sampled from the Kronara mark */
+      --gold-hi:  #F2E0AE;
+      --gold:     #D9AE68;
+      --gold-mid: #C08A42;
+      --gold-dp:  #8A5F1F;
 
-      --input-bg:      #24243a;
-      --input-border:   #3a3a52;
-      --input-text:     #e4e6f0;
-      --label-color:    #a0a4b8;
+      --red:    #9A6B24;   /* brand accent: AA as a fill under #fff, and legible as text on charcoal */
+      --green:  #6FBF8E;
+      --green-bg: #12241A;
+      --ink:    #0A0E14;
+      --card:   #111823;
+      --muted:  #8792A2;
+      --line:   #222C39;
+      --bg:     #070A0F;
+      --shadow: 0 2px 18px rgba(0,0,0,.55);
 
-      --btn-secondary-bg:     #24243a;
-      --btn-secondary-border: #3a3a52;
-      --btn-secondary-text:   #e4e6f0;
-      --lbtn-bg:              #24243a;
-      --lbtn-border:          #3a3a52;
+      --input-bg:      #161F2B;
+      --input-border:   #2A3644;
+      --input-text:     #E9EDF3;
+      --label-color:    #9AA5B4;
 
-      --day-head-bg:    #18182a;
-      --stat-bg:        #18182a;
-      --line-card-bg:   #18182a;
-      --edit-form-bg:   #1e2038;
-      --edit-form-border: #3a4060;
+      --btn-secondary-bg:     #161F2B;
+      --btn-secondary-border: #2A3644;
+      --btn-secondary-text:   #E9EDF3;
+      --lbtn-bg:              #161F2B;
+      --lbtn-border:          #2A3644;
 
-      --admin-pill-bg:  #24243a;
-      --detail-bg:      #18182a;
-      --detail-hdr-bg:  #20203a;
+      --day-head-bg:    #0E151F;
+      --stat-bg:        #0E151F;
+      --line-card-bg:   #0E151F;
+      --edit-form-bg:   #15202E;
+      --edit-form-border: #2E3E52;
 
-      --text-primary:   #e8eaf0;
-      --text-secondary: #b0b4c4;
-      --text-tertiary:  #8a8ea0;
-      --small-color:    #8a8ea0;
-      --pill-text:      #c8cce0;
-      --pill-bg:        #24243a;
+      --admin-pill-bg:  #161F2B;
+      --detail-bg:      #0E151F;
+      --detail-hdr-bg:  #141D29;
 
-      --wn-bg: #1a2030; --wn-text: #e0eaff; --wn-accent: #D4942A;
+      --text-primary:   #E9EDF3;
+      --text-secondary: #AEB8C6;
+      --text-tertiary:  #8792A2;
+      --small-color:    #8792A2;
+      --pill-text:      #C6CFDB;
+      --pill-bg:        #161F2B;
 
-      --pend-border:      rgba(212,148,42,.3);
-      --pend-hdr-bg:      rgba(100,70,20,.35);
-      --pend-hdr-text:    #D4942A;
-      --pend-detail-bg:   rgba(50,35,10,.4);
-      --pend-card-bg:     rgba(50,35,10,.25);
-      --pend-card-bg-off: rgba(50,35,10,.12);
-      --pend-badge-bg:    rgba(100,70,20,.35);
-      --pend-badge-border:rgba(212,148,42,.4);
-      --pend-badge-text:  #D4942A;
-      --pend-excl-bg:     rgba(80,50,10,.3);
-      --pend-excl-text:   #e0a030;
-      --pend-excl-border: rgba(212,148,42,.35);
+      --wn-bg: #121A26; --wn-text: #F2E0AE; --wn-accent: #D9AE68;
+
+      --pend-border:      rgba(217,174,104,.30);
+      --pend-hdr-bg:      rgba(138,95,31,.32);
+      --pend-hdr-text:    #D9AE68;
+      --pend-detail-bg:   rgba(60,42,14,.40);
+      --pend-card-bg:     rgba(60,42,14,.26);
+      --pend-card-bg-off: rgba(60,42,14,.12);
+      --pend-badge-bg:    rgba(138,95,31,.32);
+      --pend-badge-border:rgba(217,174,104,.40);
+      --pend-badge-text:  #D9AE68;
+      --pend-excl-bg:     rgba(90,60,16,.30);
+      --pend-excl-text:   #E8C078;
+      --pend-excl-border: rgba(217,174,104,.35);
       --pend-dim:         var(--muted);
-      --pend-dim-off:     #555;
-      --pend-pay:         var(--red);
-      --pend-pay-off:     #555;
+      --pend-dim-off:     #55606E;
+      --pend-pay:         var(--gold);
+      --pend-pay-off:     #55606E;
     }
 
     /* ═══════════════════════════════════════
@@ -396,6 +405,42 @@
     [data-theme="aradia"] .hclear-btn { background: var(--card); }
     [data-theme="aradia"] .btn { background: var(--red); border-color: var(--red); }
     [data-theme="aradia"] .btn:active { background: #a82838; }
+
+    /* ── Kronara-only button/accent styles — charcoal + gold ── */
+    [data-theme="kronara"] .btn {
+      background: linear-gradient(135deg, #E8C88C 0%, #D9AE68 45%, #BE8B44 100%);
+      color: #140F06; border: 0;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 2px 10px rgba(0,0,0,.45);
+    }
+    [data-theme="kronara"] .btn:active { filter: brightness(.92); }
+    [data-theme="kronara"] .btn.secondary {
+      background: var(--btn-secondary-bg); color: var(--btn-secondary-text);
+      border: 1.5px solid var(--btn-secondary-border); box-shadow: none;
+    }
+    [data-theme="kronara"] .btn.red      { background: var(--red); color: #fff; box-shadow: none; }
+    [data-theme="kronara"] .lbtn.red     { border-color: #6E2A2A; color: #F09A9A; background: #241214; }
+    [data-theme="kronara"] .lbtn.blue    { border-color: #2A3644; color: #9FB6D4; background: #141C28; }
+    [data-theme="kronara"] .msg.ok       { background: #0E2118; border-color: #1E4433; color: #7FD8A6; }
+    [data-theme="kronara"] .msg.err      { background: #241214; border-color: #5A2226; color: #F09A9A; }
+    [data-theme="kronara"] .pp-stat:last-child      { background: rgba(217,174,104,.12); }
+    [data-theme="kronara"] .pp-stat:last-child .val { color: var(--gold); }
+    [data-theme="kronara"] .admin-stat-pill.pay  { background: rgba(217,174,104,.14); border-color: rgba(217,174,104,.34); color: var(--gold); }
+    [data-theme="kronara"] .admin-stat-pill.zero { background: #241214; border-color: #5A2226; color: #F09A9A; }
+    [data-theme="kronara"] .topbar  { background: linear-gradient(180deg, #0C111A 0%, #080C12 100%); border-bottom: 1px solid rgba(217,174,104,.28); }
+    [data-theme="kronara"] #tabBar  { background: #080C12; border-top-color: rgba(217,174,104,.22); }
+    [data-theme="kronara"] .desk-nav a.active   { background: rgba(217,174,104,.16); color: var(--gold-hi); }
+    [data-theme="kronara"] .tab-btn.active .tab-icon { color: var(--gold); }
+    [data-theme="kronara"] .admin-toggle input:checked + .slider { background: var(--gold-mid); }
+    [data-theme="kronara"] .hadd-btn    { background: rgba(217,174,104,.10); border-color: rgba(217,174,104,.45); color: var(--gold); }
+    [data-theme="kronara"] .hsubmit-btn { background: linear-gradient(135deg, #E8C88C, #BE8B44); color: #140F06; }
+    [data-theme="kronara"] .hsubmit-btn:active { filter: brightness(.92); }
+    [data-theme="kronara"] .hclear-btn  { background: var(--card); }
+    [data-theme="kronara"] .ticketTypeBtn.active,
+    [data-theme="kronara"] .chatCatBtn.active { background: var(--red) !important; color: #fff !important; border-color: var(--red) !important; }
+    [data-theme="kronara"] input:focus,
+    [data-theme="kronara"] select:focus,
+    [data-theme="kronara"] textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217,174,104,.16); }
+    [data-theme="kronara"] .t-name  { color: var(--gold-hi); letter-spacing: .02em; }
 
     /* ═══════════════════════════════════════
        SHARED NON-LIGHT — Dynamic Content Overrides
@@ -1697,10 +1742,10 @@
   <!-- ── TOP BAR ─────────────────────────────── -->
   <div class="topbar">
     
-      <img src="/logo.png" alt="Aradia logo">
+      <img src="/logo.png" alt="Kronara">
     
     <div>
-      <div class="t-name">Aradia Time</div>
+      <div class="t-name">Kronara</div>
       <div class="t-sub">TimeSheets 1.0</div>
     </div>
 
@@ -2298,7 +2343,7 @@
               <button id="themeBtn_light"  onclick="setTheme_('light')"  style="padding:7px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:var(--ink);color:#fff;">☀️ Light</button>
               <button id="themeBtn_dark"   onclick="setTheme_('dark')"   style="padding:7px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:transparent;color:var(--text-primary,#111);">🌙 Dark</button>
               <button id="themeBtn_aradia" onclick="setTheme_('aradia')" style="padding:7px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:transparent;color:var(--text-primary,#111);">🔴 Aradia</button>
-              <button id="themeBtn_kronara" onclick="setTheme_('kronara')" style="display:none;padding:7px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:transparent;color:var(--text-primary,#111);">🟢 Kronara</button>
+              <button id="themeBtn_kronara" onclick="setTheme_('kronara')" style="display:none;padding:7px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:transparent;color:var(--text-primary,#111);">🟡 Kronara</button>
             </div>
           </div>
 
@@ -3330,7 +3375,7 @@
               <button id="adminThemeBtn_light"  onclick="setTheme_('light')"  style="padding:7px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:transparent;color:var(--text-primary,#111);">☀️ Light</button>
               <button id="adminThemeBtn_dark"   onclick="setTheme_('dark')"   style="padding:7px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:transparent;color:var(--text-primary,#111);">🌙 Dark</button>
               <button id="adminThemeBtn_aradia" onclick="setTheme_('aradia')" style="padding:7px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:transparent;color:var(--text-primary,#111);">🔴 Aradia</button>
-              <button id="adminThemeBtn_kronara" onclick="setTheme_('kronara')" style="display:none;padding:7px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:transparent;color:var(--text-primary,#111);">🟢 Kronara</button>
+              <button id="adminThemeBtn_kronara" onclick="setTheme_('kronara')" style="display:none;padding:7px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:transparent;color:var(--text-primary,#111);">🟡 Kronara</button>
             </div>
           </div>
         </div>
@@ -5134,24 +5179,24 @@
     // ═══════════════════════════════════════
     //  BRAND CONFIG
     // ═══════════════════════════════════════
-    var BRAND = window.__BRAND || { name: "Aradia Time", sub: "Edmonton", colorPrimary: "#8b1e2d", demoMode: false };
+    var BRAND = window.__BRAND || { name: "Kronara", sub: "Your Studio Operating System", colorPrimary: "#D9AE68", demoMode: false };
     (function initBrand(){
       // Update topbar name + subtitle
       var tn = document.querySelector('.t-name');
-      if (tn) tn.textContent = BRAND.name || "Aradia Time";
+      if (tn) tn.textContent = BRAND.name || "Kronara";
       if (BRAND.sub) { var ts = document.querySelector('.t-sub'); if (ts) ts.textContent = BRAND.sub; }
       // Update website link
       if (BRAND.site) { var wl = document.getElementById('deskWebsiteLink'); if (wl) wl.href = BRAND.site; }
       // Update page title
-      document.title = BRAND.name || "Aradia Time";
+      document.title = BRAND.name || "Kronara";
       // Update meta tags
       var am = document.querySelector('meta[name="application-name"]');
-      if (am) am.setAttribute('content', BRAND.name || "Aradia Time");
+      if (am) am.setAttribute('content', BRAND.name || "Kronara");
       var at = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-      if (at) at.setAttribute('content', BRAND.name || "Aradia Time");
+      if (at) at.setAttribute('content', BRAND.name || "Kronara");
       // Update install prompt
       var ip = document.querySelector('#installPrompt b');
-      if (ip) ip.textContent = "Install " + (BRAND.name || "Aradia Time");
+      if (ip) ip.textContent = "Install " + (BRAND.name || "Kronara");
       // Show demo banner
       if (BRAND.demoMode) {
         var db = document.getElementById('demoBanner');
@@ -5173,7 +5218,7 @@
       localStorage.setItem('app_theme', theme);
 
       // Update PWA theme-color meta
-      var colors = { light: '#0b0b0b', dark: '#0e0e11', aradia: '#1a0a0e', kronara: '#1A1A2E' };
+      var colors = { light: '#0b0b0b', dark: '#0e0e11', aradia: '#1a0a0e', kronara: '#070A0F' };
       var mc = document.querySelector('meta[name="theme-color"]');
       if (mc) mc.setAttribute('content', colors[theme] || '#0b0b0b');
 
@@ -9814,7 +9859,7 @@
         detailSections += employees.map(buildDetailSection).join("");
       }
 
-      const brand = BRAND.name || "Aradia Time";
+      const brand = BRAND.name || "Kronara";
       const generated = new Date().toLocaleDateString("en-CA");
 
       const docHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8">'

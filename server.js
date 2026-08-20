@@ -52,7 +52,12 @@ app.get("/manifest.json", (req, res) => {
     display: "standalone",
     background_color: CONFIG.BRAND_COLOR_DARK_BG,
     theme_color: CONFIG.BRAND_COLOR_DARK_BG,
-    icons: [{ src: CONFIG.BRAND_LOGO_URL, sizes: "512x512", type: "image/png" }]
+    description: CONFIG.BRAND_SUB,
+    icons: [
+      { src: CONFIG.BRAND_ICON_192,      sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: CONFIG.BRAND_ICON_512,      sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: CONFIG.BRAND_ICON_MASKABLE, sizes: "512x512", type: "image/png", purpose: "maskable" }
+    ]
   });
 });
 
@@ -67,12 +72,15 @@ const CONFIG = {
   PAY_PERIOD_HISTORY_COUNT: 8,
 
   BRAND_NAME:           process.env.BRAND_NAME           || "Kronara",
-  BRAND_SUB:            process.env.BRAND_SUB            || "Time. Teams. Simplified.",
+  BRAND_SUB:            process.env.BRAND_SUB            || "Your Studio Operating System",
   BRAND_SITE:           process.env.BRAND_SITE           || "https://kronara.app",
   BRAND_LOGO_URL:       process.env.BRAND_LOGO_URL       || "/logo.png",
-  BRAND_COLOR_PRIMARY:  process.env.BRAND_COLOR_PRIMARY  || "#6C5CE7",
-  BRAND_COLOR_ACCENT:   process.env.BRAND_COLOR_ACCENT   || "#E8832A",
-  BRAND_COLOR_DARK_BG:  process.env.BRAND_COLOR_DARK_BG  || "#0A0A1A",
+  BRAND_ICON_192:       process.env.BRAND_ICON_192       || "/icon-192.png",
+  BRAND_ICON_512:       process.env.BRAND_ICON_512       || "/icon-512.png",
+  BRAND_ICON_MASKABLE:  process.env.BRAND_ICON_MASKABLE  || "/icon-maskable-512.png",
+  BRAND_COLOR_PRIMARY:  process.env.BRAND_COLOR_PRIMARY  || "#D9AE68",
+  BRAND_COLOR_ACCENT:   process.env.BRAND_COLOR_ACCENT   || "#C08A42",
+  BRAND_COLOR_DARK_BG:  process.env.BRAND_COLOR_DARK_BG  || "#070A0F",
   BRAND_DEFAULT_THEME:  process.env.BRAND_DEFAULT_THEME  || "kronara",
   DEMO_MODE:            process.env.DEMO_MODE === "true",
 
@@ -8952,21 +8960,21 @@ app.post("/api/onboarding", async (req, res) => {
       replyTo: [email],
       subject: `New Kronara Signup: ${businessName}`,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #141428; color: #e8eaf0; padding: 32px; border-radius: 16px;">
-          <h1 style="color: #6C5CE7; margin-bottom: 24px;">New Client Signup</h1>
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0E141C; color: #E9EDF3; padding: 32px; border-radius: 16px;">
+          <h1 style="color: #D9AE68; margin-bottom: 24px;">New Client Signup</h1>
           <table style="width: 100%; border-collapse: collapse;">
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Business Name</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${businessName}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Owner Name</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${ownerName}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Email</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${email}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Phone</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${phone || 'Not provided'}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Number of Staff</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numStaff}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Locations (${numLocations})</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${locationsList}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Admin Staff to Train</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numAdmins}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Requested Domain</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${domainDisplay}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Features</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${featuresList}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Preferred Start Date</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${startDate || 'ASAP'}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Referral Source</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${referral || 'Not specified'}</td></tr>
-            <tr><td style="padding: 8px 0; color: #8a8ea0;">Special Requests</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${specialRequests || 'None'}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8792A2;">Business Name</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${businessName}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8792A2;">Owner Name</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${ownerName}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8792A2;">Email</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${email}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8792A2;">Phone</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${phone || 'Not provided'}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8792A2;">Number of Staff</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numStaff}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8792A2;">Locations (${numLocations})</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${locationsList}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8792A2;">Admin Staff to Train</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${numAdmins}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8792A2;">Requested Domain</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${domainDisplay}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8792A2;">Features</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${featuresList}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8792A2;">Preferred Start Date</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${startDate || 'ASAP'}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8792A2;">Referral Source</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${referral || 'Not specified'}</td></tr>
+            <tr><td style="padding: 8px 0; color: #8792A2;">Special Requests</td><td style="padding: 8px 0; color: #fff; font-weight: 600;">${specialRequests || 'None'}</td></tr>
           </table>
         </div>
       `,
@@ -8979,12 +8987,12 @@ app.post("/api/onboarding", async (req, res) => {
       to: [email],
       subject: `Welcome to Kronara, ${ownerName}!`,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #141428; color: #e8eaf0; padding: 32px; border-radius: 16px;">
-          <h1 style="color: #6C5CE7; margin-bottom: 16px;">Welcome to Kronara!</h1>
-          <p style="color: #b0b4c4; line-height: 1.6;">Hi ${ownerName},</p>
-          <p style="color: #b0b4c4; line-height: 1.6;">Thank you for signing up! We've received your details for <strong style="color: #fff;">${businessName}</strong> and our team will have your studio set up within 24 hours.</p>
-          <p style="color: #b0b4c4; line-height: 1.6;">We'll reach out to your email with login credentials and next steps for onboarding and training.</p>
-          <p style="color: #b0b4c4; line-height: 1.6; margin-top: 24px;">Cheers,<br><strong style="color: #fff;">The Kronara Team</strong></p>
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0E141C; color: #E9EDF3; padding: 32px; border-radius: 16px;">
+          <h1 style="color: #D9AE68; margin-bottom: 16px;">Welcome to Kronara!</h1>
+          <p style="color: #AEB8C6; line-height: 1.6;">Hi ${ownerName},</p>
+          <p style="color: #AEB8C6; line-height: 1.6;">Thank you for signing up! We've received your details for <strong style="color: #fff;">${businessName}</strong> and our team will have your studio set up within 24 hours.</p>
+          <p style="color: #AEB8C6; line-height: 1.6;">We'll reach out to your email with login credentials and next steps for onboarding and training.</p>
+          <p style="color: #AEB8C6; line-height: 1.6; margin-top: 24px;">Cheers,<br><strong style="color: #fff;">The Kronara Team</strong></p>
         </div>
       `,
     });

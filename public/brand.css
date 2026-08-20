@@ -1,0 +1,222 @@
+/* ═══════════════════════════════════════════════════════════
+   KRONARA — brand stylesheet for the static pages
+   (guide, privacy, terms, security)
+
+   Charcoal + gold, sampled from the Kronara mark. Dark is the
+   brand default; the light palette swaps the gold for a deep
+   bronze so it stays legible on paper-white.
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* brand ramp */
+  --k-gold-hi:  #F2E0AE;
+  --k-gold:     #D9AE68;
+  --k-gold-mid: #C08A42;
+  --k-gold-dp:  #8A5F1F;
+
+  /* dark (default) surfaces */
+  --bg:          #070A0F;
+  --surface:     #0E141C;
+  --card:        #111823;
+  --line:        #222C39;
+  --text:        #E9EDF3;
+  --text-strong: #FFFFFF;
+  --muted:       #8792A2;
+  --code-bg:     #161F2B;
+
+  --accent:      #D9AE68;
+  --accent-soft: rgba(217, 174, 104, .12);
+  --accent-line: rgba(217, 174, 104, .32);
+
+  --ok:   #6FBF8E;  --ok-bg:   rgba(111, 191, 142, .10);
+  --info: #7FA9E0;  --info-bg: rgba(127, 169, 224, .10);
+  --warn: #E0B44E;  --warn-bg: rgba(224, 180, 78, .10);
+
+  --shadow: 0 6px 28px rgba(0, 0, 0, .45);
+  --radius: 14px;
+}
+
+/* Light palette — gold becomes bronze so contrast holds on white */
+[data-theme="light"] {
+  --bg:          #F6F5F2;
+  --surface:     #FFFFFF;
+  --card:        #FFFFFF;
+  --line:        #E4E1D8;
+  --text:        #1A1D23;
+  --text-strong: #000000;
+  --muted:       #5C6470;
+  --code-bg:     #F0EEE8;
+
+  --accent:      #7A5218;
+  --accent-soft: rgba(122, 82, 24, .07);
+  --accent-line: rgba(122, 82, 24, .22);
+
+  --ok:   #2E7D32;  --ok-bg:   rgba(46, 125, 50, .08);
+  --info: #1565C0;  --info-bg: rgba(21, 101, 192, .08);
+  --warn: #8A6100;  --warn-bg: rgba(224, 180, 78, .14);
+
+  --shadow: 0 4px 18px rgba(20, 18, 12, .10);
+}
+
+/* ── base ─────────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { color-scheme: dark; }
+[data-theme="light"] { color-scheme: light; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container { max-width: 820px; margin: 0 auto; padding: 48px 24px 96px; }
+
+/* ── masthead ─────────────────────────────────────────────── */
+/* The lockup carries its own dark plate, so it is rounded and
+   given a hairline rather than sat flat on the page. */
+.logo { text-align: center; margin-bottom: 36px; }
+.logo img { height: 64px; width: auto; max-width: 100%; }
+/* The lockup is a transparent PNG whose wordmark is white, so on paper-white
+   it needs a dark plate drawn behind it. Dark themes need nothing. */
+[data-theme="light"] .logo img {
+  background: #0A0E14;
+  border-radius: 14px;
+  padding: 12px 18px;
+  box-shadow: 0 4px 20px rgba(20, 18, 12, .18);
+}
+
+/* ── type ─────────────────────────────────────────────────── */
+h1 { font-size: 2.1rem; line-height: 1.25; letter-spacing: -.02em; margin-bottom: 8px; color: var(--text-strong); }
+h2 {
+  font-size: 1.3rem; letter-spacing: -.01em;
+  margin-top: 40px; margin-bottom: 10px;
+  color: var(--accent);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--accent-line);
+}
+h3 { font-size: 1.05rem; margin-top: 24px; margin-bottom: 8px; color: var(--text-strong); }
+
+p, li { margin-bottom: 12px; }
+ul, ol { padding-left: 24px; margin-bottom: 16px; }
+strong { color: var(--text-strong); font-weight: 700; }
+
+a { color: var(--accent); text-underline-offset: 2px; }
+a:hover { text-decoration: underline; }
+
+code {
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  padding: 2px 6px; border-radius: 5px;
+  font-size: .88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+hr { border: none; border-top: 1px solid var(--line); margin: 44px 0; }
+
+/* Sub-headers under the title */
+.subtitle, .lead, .updated { color: var(--muted); }
+.subtitle { text-align: center; font-size: 1rem; margin-bottom: 36px; }
+.lead     { font-size: 1.05rem; margin-bottom: 32px; }
+.updated  { font-size: .9rem; margin-bottom: 32px; }
+
+/* ── table of contents ────────────────────────────────────── */
+.toc {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 24px 28px; margin-bottom: 40px;
+}
+.toc-title { font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: var(--accent); }
+.toc ol { padding-left: 20px; margin: 0; }
+.toc li { margin-bottom: 6px; font-size: .93rem; }
+.toc a  { text-decoration: none; font-weight: 600; }
+.toc a:hover { text-decoration: underline; }
+
+/* ── callouts ─────────────────────────────────────────────── */
+.tip, .note, .warn {
+  border-radius: 10px; padding: 14px 18px; margin: 16px 0;
+  font-size: .93rem; border: 1px solid var(--line);
+}
+.tip  { background: var(--ok-bg);   border-left: 4px solid var(--ok); }
+.note { background: var(--info-bg); border-left: 4px solid var(--info); }
+.warn { background: var(--warn-bg); border-left: 4px solid var(--warn); }
+.tip strong, .note strong, .warn strong { display: block; margin-bottom: 4px; }
+
+/* Small muted print at the foot of a page */
+.footnote { color: var(--muted); font-size: .85rem; margin-top: 24px; }
+
+/* ── numbered steps ───────────────────────────────────────── */
+.steps { counter-reset: step; list-style: none; padding-left: 0; }
+.steps li { counter-increment: step; position: relative; padding-left: 40px; margin-bottom: 14px; }
+.steps li::before {
+  content: counter(step);
+  position: absolute; left: 0; top: 1px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--k-gold-hi), var(--k-gold-mid));
+  color: #140F06; font-weight: 800; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+[data-theme="light"] .steps li::before {
+  background: linear-gradient(135deg, #9A6B24, #6E4A1E);
+  color: #FFFFFF;
+}
+
+/* ── card grids (guide feature cards + security items) ────── */
+.feature-grid, .grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px; margin: 20px 0 8px;
+}
+.feature-card, .item {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 12px; padding: 18px 20px;
+}
+.feature-card { text-align: center; }
+.feature-card .icon  { font-size: 28px; margin-bottom: 8px; }
+.feature-card .label { font-weight: 800; font-size: .9rem; margin-bottom: 4px; }
+.feature-card .desc  { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+.item .ico { font-size: 1.4rem; }
+.item h3   { font-size: 1rem; margin: 6px 0 4px; color: var(--text-strong); }
+.item p    { font-size: .92rem; color: var(--muted); margin: 0; }
+
+/* ── highlight panel + badge ──────────────────────────────── */
+.highlight {
+  background: var(--card); border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 10px; padding: 18px 22px; margin: 24px 0;
+}
+.highlight h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+
+.badge-row { text-align: center; margin: 8px 0 28px; }
+.badge {
+  display: inline-block;
+  background: var(--accent-soft); border: 1px solid var(--accent-line);
+  border-radius: 999px; padding: 8px 16px;
+  font-size: .85rem; font-weight: 600; color: var(--accent);
+}
+
+/* ── definition lists ─────────────────────────────────────── */
+.field-list { margin: 12px 0; }
+.field-list dt { font-weight: 800; font-size: .9rem; margin-top: 10px; color: var(--text-strong); }
+.field-list dd { font-size: .9rem; color: var(--muted); margin-left: 16px; }
+
+/* ── back link ────────────────────────────────────────────── */
+.back {
+  display: inline-block; margin-top: 44px;
+  color: var(--accent); text-decoration: none; font-weight: 600;
+}
+.back:hover { text-decoration: underline; }
+
+/* ── print ────────────────────────────────────────────────── */
+@media print {
+  :root {
+    --bg: #fff; --surface: #fff; --card: #fff; --line: #ddd;
+    --text: #111; --text-strong: #000; --muted: #555; --accent: #7A5218;
+    --accent-line: #ccc; --shadow: none;
+  }
+  body { background: #fff; color: #111; }
+  .toc { break-after: page; }
+  h2   { break-before: page; }
+  .back, .badge-row { display: none; }
+}

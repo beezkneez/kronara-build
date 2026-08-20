@@ -4,25 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Privacy Policy - Kronara</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f2f3f6; color: #23243a; line-height: 1.7; }
-    .container { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
-    .logo { text-align: center; margin-bottom: 32px; }
-    .logo img { height: 48px; }
-    h1 { font-size: 2rem; margin-bottom: 8px; }
-    .updated { color: #888; font-size: 0.9rem; margin-bottom: 32px; }
-    h2 { font-size: 1.25rem; margin-top: 32px; margin-bottom: 8px; color: #b0294a; }
-    p, li { margin-bottom: 12px; }
-    ul { padding-left: 24px; }
-    a { color: #b0294a; }
-    .back { display: inline-block; margin-top: 40px; color: #b0294a; text-decoration: none; font-weight: 600; }
-    .back:hover { text-decoration: underline; }
-  </style>
+  <meta name="theme-color" content="#070A0F">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <script>
+    // Follow the app's theme choice (same localStorage keys). Anything that
+    // isn't the light theme gets the Kronara charcoal-and-gold treatment.
+    (function () {
+      try {
+        var t = localStorage.getItem('app_theme') || localStorage.getItem('aradia_theme') || 'kronara';
+        document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'kronara');
+      } catch (e) { document.documentElement.setAttribute('data-theme', 'kronara'); }
+    })();
+  </script>
+  <link rel="stylesheet" href="/brand.css">
 </head>
 <body>
   <div class="container">
-    <div class="logo"><img src="/logo.png" alt="Kronara"></div>
+    <div class="logo"><img src="/logo-on-dark.png" alt="Kronara"></div>
     <h1>Privacy Policy</h1>
     <p class="updated">Last updated: March 1, 2026</p>
 
